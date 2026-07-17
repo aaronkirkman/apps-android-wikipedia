@@ -9,15 +9,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.database.AppDatabase
 import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.page.PageTitle
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.log.L
-import org.wikipedia.watchlist.WatchlistExpiry
-import org.wikipedia.watchlist.WatchlistViewModel
 
 class LinkPreviewViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     private val _uiState = MutableStateFlow<LinkPreviewViewState>(LinkPreviewViewState.Loading)
@@ -29,9 +26,6 @@ class LinkPreviewViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     val lastKnownLocation = savedStateHandle.get<Location>(LinkPreviewDialog.ARG_LAST_KNOWN_LOCATION)
     var isInReadingList = false
 
-    var isWatched = false
-    var hasWatchlistExpiry = false
-
     init {
         loadContent()
     }
@@ -42,8 +36,6 @@ class LinkPreviewViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
         }) {
             val summaryCall = async { ServiceFactory.getRest(pageTitle.wikiSite)
                 .getSummaryResponse(pageTitle.prefixedText) }
-
-            val watchedCall = async { if (fromPlaces && AccountUtil.isLoggedIn) ServiceFactory.get(pageTitle.wikiSite).getWatchedStatus(pageTitle.prefixedText) else null }
 
             val response = summaryCall.await()
             val summary = response.body()!!
@@ -63,7 +55,6 @@ class LinkPreviewViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
             }
 
             if (fromPlaces) {
-                isWatched = watchedCall.await()?.query?.firstPage()?.watched ?: false
                 val readingList = AppDatabase.instance.readingListPageDao().findPageInAnyList(pageTitle)
                 isInReadingList = readingList != null
             }
@@ -106,13 +97,4 @@ class LinkPreviewViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
         }
     }
 
-    fun watchOrUnwatch(unwatch: Boolean) {
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
-            L.e("Failed to fetch watch status.", throwable)
-        }) {
-            val pair = WatchlistViewModel.watchPageTitle(this, pageTitle, unwatch, WatchlistExpiry.NEVER, isWatched, pageTitle.namespace().talk())
-            isWatched = pair.first
-            _uiState.value = LinkPreviewViewState.Watch(pair)
-        }
-    }
 }

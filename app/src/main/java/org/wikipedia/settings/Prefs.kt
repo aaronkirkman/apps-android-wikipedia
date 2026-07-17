@@ -18,7 +18,6 @@ import org.wikimedia.testkitchen.config.StreamConfig
 import org.wikipedia.BuildConfig
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
-import org.wikipedia.activitytab.ActivityTabModules
 import org.wikipedia.analytics.SessionData
 import org.wikipedia.analytics.eventplatform.AppSessionEvent
 import org.wikipedia.dataclient.WikiSite
@@ -30,13 +29,11 @@ import org.wikipedia.page.tabs.Tab
 import org.wikipedia.readinglist.recommended.RecommendedReadingListSource
 import org.wikipedia.readinglist.recommended.RecommendedReadingListUpdateFrequency
 import org.wikipedia.readinglist.recommended.SourceWithOffset
-import org.wikipedia.suggestededits.SuggestedEditsRecentEditsFilterTypes
 import org.wikipedia.theme.Theme.Companion.fallback
 import org.wikipedia.util.DateUtil.dbDateFormat
 import org.wikipedia.util.DateUtil.dbDateParse
 import org.wikipedia.util.ReleaseUtil.isDevRelease
 import org.wikipedia.util.StringUtil
-import org.wikipedia.watchlist.WatchlistFilterTypes
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeWidgetRepository
 import java.util.Date
 
@@ -652,16 +649,6 @@ object Prefs {
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_se_machine_generated_descriptions_tooltip_shown, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_se_machine_generated_descriptions_tooltip_shown, value)
 
-    var watchlistExcludedWikiCodes
-        get() = JsonUtil.decodeFromString<Set<String>>(PrefsIoUtil.getString(R.string.preference_key_excluded_wiki_codes_watchlist, null))
-            ?: emptySet()
-        set(wikis) = PrefsIoUtil.setString(R.string.preference_key_excluded_wiki_codes_watchlist, JsonUtil.encodeToString(wikis))
-
-    var watchlistIncludedTypeCodes
-        get() = JsonUtil.decodeFromString<Set<String>>(PrefsIoUtil.getString(R.string.preference_key_included_type_codes_watchlist, null))
-            ?: WatchlistFilterTypes.DEFAULT_FILTER_TYPE_SET.map { it.id }
-        set(types) = PrefsIoUtil.setString(R.string.preference_key_included_type_codes_watchlist, JsonUtil.encodeToString(types))
-
     var analyticsQueueSize
         get() = PrefsIoUtil.getInt(R.string.preference_key_event_platform_queue_size, 128)
         set(value) = PrefsIoUtil.setInt(R.string.preference_key_event_platform_queue_size, value)
@@ -669,19 +656,6 @@ object Prefs {
     var recentEditsWikiCode
         get() = PrefsIoUtil.getString(R.string.preference_key_recent_edits_wiki_code, WikipediaApp.instance.appOrSystemLanguageCode).orEmpty()
         set(value) = PrefsIoUtil.setString(R.string.preference_key_recent_edits_wiki_code, value)
-
-    var recentEditsIncludedTypeCodes
-        get() = JsonUtil.decodeFromString<Set<String>>(PrefsIoUtil.getString(R.string.preference_key_recent_edits_included_type_codes, null))
-            ?: SuggestedEditsRecentEditsFilterTypes.DEFAULT_FILTER_TYPE_SET.map { it.id }
-        set(types) = PrefsIoUtil.setString(R.string.preference_key_recent_edits_included_type_codes, JsonUtil.encodeToString(types))
-
-    var recentEditsOnboardingShown
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_recent_edits_onboarding_shown, false)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_recent_edits_onboarding_shown, value)
-
-    var showOneTimeSequentialRecentEditsDiffTooltip
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_show_sequential_recent_edits_diff_tooltip, true)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_show_sequential_recent_edits_diff_tooltip, value)
 
     var showOneTimeRecentEditsFeedbackForm
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_show_recent_edits_feedback_form, true)
@@ -872,14 +846,6 @@ object Prefs {
             ?: emptyMap()
         set(langSupportedMap) = PrefsIoUtil.setString(R.string.preference_key_impact_last_response_body, JsonUtil.encodeToString(langSupportedMap))
 
-    var activityTabModules: ActivityTabModules
-        get() = JsonUtil.decodeFromString<ActivityTabModules>(PrefsIoUtil.getString(R.string.preference_key_activity_tab_modules, null))
-            ?: ActivityTabModules()
-        set(modules) = PrefsIoUtil.setString(R.string.preference_key_activity_tab_modules, JsonUtil.encodeToString(modules))
-
-    var isActivityTabOnboardingShown
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_activity_tab_onboarding_shown, false)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_activity_tab_onboarding_shown, value)
 
     var selectedAppIcon
         get() = PrefsIoUtil.getString(R.string.preference_key_selected_app_icon, LauncherIcon.DEFAULT.key)

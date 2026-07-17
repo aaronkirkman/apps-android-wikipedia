@@ -46,7 +46,6 @@ import org.wikipedia.compose.components.WikipediaAlertDialog
 import org.wikipedia.compose.theme.BaseTheme
 import org.wikipedia.compose.theme.WikipediaTheme
 import org.wikipedia.extensions.instrument
-import org.wikipedia.login.LoginActivity
 import org.wikipedia.settings.Prefs
 import org.wikipedia.theme.Theme
 import org.wikipedia.util.DeviceUtil
@@ -109,7 +108,6 @@ class ReadingChallengeOnboardingActivity : BaseActivity() {
                         },
                         onConfirmButtonClick = {
                             instrument?.submitInteraction(action = "click", actionSource = "widget_challenge_login", elementId = "login_join")
-                            startActivity(LoginActivity.newIntent(this, LoginActivity.SOURCE_READING_CHALLENGE))
                             finish()
                         },
                         onDismissButtonClick = {

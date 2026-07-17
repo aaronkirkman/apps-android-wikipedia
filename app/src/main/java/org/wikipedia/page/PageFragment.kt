@@ -64,22 +64,16 @@ import org.wikipedia.databinding.GroupFindReferencesInPageBinding
 import org.wikipedia.dataclient.RestService
 import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.dataclient.mwapi.MwQueryPage
 import org.wikipedia.dataclient.okhttp.HttpStatusException
 import org.wikipedia.dataclient.okhttp.OkHttpWebViewClient
-import org.wikipedia.descriptions.DescriptionEditActivity
-import org.wikipedia.diff.ArticleEditDetailsActivity
-import org.wikipedia.edit.EditHandler
 import org.wikipedia.gallery.GalleryActivity
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.json.JsonUtil
-import org.wikipedia.login.LoginActivity
 import org.wikipedia.main.MainActivity
 import org.wikipedia.media.AvPlayer
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.notifications.PollNotificationWorker
 import org.wikipedia.page.action.PageActionItem
-import org.wikipedia.page.edithistory.EditHistoryListActivity
 import org.wikipedia.page.issues.PageIssuesDialog
 import org.wikipedia.page.leadimages.LeadImagesHandler
 import org.wikipedia.page.references.PageReferences
@@ -90,8 +84,6 @@ import org.wikipedia.readinglist.LongPressMenu
 import org.wikipedia.readinglist.ReadingListBehaviorsUtil
 import org.wikipedia.readinglist.database.ReadingListPage
 import org.wikipedia.settings.Prefs
-import org.wikipedia.suggestededits.PageSummaryForEdit
-import org.wikipedia.talk.TalkTopicsActivity
 import org.wikipedia.theme.ThemeChooserDialog
 import org.wikipedia.util.ActiveTimer
 import org.wikipedia.util.DimenUtil
@@ -126,12 +118,8 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         fun onPageLoadErrorBackPressed()
         fun onPageSetToolbarElevationEnabled(enabled: Boolean)
         fun onPageCloseActionMode()
-        fun onPageRequestEditSection(sectionId: Int, sectionAnchor: String?, title: PageTitle, highlightText: String?)
         fun onPageRequestLangLinks(title: PageTitle, historyEntryId: Long)
         fun onPageRequestGallery(title: PageTitle, fileName: String, wikiSite: WikiSite, revision: Long, isLeadImage: Boolean, options: ActivityOptionsCompat?)
-        fun onPageRequestAddImageTags(mwQueryPage: MwQueryPage, invokeSource: InvokeSource)
-        fun onPageRequestEditDescription(text: String?, title: PageTitle, sourceSummary: PageSummaryForEdit?,
-                                         targetSummary: PageSummaryForEdit?, action: DescriptionEditActivity.Action, invokeSource: InvokeSource)
     }
 
     private var _binding: FragmentPageBinding? = null
@@ -170,7 +158,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
 
     lateinit var sidePanelHandler: SidePanelHandler
     lateinit var shareHandler: ShareHandler
-    lateinit var editHandler: EditHandler
     var revision = 0L
 
     private val shouldCreateNewTab get() = currentTab.backStack.isNotEmpty()
@@ -181,7 +168,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
     val title get() = model.title
     val page get() = model.page
     val isLoading get() = bridge.isLoading
-    val leadImageEditLang get() = leadImagesHandler.callToActionEditLang
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentPageBinding.inflate(inflater, container, false)
@@ -230,7 +216,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             }
         }
 
-        editHandler = EditHandler(this, bridge)
         sidePanelHandler = SidePanelHandler(this, bridge)
         leadImagesHandler = LeadImagesHandler(this, webView, binding.pageHeaderView, callback())
         shareHandler = ShareHandler(this, bridge)
@@ -478,10 +463,7 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         if (!isResumed) {
             return
         }
-        if (title.namespace() === Namespace.USER_TALK || title.namespace() === Namespace.TALK) {
-            startTalkTopicsActivity(title)
-            return
-        } else if (title.namespace() == Namespace.CATEGORY) {
+        if (title.namespace() == Namespace.CATEGORY) {
             startActivity(CategoryActivity.newIntent(requireActivity(), title))
             return
         }
@@ -605,14 +587,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         }
     }
 
-    private fun startTalkTopicsActivity(title: PageTitle, stripUrlFragment: Boolean = false) {
-        val talkTitle = title.copy()
-        if (stripUrlFragment) {
-            talkTitle.fragment = null
-        }
-        startActivity(TalkTopicsActivity.newIntent(requireActivity(), talkTitle, InvokeSource.PAGE_ACTIVITY))
-    }
-
     private fun startGalleryActivity(fileName: String) {
         if (app.isOnline) {
             bridge.evaluate(JavaScriptActionHandler.getElementAtPosition(DimenUtil.roundedPxToDp(webView.lastTouchX),
@@ -703,7 +677,7 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             }
 
             override fun onDiffLinkClicked(title: PageTitle, revisionId: Long) {
-                startActivity(ArticleEditDetailsActivity.newIntent(requireContext(), title, revisionId))
+                // ignore
             }
 
             // ignore
@@ -799,17 +773,7 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         bridge.addListener("footer_item") { _, messagePayload ->
             messagePayload?.let { payload ->
                 when (payload["itemType"]?.jsonPrimitive?.content) {
-                    "talkPage" -> model.title?.run {
-                        articleInteractionEvent?.logTalkPageArticleClick()
-                        startTalkTopicsActivity(this, true)
-                    }
                     "languages" -> startLangLinksActivity()
-                    "lastEdited" -> {
-                        model.title?.run {
-                            articleInteractionEvent?.logEditHistoryArticleClick()
-                            startActivity(EditHistoryListActivity.newIntent(requireContext(), this))
-                        }
-                    }
                     "coordinate" -> {
                         FeedbackUtil.showMessage(this@PageFragment, getString(R.string.action_item_view_on_map_unavailable))
                     }
@@ -863,7 +827,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         model.page?.run {
             articleInteractionEvent = ArticleInteractionEvent(model.title?.wikiSite?.dbName()!!, pageProperties.pageId)
         }
-        editHandler.setPage(model.page)
         binding.pageRefreshContainer.isEnabled = true
         binding.pageRefreshContainer.isRefreshing = false
         requireActivity().invalidateOptionsMenu()
@@ -887,7 +850,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             }
         }
         if (!errorState) {
-            editHandler.setPage(model.page)
             webView.visibility = View.VISIBLE
         }
 
@@ -995,9 +957,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
                 PageActionItem.SAVE -> {
                     it.setCompoundDrawablesWithIntrinsicBounds(0, PageActionItem.readingListIcon(model.isInReadingList), 0, 0)
                 }
-                PageActionItem.EDIT_ARTICLE -> {
-                    it.setCompoundDrawablesWithIntrinsicBounds(0, PageActionItem.editArticleIcon(model.page?.pageProperties?.canEdit != true), 0, 0)
-                }
                 PageActionItem.VIEW_ON_MAP -> {
                     val geoAvailable = model.page?.pageProperties?.geo != null
                     val tintColor = ResourceUtil.getThemedColorStateList(requireContext(), if (geoAvailable) R.attr.primary_color else R.attr.inactive_color)
@@ -1026,10 +985,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         model.page?.run {
             shareHandler.onTextSelected(mode)
         }
-    }
-
-    fun onRequestEditSection(sectionId: Int, sectionAnchor: String?, title: PageTitle, highlightText: String?) {
-        callback()?.onPageRequestEditSection(sectionId, sectionAnchor, title, highlightText)
     }
 
     fun sharePageLink() {
@@ -1135,31 +1090,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             currentActivity.clearActionBarTitle()
         }
    }
-
-    fun verifyBeforeEditingDescription(text: String?, invokeSource: InvokeSource) {
-        page?.let {
-            if (!AccountUtil.isLoggedIn && Prefs.totalAnonDescriptionsEdited >= resources.getInteger(R.integer.description_max_anon_edits)) {
-                MaterialAlertDialogBuilder(requireActivity())
-                    .setMessage(R.string.description_edit_anon_limit)
-                    .setPositiveButton(R.string.page_editing_login) { _, _ ->
-                        startActivity(LoginActivity.newIntent(requireContext(), LoginActivity.SOURCE_EDIT))
-                    }
-                    .setNegativeButton(R.string.description_edit_login_cancel_button_text, null)
-                    .show()
-            } else {
-                startDescriptionEditActivity(text, invokeSource)
-            }
-        }
-    }
-
-    private fun startDescriptionEditActivity(text: String?, invokeSource: InvokeSource) {
-        title?.run {
-            val sourceSummary = PageSummaryForEdit(prefixedText, wikiSite.languageCode, this,
-                displayText, description, thumbUrl)
-            callback()?.onPageRequestEditDescription(text, this, sourceSummary, null,
-                DescriptionEditActivity.Action.ADD_DESCRIPTION, invokeSource)
-        }
-    }
 
     fun goForward() {
         pageFragmentLoadState.goForward()
@@ -1341,20 +1271,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             articleInteractionEvent?.logShareClick()
         }
 
-        override fun onViewTalkPageSelected() {
-            title?.let {
-                startTalkTopicsActivity(it, true)
-            }
-            articleInteractionEvent?.logTalkPageClick()
-        }
-
-        override fun onViewEditHistorySelected() {
-            title?.run {
-                startActivity(EditHistoryListActivity.newIntent(requireContext(), this))
-            }
-            articleInteractionEvent?.logEditHistoryClick()
-        }
-
         override fun onNewTabSelected() {
             startActivity(PageActivity.newIntentForNewTab(requireContext()))
             articleInteractionEvent?.logNewTabClick()
@@ -1370,11 +1286,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
                 ExclusiveBottomSheetPresenter.show(childFragmentManager, CategoryDialog.newInstance(it))
             }
             articleInteractionEvent?.logCategoriesClick()
-        }
-
-        override fun onEditArticleSelected() {
-            editHandler.startEditingArticle()
-            articleInteractionEvent?.logEditArticleClick()
         }
 
         override fun onViewOnMapSelected() {

@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.SystemClock
 import androidx.annotation.StringRes
 import androidx.core.app.PendingIntentCompat
-import androidx.core.app.RemoteInput
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -32,7 +31,6 @@ import org.wikipedia.push.WikipediaFirebaseMessagingService
 import org.wikipedia.readinglist.recommended.RecommendedReadingListNotificationManager
 import org.wikipedia.readinglist.recommended.RecommendedReadingListUpdateFrequency
 import org.wikipedia.settings.Prefs
-import org.wikipedia.talk.NotificationDirectReplyHelper
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.ReleaseUtil
 import org.wikipedia.util.log.L
@@ -66,18 +64,6 @@ class NotificationPollBroadcastReceiver : BroadcastReceiver() {
                 }
                 PollNotificationWorker.schedulePollNotificationJob(context)
             }
-            ACTION_DIRECT_REPLY == intent.action -> {
-                val remoteInput = RemoteInput.getResultsFromIntent(intent)
-                val text = remoteInput?.getCharSequence(RESULT_KEY_DIRECT_REPLY)
-
-                val wiki = intent.parcelableExtra<WikiSite>(Constants.ARG_WIKISITE)
-                val title = intent.parcelableExtra<PageTitle>(Constants.ARG_TITLE)
-                if (wiki != null && title != null && !text.isNullOrEmpty()) {
-                    NotificationDirectReplyHelper.handleReply(context, wiki, title, text.toString(),
-                        intent.getStringExtra(RESULT_EXTRA_REPLY_TO).orEmpty(),
-                        intent.getIntExtra(RESULT_EXTRA_ID, 0))
-                }
-            }
             ACTION_RECOMMENDED_READING_LIST == intent.action -> {
                 if (Prefs.recommendedReadingListUpdateFrequency == RecommendedReadingListUpdateFrequency.MONTHLY) {
                     RecommendedReadingListNotificationManager.scheduleRecommendedReadingListNotification(context)
@@ -90,11 +76,7 @@ class NotificationPollBroadcastReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_POLL = "action_notification_poll"
         const val ACTION_CANCEL = "action_notification_cancel"
-        const val ACTION_DIRECT_REPLY = "action_direct_reply"
         const val ACTION_RECOMMENDED_READING_LIST = "action_recommended_reading_list"
-        const val RESULT_KEY_DIRECT_REPLY = "key_direct_reply"
-        const val RESULT_EXTRA_REPLY_TO = "extra_reply_to"
-        const val RESULT_EXTRA_ID = "extra_id"
         const val TYPE_MULTIPLE = "multiple"
 
         private const val FIRST_EDITOR_REACTIVATION_NOTIFICATION_SHOW_ON_DAY = 3

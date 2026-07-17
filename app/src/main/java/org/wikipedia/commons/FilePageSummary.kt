@@ -1,4 +1,4 @@
-package org.wikipedia.suggestededits
+package org.wikipedia.commons
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -8,7 +8,7 @@ import org.wikipedia.page.PageTitle
 import org.wikipedia.util.ImageUrlUtil
 
 @Parcelize
-data class PageSummaryForEdit(
+data class FilePageSummary(
         var title: String,
         var lang: String,
         var pageTitle: PageTitle,

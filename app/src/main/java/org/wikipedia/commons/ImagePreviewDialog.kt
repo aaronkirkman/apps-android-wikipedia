@@ -14,10 +14,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
 import org.wikipedia.R
 import org.wikipedia.databinding.DialogImagePreviewBinding
-import org.wikipedia.descriptions.DescriptionEditActivity.Action
 import org.wikipedia.extensions.setLayoutDirectionByLang
 import org.wikipedia.page.ExtendedBottomSheetDialogFragment
-import org.wikipedia.suggestededits.PageSummaryForEdit
 import org.wikipedia.util.DimenUtil
 import org.wikipedia.util.Resource
 import org.wikipedia.util.StringUtil
@@ -89,19 +87,16 @@ class ImagePreviewDialog : ExtendedBottomSheetDialogFragment(), DialogInterface.
                 filePage.thumbnailWidth,
                 filePage.thumbnailHeight,
                 imageFromCommons = filePage.imageFromCommons,
-                showFilename = filePage.showFilename,
-                showEditButton = filePage.showEditButton,
-                action = viewModel.action
+                showFilename = filePage.showFilename
             )
     }
 
     companion object {
         const val ARG_SUMMARY = "summary"
-        const val ARG_ACTION = "action"
 
-        fun newInstance(pageSummaryForEdit: PageSummaryForEdit, action: Action? = null): ImagePreviewDialog {
+        fun newInstance(pageSummaryForEdit: FilePageSummary): ImagePreviewDialog {
             val dialog = ImagePreviewDialog().apply {
-                arguments = bundleOf(ARG_SUMMARY to pageSummaryForEdit, ARG_ACTION to action)
+                arguments = bundleOf(ARG_SUMMARY to pageSummaryForEdit)
             }
             return dialog
         }

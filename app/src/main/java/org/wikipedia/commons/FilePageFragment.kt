@@ -1,7 +1,6 @@
 package org.wikipedia.commons
 
 import android.Manifest
-import android.app.Activity.RESULT_OK
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -24,17 +23,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import org.wikipedia.Constants
 import org.wikipedia.R
-import org.wikipedia.analytics.eventplatform.ImageRecommendationsEvent
 import org.wikipedia.databinding.FragmentFilePageBinding
-import org.wikipedia.dataclient.mwapi.MwQueryPage
-import org.wikipedia.descriptions.DescriptionEditActivity
-import org.wikipedia.descriptions.DescriptionEditActivity.Action
 import org.wikipedia.extensions.setLayoutDirectionByLang
 import org.wikipedia.gallery.MediaDownloadReceiver
 import org.wikipedia.page.PageTitle
-import org.wikipedia.suggestededits.PageSummaryForEdit
-import org.wikipedia.suggestededits.SuggestedEditsImageTagEditActivity
-import org.wikipedia.suggestededits.SuggestedEditsSnackbars
 import org.wikipedia.util.DimenUtil
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.Resource
@@ -42,7 +34,7 @@ import org.wikipedia.util.ShareUtil.shareImage
 import org.wikipedia.views.imageservice.ImageService
 import java.io.File
 
-class FilePageFragment : Fragment(), FilePageView.Callback, MenuProvider {
+class FilePageFragment : Fragment(), MenuProvider {
     private var _binding: FragmentFilePageBinding? = null
     private val binding get() = _binding!!
     private val viewModel: FilePageViewModel by viewModels()
@@ -55,20 +47,6 @@ class FilePageFragment : Fragment(), FilePageView.Callback, MenuProvider {
             downloadImage()
         } else {
             FeedbackUtil.showMessage(requireActivity(), R.string.gallery_save_image_write_permission_rationale)
-        }
-    }
-
-    private val addImageCaptionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            SuggestedEditsSnackbars.show(requireActivity(), Action.ADD_CAPTION, true)
-            viewModel.loadImageInfo()
-        }
-    }
-
-    private val addImageTagsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            SuggestedEditsSnackbars.show(requireActivity(), Action.ADD_IMAGE_TAGS, true)
-            viewModel.loadImageInfo()
         }
     }
 
@@ -102,7 +80,6 @@ class FilePageFragment : Fragment(), FilePageView.Callback, MenuProvider {
                 }
             }
         }
-        ImageRecommendationsEvent.logImpression("imagedetails_dialog", ImageRecommendationsEvent.getActionDataString(filename = viewModel.pageTitle.prefixedText))
     }
 
     override fun onDestroyView() {
@@ -135,9 +112,7 @@ class FilePageFragment : Fragment(), FilePageView.Callback, MenuProvider {
                 filePage.thumbnailWidth,
                 filePage.thumbnailHeight,
                 imageFromCommons = filePage.imageFromCommons,
-                showFilename = filePage.showFilename,
-                showEditButton = filePage.showEditButton,
-                callback = this
+                showFilename = filePage.showFilename
             )
         }
         requireActivity().invalidateOptionsMenu()
@@ -151,22 +126,6 @@ class FilePageFragment : Fragment(), FilePageView.Callback, MenuProvider {
     override fun onResume() {
         super.onResume()
         downloadReceiver.register(requireContext(), downloadReceiverCallback)
-    }
-
-    override fun onImageCaptionClick(summaryForEdit: PageSummaryForEdit) {
-        viewModel.pageSummaryForEdit?.let {
-            addImageCaptionLauncher.launch(
-                DescriptionEditActivity.newIntent(requireContext(),
-                    it.pageTitle, null, summaryForEdit, null,
-                    Action.ADD_CAPTION, Constants.InvokeSource.FILE_PAGE_ACTIVITY)
-            )
-        }
-    }
-
-    override fun onImageTagsClick(page: MwQueryPage) {
-        addImageTagsLauncher.launch(
-            SuggestedEditsImageTagEditActivity.newIntent(requireContext(), page, Constants.InvokeSource.FILE_PAGE_ACTIVITY)
-        )
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

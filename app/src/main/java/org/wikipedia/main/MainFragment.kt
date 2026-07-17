@@ -38,7 +38,6 @@ import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.BaseActivity
 import org.wikipedia.activity.FragmentUtil.getCallback
-import org.wikipedia.activitytab.ActivityTabFragment
 import org.wikipedia.analytics.eventplatform.ReadingListsAnalyticsHelper
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.commons.FilePageActivity
@@ -75,8 +74,6 @@ import org.wikipedia.search.SearchFragment
 import org.wikipedia.settings.Prefs
 import org.wikipedia.settings.SettingsActivity
 import org.wikipedia.staticdata.MainPageNameData
-import org.wikipedia.staticdata.UserTalkAliasData
-import org.wikipedia.talk.TalkTopicsActivity
 import org.wikipedia.util.ClipboardUtil
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.FeedbackUtil
@@ -89,7 +86,7 @@ import org.wikipedia.widgets.SearchWidgetInstallDialog
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragment.Callback, MenuNavTabDialog.Callback, ActivityTabFragment.Callback {
+class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragment.Callback, MenuNavTabDialog.Callback {
     interface Callback {
         fun onTabChanged(tab: NavTab)
         fun updateToolbarElevation(elevate: Boolean)
@@ -423,14 +420,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         return false
     }
 
-    override fun talkClick() {
-        if (AccountUtil.isLoggedIn) {
-            startActivity(TalkTopicsActivity.newIntent(requireActivity(),
-                PageTitle(UserTalkAliasData.valueFor(WikipediaApp.instance.languageState.appLanguageCode), AccountUtil.userName,
-                    WikiSite.forLanguageCode(WikipediaApp.instance.appOrSystemLanguageCode)), InvokeSource.NAV_MENU))
-        }
-    }
-
     override fun settingsClick() {
         startActivityForResult(SettingsActivity.newIntent(requireActivity()), Constants.ACTIVITY_REQUEST_SETTINGS)
     }
@@ -542,7 +531,7 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         return getCallback(this, Callback::class.java)
     }
 
-    override fun onNavigateTo(navTab: NavTab) {
+    fun onNavigateTo(navTab: NavTab) {
         binding.mainNavTabLayout.selectedItemId = binding.mainNavTabLayout.menu[navTab.code()].itemId
     }
 

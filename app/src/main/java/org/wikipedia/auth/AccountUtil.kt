@@ -1,10 +1,8 @@
 package org.wikipedia.auth
 
 import android.accounts.Account
-import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
 import android.app.Activity
-import androidx.core.os.bundleOf
 import androidx.core.text.isDigitsOnly
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
@@ -12,7 +10,6 @@ import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.dataclient.SharedPreferenceCookieManager
 import org.wikipedia.events.LoggedOutInBackgroundEvent
 import org.wikipedia.json.JsonUtil
-import org.wikipedia.login.LoginResult
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.UriUtil
@@ -25,19 +22,6 @@ import kotlin.math.max
 object AccountUtil {
     private const val CENTRALAUTH_USER_COOKIE_NAME = "centralauth_User"
     private const val TEMP_ACCOUNT_EXPIRY_DAYS = 90
-
-    fun updateAccount(response: AccountAuthenticatorResponse?, result: LoginResult) {
-        if (createAccount(result.userName!!, result.password!!)) {
-            response?.onResult(bundleOf(AccountManager.KEY_ACCOUNT_NAME to result.userName,
-                    AccountManager.KEY_ACCOUNT_TYPE to accountType()))
-        } else {
-            response?.onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION, "")
-            d("account creation failure")
-            return
-        }
-        setPassword(result.password)
-        groups = result.groups
-    }
 
     val isLoggedIn: Boolean
         get() = account() != null || isTemporaryAccount
@@ -131,23 +115,6 @@ object AccountUtil {
         WikipediaApp.instance.resetAfterLogOut()
         Prefs.queueLoggedOutInBackgroundDialog = true
         FlowEventBus.post(LoggedOutInBackgroundEvent())
-    }
-
-    private fun createAccount(userName: String, password: String): Boolean {
-        var account = account()
-        if (account == null || account.name.isEmpty() || account.name != userName) {
-            removeAccount()
-            account = Account(userName, accountType())
-            return accountManager().addAccountExplicitly(account, password, null)
-        }
-        return true
-    }
-
-    private fun setPassword(password: String) {
-        val account = account()
-        if (account != null) {
-            accountManager().setPassword(account, password)
-        }
     }
 
     private fun accountManager(): AccountManager {

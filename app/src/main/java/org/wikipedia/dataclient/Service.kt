@@ -3,12 +3,6 @@ package org.wikipedia.dataclient
 import org.wikimedia.testkitchen.config.Experiment
 import org.wikimedia.testkitchen.config.Instrument
 import org.wikimedia.testkitchen.config.StreamConfigCollection
-import org.wikipedia.captcha.Captcha
-import org.wikipedia.dataclient.discussiontools.DiscussionToolsEditResponse
-import org.wikipedia.dataclient.discussiontools.DiscussionToolsInfoResponse
-import org.wikipedia.dataclient.discussiontools.DiscussionToolsSubscribeResponse
-import org.wikipedia.dataclient.discussiontools.DiscussionToolsSubscriptionList
-import org.wikipedia.dataclient.mwapi.CreateAccountResponse
 import org.wikipedia.dataclient.mwapi.MwParseResponse
 import org.wikipedia.dataclient.mwapi.MwPostResponse
 import org.wikipedia.dataclient.mwapi.MwQueryResponse
@@ -17,14 +11,10 @@ import org.wikipedia.dataclient.mwapi.ShortenUrlResponse
 import org.wikipedia.dataclient.mwapi.SiteMatrix
 import org.wikipedia.dataclient.mwapi.TemplateDataResponse
 import org.wikipedia.dataclient.okhttp.OfflineCacheInterceptor
-import org.wikipedia.dataclient.rollback.RollbackPostResponse
-import org.wikipedia.dataclient.watch.WatchPostResponse
 import org.wikipedia.dataclient.wikidata.Claims
 import org.wikipedia.dataclient.wikidata.Entities
 import org.wikipedia.dataclient.wikidata.EntityPostResponse
 import org.wikipedia.dataclient.wikidata.Search
-import org.wikipedia.edit.Edit
-import org.wikipedia.login.LoginResponse
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -131,9 +121,6 @@ interface Service {
     ): MwQueryResponse
 
     // ------- Miscellaneous -------
-
-    @GET(MW_API_PREFIX + "action=fancycaptchareload")
-    suspend fun getNewCaptcha(): Captcha
 
     @GET(MW_API_PREFIX + "action=query&prop=langlinks&lllimit=500&redirects=&converttitles=")
     suspend fun getLangLinks(@Query("titles") title: String): MwQueryResponse
@@ -296,44 +283,8 @@ interface Service {
     suspend fun getToken(@Query("type") type: String = "csrf"): MwQueryResponse
 
     @FormUrlEncoded
-    @POST(MW_API_PREFIX + "action=createaccount&createmessageformat=html")
-    suspend fun postCreateAccount(
-        @Field("username") user: String,
-        @Field("password") pass: String,
-        @Field("retype") retype: String,
-        @Field("createtoken") token: String,
-        @Field("createreturnurl") returnurl: String,
-        @Field("email") email: String?,
-        @Field("captchaId") captchaId: String?,
-        @Field("captchaWord") captchaWord: String?
-    ): CreateAccountResponse
-
-    @GET(MW_API_PREFIX + "action=query&meta=tokens&type=login")
-    @Headers("Cache-Control: no-cache")
-    suspend fun getLoginToken(): MwQueryResponse
-
-    @FormUrlEncoded
-    @POST(MW_API_PREFIX + "action=clientlogin&rememberMe=")
-    suspend fun postLogIn(
-        @Field("username") user: String? = null,
-        @Field("password") pass: String? = null,
-        @Field("retype") retype: String? = null,
-        @Field("OATHToken") twoFactorCode: String? = null,
-        @Field("token") emailAuthToken: String? = null,
-        @Field("captchaId") captchaId: String? = null,
-        @Field("captchaWord") captchaWord: String? = null,
-        @Field("loginreturnurl") returnUrl: String? = null,
-        @Field("logintoken") loginToken: String? = null,
-        @Field("logincontinue") loginContinue: Boolean? = null,
-        @Field("newModule") newModule: String? = null
-    ): LoginResponse
-
-    @FormUrlEncoded
     @POST(MW_API_PREFIX + "action=logout")
     suspend fun postLogout(@Field("token") token: String): MwPostResponse
-
-    @GET(MW_API_PREFIX + "action=query&meta=authmanagerinfo|tokens&amirequestsfor=create&type=createaccount")
-    suspend fun getAuthManagerInfo(): MwQueryResponse
 
     @GET(MW_API_PREFIX + "action=query&meta=authmanagerinfo&amirequestsfor=login")
     suspend fun getAuthManagerForLogin(): MwQueryResponse
@@ -403,95 +354,8 @@ interface Service {
         @Query("rvsection") section: Int?
     ): MwQueryResponse
 
-    @FormUrlEncoded
-    @POST(MW_API_PREFIX + "action=edit")
-    suspend fun postUndoEdit(
-            @Field("title") title: String,
-            @Field("summary") summary: String? = null,
-            @Field("assert") user: String? = null,
-            @Field("token") token: String,
-            @Field("undo") undoRevId: Long,
-            @Field("undoafter") undoRevAfter: Long? = null,
-            @Field("matags") tags: String? = null
-    ): Edit
-
-    @FormUrlEncoded
-    @POST(MW_API_PREFIX + "action=edit")
-    suspend fun postEditSubmit(
-        @Field("title") title: String,
-        @Field("section") section: String?,
-        @Field("sectiontitle") newSectionTitle: String?,
-        @Field("summary") summary: String,
-        @Field("assert") user: String?,
-        @Field("text") text: String?,
-        @Field("appendtext") appendText: String?,
-        @Field("baserevid") baseRevId: Long,
-        @Field("token") token: String,
-        @Field("captchaid") captchaId: String?,
-        @Field("captchaword") captchaWord: String?,
-        @Field("minor") minor: Boolean? = null,
-        @Field("watchlist") watchlist: String? = null,
-        @Field("matags") tags: String? = null
-    ): Edit
-
-    @FormUrlEncoded
-    @POST(MW_API_PREFIX + "action=visualeditoredit")
-    suspend fun postVisualEditorEdit(
-        @Field("paction") action: String,
-        @Field("page") title: String,
-        @Field("token") token: String,
-        @Field("section") section: Int,
-        @Field("sectiontitle") newSectionTitle: String?,
-        @Field("summary") summary: String,
-        @Field("assert") user: String?,
-        @Field("captchaid") captchaId: String?,
-        @Field("captchaword") captchaWord: String?,
-        @Field("minor") minor: Boolean? = null,
-        @Field("watchlist") watchlist: String? = null,
-        @Field("plugins") plugins: String? = null,
-        @Field("data-ge-task-image-recommendation") imageRecommendationJson: String? = null,
-    ): Edit
-
-    @GET(MW_API_PREFIX + "action=query&list=usercontribs&ucprop=ids|title|timestamp|comment|size|flags|sizediff|tags&meta=userinfo&uiprop=groups|blockinfo|editcount|latestcontrib|rights|registrationdate")
-    suspend fun getUserContributions(
-        @Query("ucuser") username: String,
-        @Query("uclimit") maxCount: Int,
-        @Query("ucnamespace") ns: Int?,
-        @Query("uccontinue") uccontinue: String?
-    ): MwQueryResponse
-
-    @GET(MW_API_PREFIX + "action=query&list=usercontribs&ucprop=ids|title|timestamp|comment|size|flags|sizediff|tags")
-    suspend fun getUserContrib(
-            @Query("ucuser") username: String,
-            @Query("uclimit") maxCount: Int,
-            @Query("ucnamespace") ns: String?,
-            @Query("ucshow") filter: String?,
-            @Query("uccontinue") uccontinue: String?,
-            @Query("ucdir") ucdir: String? = null
-    ): MwQueryResponse
-
-    @GET(MW_API_PREFIX + "action=query&list=usercontribs&meta=userinfo&uiprop=editcount")
-    suspend fun getUserContribsByTimeFrame(
-        @Query("ucuser") username: String,
-        @Query("uclimit") maxCount: Int,
-        @Query("ucstart") startDate: Instant,
-        @Query("ucend") endDate: Instant,
-        @Query("ucnamespace") ns: Int? = null,
-        @Query("uccontinue") uccontinue: String? = null
-    ): MwQueryResponse
-
     @GET(MW_API_PREFIX + "action=query&prop=pageviews")
     suspend fun getPageViewsForTitles(@Query("titles") titles: String): MwQueryResponse
-
-    @FormUrlEncoded
-    @POST(MW_API_PREFIX + "action=rollback")
-    suspend fun postRollback(
-        @Field("title") title: String,
-        @Field("summary") summary: String?,
-        @Field("user") user: String,
-        @Field("token") token: String,
-        @Field("matags") tags: String? = null
-    ): RollbackPostResponse
 
     // ------- Wikidata -------
 
@@ -573,28 +437,8 @@ interface Service {
     // ------- Watchlist -------
 
     @Headers("Cache-Control: no-cache")
-    @GET(MW_API_PREFIX + "action=query&prop=info&converttitles=&redirects=&inprop=watched")
-    suspend fun getWatchedStatus(@Query("titles") titles: String): MwQueryResponse
-
-    @Headers("Cache-Control: no-cache")
-    @GET(MW_API_PREFIX + "action=query&prop=info&converttitles=&redirects=&inprop=watched&meta=userinfo&uiprop=options")
-    suspend fun getWatchedStatusWithUserOptions(@Query("titles") titles: String): MwQueryResponse
-
-    @Headers("Cache-Control: no-cache")
-    @GET(MW_API_PREFIX + "action=query&prop=info&converttitles=&redirects=&inprop=watched&meta=userinfo&uiprop=rights")
-    suspend fun getWatchedStatusWithRights(@Query("titles") titles: String): MwQueryResponse
-
-    @Headers("Cache-Control: no-cache")
     @GET(MW_API_PREFIX + "action=query&prop=info|categories&converttitles=&redirects=&inprop=watched&clshow=!hidden&cllimit=100")
     suspend fun getWatchedStatusWithCategories(@Query("titles") titles: String): MwQueryResponse
-
-    @GET(MW_API_PREFIX + "action=query&list=watchlist&wllimit=500&wlprop=ids|title|flags|comment|parsedcomment|timestamp|sizes|user|loginfo&assert=user")
-    @Headers("Cache-Control: no-cache")
-    suspend fun getWatchlist(
-        @Query("wlallrev") latestRevisions: String?,
-        @Query("wlshow") showCriteria: String?,
-        @Query("wltype") typeOfChanges: String?
-    ): MwQueryResponse
 
     @GET(MW_API_PREFIX + "action=query&prop=revisions&rvslots=main&rvprop=timestamp|user|ids|comment|tags")
     suspend fun getLastModified(@Query("titles") titles: String): MwQueryResponse
@@ -635,89 +479,6 @@ interface Service {
         @Field("rev") revisionId: Long,
         @Field("token") token: String
     ): EntityPostResponse
-
-    @POST(MW_API_PREFIX + "action=watch&converttitles=&redirects=")
-    @FormUrlEncoded
-    suspend fun watch(
-            @Field("unwatch") unwatch: Int?,
-            @Field("pageids") pageIds: String?,
-            @Field("titles") titles: String?,
-            @Field("expiry") expiry: String?,
-            @Field("token") token: String
-    ): WatchPostResponse
-
-    @GET(MW_API_PREFIX + "action=query&meta=tokens&type=watch")
-    @Headers("Cache-Control: no-cache")
-    suspend fun getWatchToken(): MwQueryResponse
-
-    // ------- DiscussionTools -------
-
-    @GET(MW_API_PREFIX + "action=discussiontoolspageinfo&prop=threaditemshtml")
-    suspend fun getTalkPageTopics(
-            @Query("page") page: String,
-            @Header(OfflineCacheInterceptor.SAVE_HEADER) saveHeader: String,
-            @Header(OfflineCacheInterceptor.LANG_HEADER) langHeader: String,
-            @Header(OfflineCacheInterceptor.TITLE_HEADER) titleHeader: String
-    ): DiscussionToolsInfoResponse
-
-    @POST(MW_API_PREFIX + "action=discussiontoolssubscribe")
-    @FormUrlEncoded
-    suspend fun subscribeTalkPageTopic(
-            @Field("page") page: String,
-            @Field("commentname") topicName: String,
-            @Field("token") token: String,
-            @Field("subscribe") subscribe: Boolean?,
-    ): DiscussionToolsSubscribeResponse
-
-    @GET(MW_API_PREFIX + "action=discussiontoolsgetsubscriptions")
-    suspend fun getTalkPageTopicSubscriptions(@Query("commentname") topicNames: String): DiscussionToolsSubscriptionList
-
-    @POST(MW_API_PREFIX + "action=discussiontoolsedit&paction=addtopic")
-    @FormUrlEncoded
-    suspend fun postTalkPageTopic(
-            @Field("page") page: String,
-            @Field("sectiontitle") title: String,
-            @Field("wikitext") text: String,
-            @Field("token") token: String,
-            @Field("summary") summary: String? = null,
-            @Field("captchaid") captchaId: Long? = null,
-            @Field("captchaword") captchaWord: String? = null,
-            @Field("matags") tags: String? = null
-    ): DiscussionToolsEditResponse
-
-    @POST(MW_API_PREFIX + "action=discussiontoolsedit&paction=addcomment")
-    @FormUrlEncoded
-    suspend fun postTalkPageTopicReply(
-            @Field("page") page: String,
-            @Field("commentid") commentId: String,
-            @Field("wikitext") text: String,
-            @Field("token") token: String,
-            @Field("summary") summary: String? = null,
-            @Field("captchaid") captchaId: Long? = null,
-            @Field("captchaword") captchaWord: String? = null,
-            @Field("matags") tags: String? = null
-    ): DiscussionToolsEditResponse
-
-    @GET(MW_API_PREFIX + "action=query&generator=growthtasks")
-    suspend fun getGrowthTasks(
-        @Query("ggttasktypes") taskTypes: String?,
-        @Query("ggttopics") topics: String?,
-        @Query("ggtlimit") count: Int
-    ): MwQueryResponse
-
-    @GET(MW_API_PREFIX + "action=query&generator=search&gsrsearch=hasrecommendation%3Aimage&gsrnamespace=0&gsrsort=random&prop=growthimagesuggestiondata|revisions|pageimages&pilicense=any&rvprop=ids|timestamp|flags|comment|user|content&rvslots=main&rvsection=0")
-    suspend fun getPagesWithImageRecommendations(
-        @Query("gsrlimit") count: Int
-    ): MwQueryResponse
-
-    @POST(MW_API_PREFIX + "action=growthinvalidateimagerecommendation")
-    @FormUrlEncoded
-    suspend fun invalidateImageRecommendation(
-        @Field("tasktype") taskType: String,
-        @Field("title") title: String,
-        @Field("filename") fileName: String,
-        @Field("token") token: String
-    ): MwPostResponse
 
     @GET(MW_API_PREFIX + "action=paraminfo")
     suspend fun getParamInfo(

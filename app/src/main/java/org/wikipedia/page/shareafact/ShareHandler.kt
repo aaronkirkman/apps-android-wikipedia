@@ -3,7 +3,6 @@ package org.wikipedia.page.shareafact
 import android.view.ActionMode
 import android.view.MenuItem
 import kotlinx.serialization.Serializable
-import org.wikipedia.Constants
 import org.wikipedia.R
 import org.wikipedia.bridge.CommunicationBridge
 import org.wikipedia.bridge.JavaScriptActionHandler
@@ -14,16 +13,6 @@ import org.wikipedia.wiktionary.WiktionaryDialog
 
 class ShareHandler(private val fragment: PageFragment, private val bridge: CommunicationBridge) {
     private var webViewActionMode: ActionMode? = null
-
-    private fun onEditHerePayload(sectionID: Int, text: String, isEditingDescription: Boolean) {
-        if (sectionID == 0 && isEditingDescription) {
-            fragment.verifyBeforeEditingDescription(text, Constants.InvokeSource.PAGE_EDIT_HIGHLIGHT)
-        } else {
-            if (sectionID >= 0) {
-                fragment.editHandler.startEditingSection(sectionID, text)
-            }
-        }
-    }
 
     private fun finishActionMode() {
         webViewActionMode?.run {
@@ -46,14 +35,6 @@ class ShareHandler(private val fragment: PageFragment, private val bridge: Commu
                 setOnMenuItemClickListener(RequestTextSelectOnMenuItemClickListener(PAYLOAD_PURPOSE_DEFINE))
             }
         }
-        mode.menu.findItem(R.id.menu_text_edit_here)?.run {
-            setOnMenuItemClickListener(RequestTextSelectOnMenuItemClickListener(PAYLOAD_PURPOSE_EDIT_HERE))
-            fragment.page?.run {
-                if (!isArticle) {
-                    isVisible = false
-                }
-            }
-        }
         mode.invalidateContentRect()
     }
 
@@ -74,7 +55,6 @@ class ShareHandler(private val fragment: PageFragment, private val bridge: Commu
                     val message = JsonUtil.decodeFromString<TextSelectResponse>(value)!!
                     when (purpose) {
                         PAYLOAD_PURPOSE_DEFINE -> showWiktionaryDefinition(message.text)
-                        PAYLOAD_PURPOSE_EDIT_HERE -> onEditHerePayload(message.section, message.text, message.isTitleDescription)
                         else -> L.d("Unknown purpose=$purpose")
                     }
                 } catch (e: Exception) {
@@ -94,6 +74,5 @@ class ShareHandler(private val fragment: PageFragment, private val bridge: Commu
 
     companion object {
         private const val PAYLOAD_PURPOSE_DEFINE = "define"
-        private const val PAYLOAD_PURPOSE_EDIT_HERE = "edit_here"
     }
 }

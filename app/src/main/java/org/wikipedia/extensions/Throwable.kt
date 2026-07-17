@@ -1,7 +1,6 @@
 package org.wikipedia.extensions
 
 import com.hcaptcha.sdk.HCaptchaException
-import org.wikipedia.createaccount.CreateAccountException
 import org.wikipedia.dataclient.mwapi.MwException
 import org.wikipedia.dataclient.okhttp.HttpStatusException
 import java.net.SocketException
@@ -23,9 +22,6 @@ fun Throwable.getInstrumentActionContext(): Map<String, String> {
         }
         is UnknownHostException, is SocketException -> {
             map["code"] = "network_unavailable"
-        }
-        is CreateAccountException -> {
-            map["code"] = this.messageCode.orEmpty()
         }
         is HCaptchaException -> {
             map["code"] = this.statusCode.toString()

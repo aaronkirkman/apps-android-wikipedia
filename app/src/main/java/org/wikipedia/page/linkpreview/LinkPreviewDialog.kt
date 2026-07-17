@@ -21,16 +21,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import org.wikipedia.Constants
 import org.wikipedia.R
-import org.wikipedia.activity.BaseActivity
 import org.wikipedia.activity.FragmentUtil.getCallback
 import org.wikipedia.analytics.eventplatform.ArticleLinkPreviewInteractionEvent
 import org.wikipedia.analytics.eventplatform.PlacesEvent
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.bridge.JavaScriptActionHandler
 import org.wikipedia.databinding.DialogLinkPreviewBinding
 import org.wikipedia.dataclient.page.PageSummary
-import org.wikipedia.edit.EditHandler
-import org.wikipedia.edit.EditSectionActivity
 import org.wikipedia.extensions.getString
 import org.wikipedia.extensions.getStrings
 import org.wikipedia.extensions.setLayoutDirectionByLang
@@ -51,7 +47,6 @@ import org.wikipedia.util.ShareUtil
 import org.wikipedia.util.StringUtil
 import org.wikipedia.util.log.L
 import org.wikipedia.views.ViewUtil
-import org.wikipedia.watchlist.WatchlistViewModel
 import java.util.Locale
 
 class LinkPreviewDialog : ExtendedBottomSheetDialogFragment(), LinkPreviewErrorView.Callback, DialogInterface.OnDismissListener {
@@ -82,11 +77,6 @@ class LinkPreviewDialog : ExtendedBottomSheetDialogFragment(), LinkPreviewErrorV
             }
             R.id.menu_link_preview_share_page -> {
                 ShareUtil.shareText(requireContext(), viewModel.pageTitle)
-                true
-            }
-            R.id.menu_link_preview_watch -> {
-                sendPlacesEvent("watch_click", "detail_overflow_menu")
-                viewModel.watchOrUnwatch(viewModel.isWatched)
                 true
             }
             R.id.menu_link_preview_open_in_new_tab -> {
@@ -136,25 +126,11 @@ class LinkPreviewDialog : ExtendedBottomSheetDialogFragment(), LinkPreviewErrorV
         }
     }
 
-    private val requestStubArticleEditLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == EditHandler.RESULT_REFRESH_PAGE) {
-            overlayView?.let { overlay ->
-                FeedbackUtil.makeSnackbar(overlay.rootView, getString(R.string.stub_article_edit_saved_successfully))
-                    .setAnchorView(overlay.secondaryButtonView).show()
-            }
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = DialogLinkPreviewBinding.inflate(inflater, container, false)
         binding.linkPreviewToolbar.setOnClickListener { goToLinkedPage(false) }
         binding.linkPreviewOverflowButton.setOnClickListener {
             setupOverflowMenu()
-        }
-        binding.linkPreviewEditButton.setOnClickListener {
-            viewModel.pageTitle.run {
-                requestStubArticleEditLauncher.launch(EditSectionActivity.newIntent(requireContext(), -1, null, this, Constants.InvokeSource.LINK_PREVIEW_MENU, null))
-            }
         }
         binding.root.setLayoutDirectionByLang(viewModel.pageTitle.wikiSite.languageCode)
 
@@ -174,10 +150,6 @@ class LinkPreviewDialog : ExtendedBottomSheetDialogFragment(), LinkPreviewErrorV
                         is LinkPreviewViewState.Gallery -> {
                             renderGalleryState(it)
                         }
-                        is LinkPreviewViewState.Watch -> {
-                            WatchlistViewModel.showWatchlistSnackbar(requireActivity() as BaseActivity, requireActivity().supportFragmentManager, viewModel.pageTitle, it.data.first, it.data.second)
-                            dismiss()
-                        }
                         is LinkPreviewViewState.Completed -> {
                             binding.linkPreviewProgress.visibility = View.GONE
                         }
@@ -193,8 +165,7 @@ class LinkPreviewDialog : ExtendedBottomSheetDialogFragment(), LinkPreviewErrorV
         popupMenu.inflate(R.menu.menu_link_preview)
         popupMenu.menu.findItem(R.id.menu_link_preview_add_to_list).isVisible = !viewModel.fromPlaces
         popupMenu.menu.findItem(R.id.menu_link_preview_share_page).isVisible = !viewModel.fromPlaces
-        popupMenu.menu.findItem(R.id.menu_link_preview_watch).isVisible = viewModel.fromPlaces && AccountUtil.isLoggedIn
-        popupMenu.menu.findItem(R.id.menu_link_preview_watch).title = getString(if (viewModel.isWatched) R.string.menu_page_unwatch else R.string.menu_page_watch)
+        popupMenu.menu.findItem(R.id.menu_link_preview_watch).isVisible = false
         popupMenu.menu.findItem(R.id.menu_link_preview_open_in_new_tab).isVisible = viewModel.fromPlaces
         popupMenu.menu.findItem(R.id.menu_link_preview_get_directions).isVisible = viewModel.fromPlaces
         popupMenu.setOnMenuItemClickListener(menuListener)
@@ -350,12 +321,10 @@ class LinkPreviewDialog : ExtendedBottomSheetDialogFragment(), LinkPreviewErrorV
     }
 
     private fun setPreviewContents(contents: LinkPreviewContents) {
-        val editVisibility = contents.extract.isNullOrBlank() && contents.ns?.id == Namespace.MAIN.code()
-        binding.linkPreviewEditButton.isVisible = editVisibility
-        binding.linkPreviewThumbnailGallery.isVisible = !editVisibility
+        binding.linkPreviewEditButton.isVisible = false
+        binding.linkPreviewThumbnailGallery.isVisible = true
 
-        val extract = if (editVisibility) "<i>" + getString(R.string.link_preview_stub_placeholder_text) + "</i>" else contents.extract
-        binding.linkPreviewExtract.text = StringUtil.fromHtml(extract)
+        binding.linkPreviewExtract.text = StringUtil.fromHtml(contents.extract)
 
         contents.title.thumbUrl?.let {
             binding.linkPreviewThumbnail.visibility = View.VISIBLE

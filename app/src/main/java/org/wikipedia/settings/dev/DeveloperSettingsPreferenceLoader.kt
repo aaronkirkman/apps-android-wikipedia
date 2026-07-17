@@ -32,7 +32,6 @@ import org.wikipedia.settings.Prefs
 import org.wikipedia.settings.dev.playground.CategoryDeveloperPlayGround
 import org.wikipedia.settings.dev.playground.ReadingChallengePlayGroundDialog
 import org.wikipedia.setupLeakCanary
-import org.wikipedia.suggestededits.provider.EditingSuggestionsProvider
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.ReleaseUtil
 import org.wikipedia.util.StringUtil.fromHtml
@@ -125,47 +124,6 @@ internal class DeveloperSettingsPreferenceLoader(fragment: PreferenceFragmentCom
                 }
             true
         }
-        findPreference(R.string.preference_key_missing_description_test).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            fragment.lifecycleScope.launch(CoroutineExceptionHandler { _, caught ->
-                MaterialAlertDialogBuilder(activity)
-                    .setMessage(caught.message)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
-            }) {
-                val summary = EditingSuggestionsProvider.getNextArticleWithMissingDescription(WikipediaApp.instance.wikiSite)
-                MaterialAlertDialogBuilder(fragment.requireActivity())
-                        .setTitle(fromHtml(summary.displayTitle))
-                        .setMessage(fromHtml(summary.extract))
-                        .setPositiveButton("Go") { _: DialogInterface, _: Int ->
-                            val title = summary.getPageTitle(WikipediaApp.instance.wikiSite)
-                            fragment.requireActivity().startActivity(PageActivity.newIntentForNewTab(fragment.requireActivity(), HistoryEntry(title, HistoryEntry.SOURCE_INTERNAL_LINK), title))
-                        }
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .show()
-            }
-            true
-        }
-        findPreference(R.string.preference_key_missing_description_test2).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            fragment.lifecycleScope.launch(CoroutineExceptionHandler { _, caught ->
-                MaterialAlertDialogBuilder(activity)
-                    .setMessage(caught.message)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
-            }) {
-                val summary = EditingSuggestionsProvider.getNextArticleWithMissingDescription(WikipediaApp.instance.wikiSite,
-                    WikipediaApp.instance.languageState.appLanguageCodes[1])
-                MaterialAlertDialogBuilder(fragment.requireActivity())
-                        .setTitle(fromHtml(summary.second.displayTitle))
-                        .setMessage(fromHtml(summary.second.extract))
-                        .setPositiveButton("Go") { _: DialogInterface, _: Int ->
-                            val title = summary.second.getPageTitle(WikipediaApp.instance.wikiSite)
-                            fragment.requireActivity().startActivity(PageActivity.newIntentForNewTab(fragment.requireActivity(), HistoryEntry(title, HistoryEntry.SOURCE_INTERNAL_LINK), title))
-                        }
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .show()
-            }
-            true
-        }
         findPreference(R.string.preference_key_announcement_shown_dialogs).summary = activity.getString(R.string.preferences_developer_announcement_reset_shown_dialogs_summary, Prefs.announcementShownDialogs.size)
         findPreference(R.string.preference_key_announcement_shown_dialogs).onPreferenceClickListener = Preference.OnPreferenceClickListener {
             Prefs.resetAnnouncementShownDialogs()
@@ -183,13 +141,6 @@ internal class DeveloperSettingsPreferenceLoader(fragment: PreferenceFragmentCom
         }
         findPreference(R.string.preferences_developer_suggested_edits_reactivation_notification_stage_two).onPreferenceClickListener = Preference.OnPreferenceClickListener {
             NotificationPollBroadcastReceiver.showSuggestedEditsLocalNotification(activity, R.string.suggested_edits_reactivation_notification_stage_two)
-            true
-        }
-        findPreference(R.string.preference_developer_clear_all_talk_topics).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            CoroutineScope(Dispatchers.Main).launch {
-                AppDatabase.instance.talkPageSeenDao().deleteAll()
-                Toast.makeText(activity, "Reset complete.", Toast.LENGTH_SHORT).show()
-            }
             true
         }
         findPreference(R.string.preference_developer_clear_last_location_and_zoom_level).onPreferenceClickListener = Preference.OnPreferenceClickListener {

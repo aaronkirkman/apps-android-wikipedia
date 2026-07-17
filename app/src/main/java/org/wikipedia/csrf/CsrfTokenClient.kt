@@ -3,12 +3,10 @@ package org.wikipedia.csrf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.wikipedia.WikipediaApp
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.dataclient.Service
 import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.login.LoginClient
 import org.wikipedia.util.log.L
 import java.io.IOException
 import java.util.concurrent.Semaphore
@@ -34,16 +32,8 @@ object CsrfTokenClient {
                             tokenResponse.query?.csrfToken().orEmpty()
                         }
                         if (tokenRequiresLogin(token)) {
-                            L.d("App believes we're logged in, but got anonymous token. Logging in explicitly...")
-                            // Regardless of which WikiSite the token is being requested from, the login call
-                            // should be done on the primary WikiSite of the app itself.
-                            val loginResult = LoginClient().loginBlocking(WikipediaApp.instance.wikiSite, AccountUtil.userName, AccountUtil.password!!)
-                            // If the login sequence results in anything but PASS, then don't bother retrying.
-                            // Retrying is intended only for network errors, which would result in an exception, which is caught below.
-                            if (!loginResult.pass()) {
-                                AccountUtil.bailWithLogout()
-                                break
-                            }
+                            AccountUtil.bailWithLogout()
+                            break
                         }
                     } catch (e: CancellationException) {
                         throw e

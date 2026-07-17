@@ -34,10 +34,7 @@ import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.main.MainActivity
 import org.wikipedia.page.LinkMovementMethodExt
 import org.wikipedia.page.PageActivity
-import org.wikipedia.page.edithistory.EditHistoryListActivity
 import org.wikipedia.readinglist.ReadingListActivity
-import org.wikipedia.suggestededits.SuggestionsActivity
-import org.wikipedia.talk.TalkTopicsActivity
 import org.wikipedia.util.log.L
 import org.wikipedia.views.AllowSnackbarOverBottomSheet
 
@@ -300,9 +297,6 @@ object FeedbackUtil {
             is MainActivity -> R.id.fragment_main_coordinator
             is PageActivity -> R.id.fragment_page_coordinator
             is ReadingListActivity -> R.id.fragment_reading_list_coordinator
-            is SuggestionsActivity -> R.id.suggestedEditsCardsCoordinator
-            is EditHistoryListActivity -> R.id.edit_history_coordinator
-            is TalkTopicsActivity -> R.id.talkTopicsSnackbar
             else -> android.R.id.content
         }
         return ActivityCompat.requireViewById(activity, viewId)

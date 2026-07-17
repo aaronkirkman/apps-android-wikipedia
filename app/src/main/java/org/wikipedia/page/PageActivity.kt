@@ -45,12 +45,6 @@ import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.databinding.ActivityPageBinding
 import org.wikipedia.dataclient.Service
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.dataclient.mwapi.MwQueryPage
-import org.wikipedia.descriptions.DescriptionEditActivity
-import org.wikipedia.descriptions.DescriptionEditRevertHelpView
-import org.wikipedia.descriptions.DescriptionEditSuccessActivity
-import org.wikipedia.edit.EditHandler
-import org.wikipedia.edit.EditSectionActivity
 import org.wikipedia.events.ArticleSavedOrDeletedEvent
 import org.wikipedia.events.ChangeTextSizeEvent
 import org.wikipedia.extensions.parcelableExtra
@@ -68,11 +62,6 @@ import org.wikipedia.search.HybridSearchAbCTest
 import org.wikipedia.search.SearchActivity
 import org.wikipedia.settings.Prefs
 import org.wikipedia.staticdata.MainPageNameData
-import org.wikipedia.staticdata.UserTalkAliasData
-import org.wikipedia.suggestededits.PageSummaryForEdit
-import org.wikipedia.suggestededits.SuggestedEditsImageTagEditActivity
-import org.wikipedia.suggestededits.SuggestedEditsSnackbars
-import org.wikipedia.talk.TalkTopicsActivity
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.DimenUtil
 import org.wikipedia.util.FeedbackUtil
@@ -105,37 +94,11 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     private var exclusiveTooltipRunnable: Runnable? = null
     private var isTooltipShowing = false
 
-    private val requestEditSectionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == EditHandler.RESULT_REFRESH_PAGE) {
-            FeedbackUtil.makeSnackbar(this, getString(R.string.edit_saved_successfully))
-                .addCallback(object : Snackbar.Callback() {
-                    override fun onDismissed(transientBottomBar: Snackbar, @DismissEvent event: Int) {
-                        if (!isDestroyed) {
-                            AccountUtil.maybeShowTempAccountWelcome(this@PageActivity)
-                        }
-                    }
-                }).show()
-
-            // and reload the page...
-            pageFragment.model.title?.let { title ->
-                pageFragment.model.curEntry?.let { entry ->
-                    pageFragment.loadPage(title, entry, pushBackStack = false, squashBackstack = false, isRefresh = true)
-                }
-            }
-        }
-    }
-
     private val requestHandleIntentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == LangLinksActivity.ACTIVITY_RESULT_LANGLINK_SELECT || it.resultCode == GalleryActivity.ACTIVITY_RESULT_PAGE_SELECTED) {
             it.data?.let {
                 binding.pageToolbarContainer.post { handleIntent(it) }
             }
-        }
-    }
-
-    private val requestGalleryEditLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == GalleryActivity.ACTIVITY_RESULT_IMAGE_CAPTION_ADDED || it.resultCode == GalleryActivity.ACTIVITY_RESULT_IMAGE_TAGS_ADDED) {
-            pageFragment.reloadFromBackstack()
         }
     }
 
@@ -150,32 +113,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
             animateTabsButton()
         } else if (it.resultCode == TabActivity.RESULT_LOAD_FROM_BACKSTACK) {
             pageFragment.reloadFromBackstack(false)
-        }
-    }
-
-    private val requestSuggestedEditsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK || it.resultCode == DescriptionEditSuccessActivity.RESULT_OK_FROM_EDIT_SUCCESS) {
-            pageFragment.refreshPage()
-            val data = it.data
-            val editLanguage = pageFragment.leadImageEditLang.orEmpty().ifEmpty { app.languageState.appLanguageCode }
-            val action = if (data != null && data.hasExtra(Constants.INTENT_EXTRA_ACTION))
-                data.getSerializableExtra(Constants.INTENT_EXTRA_ACTION) as DescriptionEditActivity.Action?
-            else null
-
-            SuggestedEditsSnackbars.show(this, action, it.resultCode != DescriptionEditSuccessActivity.RESULT_OK_FROM_EDIT_SUCCESS,
-                editLanguage, action !== DescriptionEditActivity.Action.ADD_DESCRIPTION && action !== DescriptionEditActivity.Action.TRANSLATE_DESCRIPTION) {
-                pageFragment.page?.pageProperties?.leadImageName?.let { imageName ->
-                    val wikiSite = WikiSite.forLanguageCode(pageFragment.leadImageEditLang.orEmpty().ifEmpty { app.appOrSystemLanguageCode })
-                    val imageTitle = PageTitle("File:${StringUtil.removeNamespace(imageName)}", wikiSite)
-                    if (action === DescriptionEditActivity.Action.ADD_IMAGE_TAGS) {
-                        startActivity(FilePageActivity.newIntent(this, imageTitle))
-                    } else if (action === DescriptionEditActivity.Action.ADD_CAPTION || action === DescriptionEditActivity.Action.TRANSLATE_CAPTION) {
-                        pageFragment.title?.let { pageTitle ->
-                            startActivity(GalleryActivity.newIntent(this, pageTitle, imageTitle.prefixedText, wikiSite))
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -247,10 +184,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
             pageFragment.articleInteractionEvent?.logNotificationClick()
             if (AccountUtil.isLoggedIn) {
                 startActivity(NotificationActivity.newIntent(this@PageActivity))
-            } else if (AnonymousNotificationHelper.isWithinAnonNotificationTime() && !Prefs.lastAnonNotificationLang.isNullOrEmpty()) {
-                val wikiSite = WikiSite.forLanguageCode(Prefs.lastAnonNotificationLang!!)
-                startActivity(TalkTopicsActivity.newIntent(this@PageActivity,
-                PageTitle(UserTalkAliasData.valueFor(wikiSite.languageCode) + ":" + Prefs.lastAnonUserWithMessages, wikiSite), InvokeSource.PAGE_ACTIVITY))
             }
         }
 
@@ -472,29 +405,12 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
         currentActionModes.clear()
     }
 
-    override fun onPageRequestEditSection(sectionId: Int, sectionAnchor: String?, title: PageTitle, highlightText: String?) {
-        requestEditSectionLauncher.launch(EditSectionActivity.newIntent(this, sectionId, sectionAnchor, title, InvokeSource.PAGE_ACTIVITY, highlightText))
-    }
-
     override fun onPageRequestLangLinks(title: PageTitle, historyEntryId: Long) {
         requestHandleIntentLauncher.launch(LangLinksActivity.newIntent(this, title, historyEntryId))
     }
 
     override fun onPageRequestGallery(title: PageTitle, fileName: String, wikiSite: WikiSite, revision: Long, isLeadImage: Boolean, options: ActivityOptionsCompat?) {
-        if (isLeadImage) {
-            requestGalleryEditLauncher.launch(GalleryActivity.newIntent(this, title, fileName, title.wikiSite, revision), options)
-        } else {
-            requestHandleIntentLauncher.launch(GalleryActivity.newIntent(this, title, fileName, title.wikiSite, revision), options)
-        }
-    }
-
-    override fun onPageRequestEditDescription(text: String?, title: PageTitle, sourceSummary: PageSummaryForEdit?,
-                                              targetSummary: PageSummaryForEdit?, action: DescriptionEditActivity.Action, invokeSource: InvokeSource) {
-        requestSuggestedEditsLauncher.launch(DescriptionEditActivity.newIntent(this, title, text, sourceSummary, targetSummary, action, invokeSource))
-    }
-
-    override fun onPageRequestAddImageTags(mwQueryPage: MwQueryPage, invokeSource: InvokeSource) {
-        requestSuggestedEditsLauncher.launch(SuggestedEditsImageTagEditActivity.newIntent(this, mwQueryPage, invokeSource))
+        requestHandleIntentLauncher.launch(GalleryActivity.newIntent(this, title, fileName, title.wikiSite, revision), options)
     }
 
     override fun onLinkPreviewLoadPage(title: PageTitle, entry: HistoryEntry, inNewTab: Boolean) {
@@ -553,9 +469,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
                 ACTION_LOAD_IN_NEW_TAB -> loadPage(title, historyEntry, TabPosition.NEW_TAB_FOREGROUND)
                 ACTION_LOAD_IN_CURRENT_TAB -> loadPage(title, historyEntry, TabPosition.CURRENT_TAB)
                 ACTION_LOAD_IN_CURRENT_TAB_SQUASH -> loadPage(title, historyEntry, TabPosition.CURRENT_TAB_SQUASH)
-            }
-            intent.getStringExtra(Constants.INTENT_EXTRA_REVERT_QNUMBER)?.let {
-                showDescriptionEditRevertDialog(it)
             }
         } else if (ACTION_LOAD_FROM_EXISTING_TAB == intent.action && intent.hasExtra(EXTRA_HISTORYENTRY)) {
             val title = intent.parcelableExtra<PageTitle>(Constants.ARG_TITLE)
@@ -636,10 +549,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
                 startActivity(FilePageActivity.newIntent(this, title))
                 finish()
                 return true
-            } else if (title.namespace() === Namespace.USER_TALK || title.namespace() === Namespace.TALK) {
-                startActivity(TalkTopicsActivity.newIntent(this, title, InvokeSource.PAGE_ACTIVITY))
-                finish()
-                return true
             } else if (title.isSpecial) {
                 UriUtil.visitInExternalBrowser(this, title.uri.toUri())
                 finish()
@@ -678,14 +587,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
         }
         // Append our custom items to the context menu.
         mode.menuInflater.inflate(R.menu.menu_text_select, menu)
-    }
-
-    private fun showDescriptionEditRevertDialog(qNumber: String) {
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.notification_reverted_title)
-            .setView(DescriptionEditRevertHelpView(this, qNumber))
-            .setPositiveButton(R.string.reverted_edit_dialog_ok_button_text, null)
-            .show()
     }
 
     private fun maybeShowThemeTooltip() {

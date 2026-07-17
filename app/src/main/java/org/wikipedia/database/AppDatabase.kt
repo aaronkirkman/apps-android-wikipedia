@@ -9,8 +9,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import org.wikipedia.WikipediaApp
 import org.wikipedia.categories.db.Category
 import org.wikipedia.categories.db.CategoryDao
-import org.wikipedia.edit.db.EditSummary
-import org.wikipedia.edit.db.EditSummaryDao
 import org.wikipedia.feed.personalization.db.dao.InterestArticleDao
 import org.wikipedia.feed.personalization.db.dao.InterestTopicDao
 import org.wikipedia.feed.personalization.db.entity.InterestArticle
@@ -33,27 +31,20 @@ import org.wikipedia.readinglist.db.RecommendedPageDao
 import org.wikipedia.search.db.RecentSearch
 import org.wikipedia.search.db.RecentSearchDao
 import org.wikipedia.staticdata.MainPageNameData
-import org.wikipedia.talk.db.TalkPageSeen
-import org.wikipedia.talk.db.TalkPageSeenDao
-import org.wikipedia.talk.db.TalkTemplate
-import org.wikipedia.talk.db.TalkTemplateDao
 import java.time.LocalDate
 
 const val DATABASE_NAME = "wikipedia.db"
-const val DATABASE_VERSION = 35
+const val DATABASE_VERSION = 36
 
 @Database(
     entities = [
         HistoryEntry::class,
         PageImage::class,
         RecentSearch::class,
-        TalkPageSeen::class,
-        EditSummary::class,
         OfflineObject::class,
         ReadingList::class,
         ReadingListPage::class,
         Notification::class,
-        TalkTemplate::class,
         Category::class,
         RecommendedPage::class,
         InterestTopic::class,
@@ -73,13 +64,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun historyEntryWithImageDao(): HistoryEntryWithImageDao
     abstract fun pageImagesDao(): PageImageDao
     abstract fun recentSearchDao(): RecentSearchDao
-    abstract fun talkPageSeenDao(): TalkPageSeenDao
-    abstract fun editSummaryDao(): EditSummaryDao
     abstract fun offlineObjectDao(): OfflineObjectDao
     abstract fun readingListDao(): ReadingListDao
     abstract fun readingListPageDao(): ReadingListPageDao
     abstract fun notificationDao(): NotificationDao
-    abstract fun talkTemplateDao(): TalkTemplateDao
     abstract fun categoryDao(): CategoryDao
     abstract fun recommendedPageDao(): RecommendedPageDao
     abstract fun topicInterestDao(): InterestTopicDao
@@ -388,12 +376,21 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_35_36 = object : Migration(35, 36) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS TalkPageSeen")
+                db.execSQL("DROP TABLE IF EXISTS EditSummary")
+                db.execSQL("DROP TABLE IF EXISTS TalkTemplate")
+            }
+        }
+
         val instance: AppDatabase by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             Room.databaseBuilder(WikipediaApp.instance, AppDatabase::class.java, DATABASE_NAME)
                 .addMigrations(MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23,
                     MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27,
                     MIGRATION_26_28, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30,
-                    MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35)
+                    MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35,
+                    MIGRATION_35_36)
                 .fallbackToDestructiveMigration(false)
                 .build()
         }

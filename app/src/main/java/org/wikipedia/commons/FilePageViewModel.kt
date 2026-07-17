@@ -13,7 +13,6 @@ import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.gallery.ImageInfo
 import org.wikipedia.language.LanguageUtil
 import org.wikipedia.page.PageTitle
-import org.wikipedia.suggestededits.PageSummaryForEdit
 import org.wikipedia.util.Resource
 import org.wikipedia.util.StringUtil
 
@@ -23,7 +22,7 @@ class FilePageViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     }
     private val allowEdit = savedStateHandle[FilePageActivity.INTENT_EXTRA_ALLOW_EDIT] ?: true
     val pageTitle = savedStateHandle.get<PageTitle>(Constants.ARG_TITLE)!!
-    var pageSummaryForEdit: PageSummaryForEdit? = null
+    var pageSummaryForEdit: FilePageSummary? = null
     var mediaInfo: ImageInfo? = null
 
     private val _uiState = MutableStateFlow(Resource<FilePage>())
@@ -58,7 +57,7 @@ class FilePageViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
             }
 
             firstPage?.imageInfo()?.let { imageInfo ->
-                pageSummaryForEdit = PageSummaryForEdit(
+                pageSummaryForEdit = FilePageSummary(
                     pageTitle.prefixedText,
                     pageTitle.wikiSite.languageCode,
                     pageTitle,

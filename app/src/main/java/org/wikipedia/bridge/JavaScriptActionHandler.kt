@@ -8,14 +8,11 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.extensions.getStrings
 import org.wikipedia.json.JsonUtil
-import org.wikipedia.page.Namespace
 import org.wikipedia.page.PageTitle
 import org.wikipedia.page.PageViewModel
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DimenUtil
-import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 object JavaScriptActionHandler {
@@ -122,9 +119,7 @@ object JavaScriptActionHandler {
         if (model.page == null) {
             return ""
         }
-        val showTalkLink = model.page!!.title.namespace() !== Namespace.TALK
         val showMapLink = model.page!!.pageProperties.geo != null
-        val editedDaysAgo = TimeUnit.MILLISECONDS.toDays(Date().time - model.page!!.pageProperties.lastModified.time)
         val langCode = model.title?.wikiSite?.languageCode ?: WikipediaApp.instance.appOrSystemLanguageCode
 
         // TODO: page-library also supports showing disambiguation ("similar pages") links and
@@ -134,14 +129,11 @@ object JavaScriptActionHandler {
                 "   clientVersion: \"${BuildConfig.VERSION_NAME}\"," +
                 "   menu: {" +
                 "       items: [" +
-                                "pcs.c1.Footer.MenuItemType.lastEdited, " +
-                                (if (showTalkLink) "pcs.c1.Footer.MenuItemType.talkPage, " else "") +
                                 (if (showMapLink) "pcs.c1.Footer.MenuItemType.coordinate, " else "") +
                                 "pcs.c1.Footer.MenuItemType.pageIssues, " +
                 "               pcs.c1.Footer.MenuItemType.referenceList " +
                 "              ]," +
-                "       fragment: \"pcs-menu\"," +
-                "       editedDaysAgo: $editedDaysAgo" +
+                "       fragment: \"pcs-menu\"" +
                 "   }," +
                 "   readMore: { " +
                 "       itemCount: 3," +

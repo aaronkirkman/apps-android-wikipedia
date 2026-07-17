@@ -17,12 +17,10 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.databinding.ViewFilePageBinding
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.dataclient.mwapi.MwQueryPage
-import org.wikipedia.descriptions.DescriptionEditActivity
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.page.LinkMovementMethodExt
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
-import org.wikipedia.suggestededits.PageSummaryForEdit
 import org.wikipedia.util.ImageUrlUtil
 import org.wikipedia.util.ResourceUtil
 import org.wikipedia.util.StringUtil
@@ -34,28 +32,20 @@ import java.util.Locale
 
 class FilePageView(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
 
-    interface Callback {
-        fun onImageCaptionClick(summaryForEdit: PageSummaryForEdit)
-        fun onImageTagsClick(page: MwQueryPage)
-    }
-
     val binding = ViewFilePageBinding.inflate(LayoutInflater.from(context), this)
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
-    fun setup(summaryForEdit: PageSummaryForEdit,
+    fun setup(summaryForEdit: FilePageSummary,
               imageTags: Map<String, List<String>>,
               page: MwQueryPage,
               containerWidth: Int,
               thumbWidth: Int,
               thumbHeight: Int,
               imageFromCommons: Boolean,
-              showFilename: Boolean,
-              showEditButton: Boolean,
-              action: DescriptionEditActivity.Action? = null,
-              callback: Callback? = null) {
+              showFilename: Boolean) {
 
         loadImage(summaryForEdit, containerWidth, thumbWidth, thumbHeight)
 
@@ -71,29 +61,13 @@ class FilePageView(context: Context, attrs: AttributeSet? = null) : LinearLayout
 
         binding.detailsContainer.removeAllViews()
 
-        if (summaryForEdit.pageTitle.description.isNullOrEmpty() && summaryForEdit.description.isNullOrEmpty() && showEditButton) {
-            addActionButton(context.getString(R.string.file_page_add_image_caption_button), imageCaptionOnClickListener(summaryForEdit, callback))
-        } else if ((action == DescriptionEditActivity.Action.ADD_CAPTION || action == null) && summaryForEdit.pageTitle.description.isNullOrEmpty()) {
-            // Show the image description when a structured caption does not exist.
-            addDetail(
-                titleString = context.getString(R.string.description_edit_add_caption_label),
-                detail = summaryForEdit.description,
-                listener = if (showEditButton) imageCaptionOnClickListener(summaryForEdit, callback) else null
-            )
-        } else {
-            addDetail(
-                titleString = context.getString(R.string.suggested_edits_image_preview_dialog_caption_in_language_title,
-                    WikipediaApp.instance.languageState.getAppLanguageLocalizedName(getProperLanguageCode(summaryForEdit, imageFromCommons))),
-                detail = if (summaryForEdit.pageTitle.description.isNullOrEmpty()) summaryForEdit.description else summaryForEdit.pageTitle.description,
-                listener = if (showEditButton) imageCaptionOnClickListener(summaryForEdit, callback) else null
-            )
-        }
+        addDetail(
+            titleString = context.getString(R.string.suggested_edits_image_preview_dialog_caption_in_language_title,
+                WikipediaApp.instance.languageState.getAppLanguageLocalizedName(getProperLanguageCode(summaryForEdit, imageFromCommons))),
+            detail = if (summaryForEdit.pageTitle.description.isNullOrEmpty()) summaryForEdit.description else summaryForEdit.pageTitle.description
+        )
 
-        if ((imageTags.isEmpty() || !imageTags.containsKey(getProperLanguageCode(summaryForEdit, imageFromCommons))) && showEditButton) {
-            addActionButton(context.getString(R.string.file_page_add_image_tags_button), imageTagsOnClickListener(page, callback))
-        } else {
-            addDetail(titleString = context.getString(R.string.suggested_edits_image_tags), detail = getImageTags(imageTags, getProperLanguageCode(summaryForEdit, imageFromCommons)))
-        }
+        addDetail(titleString = context.getString(R.string.suggested_edits_image_tags), detail = getImageTags(imageTags, getProperLanguageCode(summaryForEdit, imageFromCommons)))
 
         addDetail(titleString = context.getString(R.string.suggested_edits_image_caption_summary_title_author), detail = summaryForEdit.metadata!!.artist())
         addDetail(titleString = context.getString(R.string.suggested_edits_image_preview_dialog_date), detail = summaryForEdit.metadata!!.dateTime())
@@ -119,7 +93,7 @@ class FilePageView(context: Context, attrs: AttributeSet? = null) : LinearLayout
         }
     }
 
-    private fun getProperLanguageCode(summary: PageSummaryForEdit, imageFromCommons: Boolean): String {
+    private fun getProperLanguageCode(summary: FilePageSummary, imageFromCommons: Boolean): String {
         return if (!imageFromCommons || summary.lang == Constants.WIKI_CODE_COMMONS) {
             WikipediaApp.instance.languageState.appLanguageCode
         } else {
@@ -127,25 +101,13 @@ class FilePageView(context: Context, attrs: AttributeSet? = null) : LinearLayout
         }
     }
 
-    private fun loadImage(summaryForEdit: PageSummaryForEdit, containerWidth: Int, thumbWidth: Int, thumbHeight: Int) {
+    private fun loadImage(summaryForEdit: FilePageSummary, containerWidth: Int, thumbWidth: Int, thumbHeight: Int) {
         ImageZoomHelper.setViewZoomable(binding.imageView)
         ViewUtil.loadImage(binding.imageView, ImageUrlUtil.getUrlForPreferredSize(summaryForEdit.thumbnailUrl!!, PREFERRED_GALLERY_IMAGE_SIZE),
             force = true,
             listener = null
         )
         binding.imageViewPlaceholder.layoutParams = LayoutParams(containerWidth, ViewUtil.adjustImagePlaceholderHeight(containerWidth.toFloat(), thumbWidth.toFloat(), thumbHeight.toFloat()))
-    }
-
-    private fun imageCaptionOnClickListener(summaryForEdit: PageSummaryForEdit, callback: Callback?): OnClickListener {
-        return OnClickListener {
-            callback?.onImageCaptionClick(summaryForEdit)
-        }
-    }
-
-    private fun imageTagsOnClickListener(page: MwQueryPage, callback: Callback?): OnClickListener {
-        return OnClickListener {
-            callback?.onImageTagsClick(page)
-        }
     }
 
     private fun addDetail(
@@ -176,16 +138,6 @@ class FilePageView(context: Context, attrs: AttributeSet? = null) : LinearLayout
             }
             binding.detailsContainer.addView(view)
         }
-    }
-
-    private fun addActionButton(buttonText: String, listener: OnClickListener) {
-        val view = ImageDetailView(context)
-        view.binding.titleContainer.visibility = View.GONE
-        view.binding.contentContainer.visibility = View.GONE
-        view.binding.actionButton.visibility = View.VISIBLE
-        view.binding.actionButton.text = buttonText
-        view.binding.actionButton.setOnClickListener(listener)
-        binding.detailsContainer.addView(view)
     }
 
     private val movementMethod = LinkMovementMethodExt { url ->

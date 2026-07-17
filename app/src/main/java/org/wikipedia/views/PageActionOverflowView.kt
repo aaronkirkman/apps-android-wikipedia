@@ -73,9 +73,6 @@ class PageActionOverflowView(context: Context) : FrameLayout(context) {
                     view.setCompoundDrawablesRelativeWithIntrinsicBounds(PageActionItem.readingListIcon(model.isInReadingList), 0, 0, 0)
                     view.visibility = if (enabled) VISIBLE else GONE
                 }
-                PageActionItem.EDIT_ARTICLE -> {
-                    view.setCompoundDrawablesRelativeWithIntrinsicBounds(PageActionItem.editArticleIcon(model.page?.pageProperties?.canEdit != true), 0, 0, 0)
-                }
                 PageActionItem.VIEW_ON_MAP -> {
                     val geoAvailable = model.page?.pageProperties?.geo != null
                     val tintColor = ResourceUtil.getThemedColorStateList(context, if (geoAvailable) R.attr.primary_color else R.attr.inactive_color)

@@ -6,7 +6,6 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
-import org.wikipedia.dataclient.growthtasks.GrowthImageSuggestion
 import org.wikipedia.dataclient.page.Protection
 import org.wikipedia.gallery.ImageInfo
 import org.wikipedia.json.JsonUtil
@@ -48,11 +47,6 @@ class MwQueryPage {
     var convertedTo: String? = null
     val watched = false
     val lastrevid: Long = 0
-
-    val tasktype: String? = null
-    val difficulty: String? = null
-    val qualityGateIds: List<String>? = null
-    val growthimagesuggestiondata: List<GrowthImageSuggestion>? = null
 
     fun namespace(): Namespace {
         return Namespace.of(ns)

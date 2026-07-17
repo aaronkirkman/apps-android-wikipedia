@@ -43,16 +43,6 @@ enum class PageActionItem constructor(val id: Int,
             cb.onShareSelected()
         }
     },
-    VIEW_TALK_PAGE(7, R.id.page_view_talk_page, R.string.menu_page_talk_page, R.drawable.ic_icon_speech_bubbles_ooui_ltr) {
-        override fun select(cb: Callback) {
-            cb.onViewTalkPageSelected()
-        }
-    },
-    VIEW_EDIT_HISTORY(8, R.id.page_view_edit_history, R.string.menu_page_edit_history, R.drawable.ic_icon_revision_history_apps, true) {
-        override fun select(cb: Callback) {
-            cb.onViewEditHistorySelected()
-        }
-    },
     NEW_TAB(9, R.id.page_new_tab, R.string.menu_new_tab, R.drawable.ic_add_gray_white_24dp) {
         override fun select(cb: Callback) {
             cb.onNewTabSelected()
@@ -66,11 +56,6 @@ enum class PageActionItem constructor(val id: Int,
     CATEGORIES(11, R.id.page_categories, R.string.action_item_categories, R.drawable.ic_category_black_24dp) {
         override fun select(cb: Callback) {
             cb.onCategoriesSelected()
-        }
-    },
-    EDIT_ARTICLE(12, R.id.page_edit_article, R.string.menu_edit_article, R.drawable.ic_mode_edit_white_24dp) {
-        override fun select(cb: Callback) {
-            cb.onEditArticleSelected()
         }
     },
     VIEW_ON_MAP(13, R.id.page_view_on_map, R.string.action_item_view_on_map, R.drawable.baseline_location_on_24, false) {
@@ -94,19 +79,16 @@ enum class PageActionItem constructor(val id: Int,
         fun onThemeSelected()
         fun onContentsSelected()
         fun onShareSelected()
-        fun onViewTalkPageSelected()
-        fun onViewEditHistorySelected()
         fun onNewTabSelected()
         fun onHomeSelected()
         fun onCategoriesSelected()
-        fun onEditArticleSelected()
         fun onViewOnMapSelected()
         fun forwardClick()
     }
 
     companion object {
         val DEFAULT_TOOLBAR_LIST = listOf(SAVE, LANGUAGE, FIND_IN_ARTICLE, THEME, CONTENTS).map { it.id }
-        val DEFAULT_OVERFLOW_MENU_LIST = listOf(SHARE, VIEW_TALK_PAGE, VIEW_EDIT_HISTORY, VIEW_ON_MAP, NEW_TAB, HOME, CATEGORIES, EDIT_ARTICLE).map { it.id }
+        val DEFAULT_OVERFLOW_MENU_LIST = listOf(SHARE, VIEW_ON_MAP, NEW_TAB, HOME, CATEGORIES).map { it.id }
 
         fun find(id: Int): PageActionItem {
             return entries.find { id == it.id || id == it.viewId } ?: entries[0]
@@ -115,11 +97,6 @@ enum class PageActionItem constructor(val id: Int,
         @DrawableRes
         fun readingListIcon(pageSaved: Boolean): Int {
             return if (pageSaved) R.drawable.ic_bookmark_white_24dp else R.drawable.ic_bookmark_border_white_24dp
-        }
-
-        @DrawableRes
-        fun editArticleIcon(isProtected: Boolean): Int {
-            return if (isProtected) R.drawable.ic_edit_pencil_locked else R.drawable.ic_mode_edit_white_24dp
         }
     }
 }

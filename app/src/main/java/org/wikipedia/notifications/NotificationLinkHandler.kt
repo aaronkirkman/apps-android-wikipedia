@@ -3,7 +3,6 @@ package org.wikipedia.notifications
 import android.content.Context
 import android.net.Uri
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.diff.ArticleEditDetailsActivity
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.page.LinkHandler
 import org.wikipedia.page.PageActivity
@@ -22,7 +21,7 @@ class NotificationLinkHandler(context: Context, private val category: Notificati
     }
 
     override fun onDiffLinkClicked(title: PageTitle, revisionId: Long) {
-        context.startActivity(ArticleEditDetailsActivity.newIntent(context, title, revisionId))
+        // ignore
     }
 
     override lateinit var wikiSite: WikiSite

@@ -10,16 +10,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.wikipedia.Constants
 import org.wikipedia.dataclient.ServiceFactory
-import org.wikipedia.descriptions.DescriptionEditActivity
-import org.wikipedia.suggestededits.PageSummaryForEdit
 import org.wikipedia.util.Resource
 
 class ImagePreviewViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     private val handler = CoroutineExceptionHandler { _, throwable ->
         _uiState.value = Resource.Error(throwable)
     }
-    var pageSummaryForEdit = savedStateHandle.get<PageSummaryForEdit>(ImagePreviewDialog.ARG_SUMMARY)!!
-    var action = savedStateHandle.get<DescriptionEditActivity.Action>(ImagePreviewDialog.ARG_ACTION)
+    var pageSummaryForEdit = savedStateHandle.get<FilePageSummary>(ImagePreviewDialog.ARG_SUMMARY)!!
 
     private val _uiState = MutableStateFlow(Resource<FilePage>())
     val uiState = _uiState.asStateFlow()

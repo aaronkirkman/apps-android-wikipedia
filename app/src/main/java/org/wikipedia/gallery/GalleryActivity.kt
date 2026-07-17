@@ -38,17 +38,12 @@ import org.wikipedia.databinding.ActivityGalleryBinding
 import org.wikipedia.dataclient.Service
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.dataclient.wikidata.Entities
-import org.wikipedia.descriptions.DescriptionEditActivity
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.LinkMovementMethodExt
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
 import org.wikipedia.page.linkpreview.LinkPreviewDialog
-import org.wikipedia.richtext.RichTextUtil
-import org.wikipedia.suggestededits.PageSummaryForEdit
-import org.wikipedia.suggestededits.SuggestedEditsImageTagEditActivity
-import org.wikipedia.suggestededits.SuggestedEditsSnackbars
 import org.wikipedia.theme.Theme
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.DimenUtil
@@ -80,28 +75,6 @@ class GalleryActivity : BaseActivity(), LinkPreviewDialog.LoadPageCallback, Gall
     private val downloadReceiver = MediaDownloadReceiver()
     private val downloadReceiverCallback = MediaDownloadReceiverCallback()
     private val currentItem get() = galleryAdapter.getFragmentAt(binding.pager.currentItem) as GalleryItemFragment?
-
-    private val requestAddCaptionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val action = it.data?.getSerializableExtra(Constants.INTENT_EXTRA_ACTION) as DescriptionEditActivity.Action?
-            SuggestedEditsSnackbars.show(this, action, true, targetLanguageCode, false)
-            fetchGalleryDescription(currentItem)
-            setResult(ACTIVITY_RESULT_IMAGE_CAPTION_ADDED)
-        }
-    }
-
-    private val requestAddImageTagsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val action = DescriptionEditActivity.Action.ADD_IMAGE_TAGS
-            SuggestedEditsSnackbars.show(this, action, true, targetLanguageCode, true) {
-                currentItem?.let {
-                    startActivity(FilePageActivity.newIntent(this@GalleryActivity, it.imageTitle))
-                }
-            }
-            fetchGalleryDescription(currentItem)
-            setResult(ACTIVITY_RESULT_IMAGE_TAGS_ADDED)
-        }
-    }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -192,8 +165,6 @@ class GalleryActivity : BaseActivity(), LinkPreviewDialog.LoadPageCallback, Gall
             binding.transitionReceiver.visibility = View.GONE
             viewModel.fetchGalleryItems()
         }
-        binding.captionEditButton.setOnClickListener { onEditClick(it) }
-        binding.ctaButton.setOnClickListener { onTranslateClick() }
         binding.licenseContainer.setOnClickListener { onLicenseClick() }
         binding.licenseContainer.setOnLongClickListener { onLicenseLongClick() }
 
@@ -265,73 +236,6 @@ class GalleryActivity : BaseActivity(), LinkPreviewDialog.LoadPageCallback, Gall
 
     override fun setTheme() {
         setTheme(Theme.DARK.resourceId)
-    }
-
-    private fun onEditClick(v: View) {
-        val item = currentItem
-        if (item?.imageTitle == null || item.mediaInfo?.metadata == null) {
-            return
-        }
-
-        val isProtected = v.tag as Boolean
-        if (isProtected) {
-            MaterialAlertDialogBuilder(this)
-                .setCancelable(false)
-                .setTitle(R.string.page_protected_can_not_edit_title)
-                .setMessage(R.string.page_protected_can_not_edit)
-                .setPositiveButton(R.string.protected_page_warning_dialog_ok_button_text, null)
-                .show()
-            return
-        }
-        startCaptionEdit(item)
-    }
-
-    private fun startCaptionEdit(item: GalleryItemFragment) {
-        item.mediaInfo?.let {
-            val title = PageTitle(item.imageTitle.prefixedText,
-                WikiSite(Service.COMMONS_URL, viewModel.wikiSite.languageCode))
-            title.description = it.captions[viewModel.wikiSite.languageCode]
-            val summary = PageSummaryForEdit(title.prefixedText, viewModel.wikiSite.languageCode, title,
-                title.displayText, RichTextUtil.stripHtml(it.metadata?.imageDescription()), it.thumbUrl)
-            requestAddCaptionLauncher.launch(DescriptionEditActivity.newIntent(this, title, null, summary, null,
-                DescriptionEditActivity.Action.ADD_CAPTION, InvokeSource.GALLERY_ACTIVITY))
-        }
-    }
-
-    private fun onTranslateClick() {
-        val item = currentItem
-        if (item?.mediaInfo?.metadata == null || imageEditType == null) {
-            return
-        }
-        when (imageEditType) {
-            ImageEditType.ADD_TAGS -> startTagsEdit(item)
-            ImageEditType.ADD_CAPTION_TRANSLATION -> startCaptionTranslation(item)
-            else -> startCaptionEdit(item)
-        }
-    }
-
-    private fun startTagsEdit(item: GalleryItemFragment) {
-        item.mediaPage?.let {
-            requestAddImageTagsLauncher.launch(SuggestedEditsImageTagEditActivity.newIntent(this, it, InvokeSource.GALLERY_ACTIVITY))
-        }
-    }
-
-    private fun startCaptionTranslation(item: GalleryItemFragment) {
-        item.mediaInfo?.let {
-            val sourceTitle = PageTitle(item.imageTitle.prefixedText, WikiSite(Service.COMMONS_URL, viewModel.wikiSite.languageCode))
-            val targetTitle = PageTitle(item.imageTitle.prefixedText, WikiSite(Service.COMMONS_URL,
-                targetLanguageCode ?: WikipediaApp.instance.languageState.appLanguageCodes[1]))
-            val currentCaption = it.captions[viewModel.wikiSite.languageCode].orEmpty().ifEmpty {
-                RichTextUtil.stripHtml(it.metadata?.imageDescription())
-            }
-            val sourceSummary = PageSummaryForEdit(sourceTitle.prefixedText, sourceTitle.wikiSite.languageCode,
-                sourceTitle, sourceTitle.displayText, currentCaption, it.thumbUrl)
-            val targetSummary = PageSummaryForEdit(targetTitle.prefixedText, targetTitle.wikiSite.languageCode,
-                targetTitle, targetTitle.displayText, null, it.thumbUrl)
-            requestAddCaptionLauncher.launch(DescriptionEditActivity.newIntent(this, targetTitle, null, sourceSummary,
-                targetSummary, if (sourceSummary.lang == targetSummary.lang) DescriptionEditActivity.Action.ADD_CAPTION
-                else DescriptionEditActivity.Action.TRANSLATE_CAPTION, InvokeSource.GALLERY_ACTIVITY))
-        }
     }
 
     private fun onLicenseClick() {
