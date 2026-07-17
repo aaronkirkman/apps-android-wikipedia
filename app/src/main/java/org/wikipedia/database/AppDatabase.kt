@@ -24,17 +24,15 @@ import org.wikipedia.pageimages.db.PageImage
 import org.wikipedia.pageimages.db.PageImageDao
 import org.wikipedia.readinglist.database.ReadingList
 import org.wikipedia.readinglist.database.ReadingListPage
-import org.wikipedia.readinglist.database.RecommendedPage
 import org.wikipedia.readinglist.db.ReadingListDao
 import org.wikipedia.readinglist.db.ReadingListPageDao
-import org.wikipedia.readinglist.db.RecommendedPageDao
 import org.wikipedia.search.db.RecentSearch
 import org.wikipedia.search.db.RecentSearchDao
 import org.wikipedia.staticdata.MainPageNameData
 import java.time.LocalDate
 
 const val DATABASE_NAME = "wikipedia.db"
-const val DATABASE_VERSION = 36
+const val DATABASE_VERSION = 37
 
 @Database(
     entities = [
@@ -46,7 +44,6 @@ const val DATABASE_VERSION = 36
         ReadingListPage::class,
         Notification::class,
         Category::class,
-        RecommendedPage::class,
         InterestTopic::class,
         InterestArticle::class
     ],
@@ -69,7 +66,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun readingListPageDao(): ReadingListPageDao
     abstract fun notificationDao(): NotificationDao
     abstract fun categoryDao(): CategoryDao
-    abstract fun recommendedPageDao(): RecommendedPageDao
     abstract fun topicInterestDao(): InterestTopicDao
     abstract fun articleInterestDao(): InterestArticleDao
 
@@ -384,13 +380,19 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_36_37 = object : Migration(36, 37) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS RecommendedPage")
+            }
+        }
+
         val instance: AppDatabase by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             Room.databaseBuilder(WikipediaApp.instance, AppDatabase::class.java, DATABASE_NAME)
                 .addMigrations(MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23,
                     MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27,
                     MIGRATION_26_28, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30,
                     MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35,
-                    MIGRATION_35_36)
+                    MIGRATION_35_36, MIGRATION_36_37)
                 .fallbackToDestructiveMigration(false)
                 .build()
         }

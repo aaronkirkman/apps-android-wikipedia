@@ -23,10 +23,8 @@ import org.wikipedia.theme.Theme
 fun HomeFeedSettingsScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {},
-    onForYouModulesClick: () -> Unit = {},
     onCommunityModulesClick: () -> Unit = {},
-    onFeedConfigurationClick: () -> Unit = {},
-    onDefaultFeedViewClick: () -> Unit = {}
+    onFeedConfigurationClick: () -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier,
@@ -47,12 +45,6 @@ fun HomeFeedSettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(34.dp)
         ) {
-            SettingsRow(
-                title = stringResource(R.string.home_feed_settings_default_view_title),
-                subtitle = stringResource(R.string.home_feed_settings_default_view_subtitle),
-                onClick = onDefaultFeedViewClick
-            )
-
             SettingsSection(
                 title = stringResource(R.string.explore_feed_community_tab_label)
             ) {
@@ -60,16 +52,6 @@ fun HomeFeedSettingsScreen(
                     title = stringResource(R.string.home_feed_settings_modules_title),
                     subtitle = stringResource(R.string.home_feed_settings_community_subtitle),
                     onClick = onCommunityModulesClick
-                )
-            }
-
-            SettingsSection(
-                title = stringResource(R.string.explore_feed_for_you_tab_label)
-            ) {
-                SettingsRow(
-                    title = stringResource(R.string.home_feed_settings_modules_title),
-                    subtitle = stringResource(R.string.home_feed_settings_for_you_subtitle),
-                    onClick = onForYouModulesClick
                 )
                 SettingsRow(
                     title = stringResource(R.string.home_feed_settings_whats_driving_title),

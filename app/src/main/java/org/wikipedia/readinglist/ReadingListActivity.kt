@@ -15,8 +15,6 @@ import org.wikipedia.analytics.eventplatform.ReadingListsAnalyticsHelper
 import org.wikipedia.main.MainActivity
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.readinglist.database.ReadingList
-import org.wikipedia.readinglist.recommended.RecommendedReadingListNotificationManager
-import org.wikipedia.settings.Prefs
 import org.wikipedia.util.ResourceUtil
 
 class ReadingListActivity : SingleFragmentActivity<ReadingListFragment>(), BaseActivity.Callback {
@@ -67,13 +65,6 @@ class ReadingListActivity : SingleFragmentActivity<ReadingListFragment>(), BaseA
     }
 
     override fun onPermissionResult(activity: BaseActivity, isGranted: Boolean) {
-        if (isGranted) {
-            RecommendedReadingListNotificationManager.scheduleRecommendedReadingListNotification(this)
-            Prefs.isRecommendedReadingListNotificationEnabled = true
-        } else {
-            Prefs.isRecommendedReadingListNotificationEnabled = false
-        }
-        fragment.updateNotificationIcon()
     }
 
     companion object {

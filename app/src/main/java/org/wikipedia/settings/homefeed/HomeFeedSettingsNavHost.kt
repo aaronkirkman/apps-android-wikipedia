@@ -15,7 +15,6 @@ import org.wikipedia.extensions.instrument
 import org.wikipedia.feed.personalization.PersonalizationActivity
 import org.wikipedia.main.MainActivity
 import org.wikipedia.navtab.NavTab
-import org.wikipedia.settings.Prefs
 import org.wikipedia.settings.languages.WikipediaLanguagesActivity
 import org.wikipedia.util.FeedbackUtil
 
@@ -29,8 +28,6 @@ fun HomeFeedSettingsNavHost(
     val startRoute = when (startDestination) {
         HomeFeedSettingsStartDestination.ROOT -> HomeFeedSettingsDestination.Root
         HomeFeedSettingsStartDestination.COMMUNITY_MODULES -> HomeFeedSettingsDestination.CommunityModuleScreen
-        HomeFeedSettingsStartDestination.FOR_YOU_MODULES -> HomeFeedSettingsDestination.ForYouModuleScreen
-        HomeFeedSettingsStartDestination.DEFAULT_FEED_VIEW -> HomeFeedSettingsDestination.DefaultFeedViewScreen
     }
     val customizeInterestsLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK || it.resultCode == PersonalizationActivity.RESULT_INTERESTS_UPDATED) {
@@ -57,17 +54,9 @@ fun HomeFeedSettingsNavHost(
                     context.instrument?.submitInteraction("click", elementId = "feed_modules_community")
                     navController.navigate(HomeFeedSettingsDestination.CommunityModuleScreen)
                 },
-                onForYouModulesClick = {
-                    context.instrument?.submitInteraction("click", elementId = "feed_modules_for_you")
-                    navController.navigate(HomeFeedSettingsDestination.ForYouModuleScreen)
-                },
                 onFeedConfigurationClick = {
                     context.instrument?.submitInteraction("click", elementId = "feed_data_info")
                     navController.navigate(HomeFeedSettingsDestination.FeedConfiguration)
-                },
-                onDefaultFeedViewClick = {
-                    context.instrument?.submitInteraction("click", elementId = "feed_default_view")
-                    navController.navigate(HomeFeedSettingsDestination.DefaultFeedViewScreen)
                 }
             )
         }
@@ -75,16 +64,6 @@ fun HomeFeedSettingsNavHost(
         composable<HomeFeedSettingsDestination.CommunityModuleScreen> {
             CommunityModulesScreen(
                 onBack = { if (!navController.navigateUp()) onExit() }
-            )
-        }
-
-        composable<HomeFeedSettingsDestination.ForYouModuleScreen> {
-            ForYouModulesScreen(
-                onBack = { if (!navController.navigateUp()) onExit() },
-                navigateToFeedConfigurationScreen = {
-                    context.instrument?.submitInteraction("click", actionSubtype = "feed_for_you", elementId = "feed_data_info")
-                    navController.navigate(HomeFeedSettingsDestination.FeedConfiguration)
-                }
             )
         }
 
@@ -106,17 +85,6 @@ fun HomeFeedSettingsNavHost(
                     context.instrument?.submitInteraction("click", elementId = "languages")
                     context.startActivity(WikipediaLanguagesActivity.newIntent(context, Constants.InvokeSource.SETTINGS))
                 },
-            )
-        }
-
-        composable<HomeFeedSettingsDestination.DefaultFeedViewScreen> {
-            HomeFeedDefaultViewScreen(
-                currentDefaultView = Prefs.homePreferenceSelection,
-                onBackClick = { if (!navController.navigateUp()) onExit() },
-                onDefaultViewSelect = { selection ->
-                    context.instrument?.submitInteraction("click", elementId = "feed_default_view_select", actionSubtype = selection.name)
-                    Prefs.homePreferenceSelection = selection
-                }
             )
         }
     }

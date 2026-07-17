@@ -8,11 +8,7 @@ import org.wikipedia.BuildConfig
 import org.wikipedia.Constants
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
-import org.wikipedia.analytics.eventplatform.RecommendedReadingListEvent
 import org.wikipedia.auth.AccountUtil
-import org.wikipedia.readinglist.recommended.RecommendedReadingListOnboardingActivity
-import org.wikipedia.readinglist.recommended.RecommendedReadingListSettingsActivity
-import org.wikipedia.readinglist.recommended.RecommendedReadingListSource
 import org.wikipedia.settings.homefeed.HomeFeedSettingsActivity
 import org.wikipedia.settings.languages.WikipediaLanguagesActivity
 import org.wikipedia.theme.ThemeFittingRoomActivity
@@ -57,17 +53,6 @@ internal class SettingsPreferenceLoader(fragment: PreferenceFragmentCompat) : Ba
                 )
                 true
         }
-        findPreference(R.string.preference_key_recommended_reading_list_enabled).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            RecommendedReadingListEvent.submit("discover_click", "global_settings")
-            if (Prefs.recommendedReadingListInterests.isEmpty() &&
-                Prefs.recommendedReadingListSource == RecommendedReadingListSource.INTERESTS) {
-                activity.startActivity(RecommendedReadingListOnboardingActivity.newIntent(activity))
-            } else {
-                activity.startActivity(RecommendedReadingListSettingsActivity.newIntent(activity))
-            }
-            true
-        }
-
         if (AccountUtil.isLoggedIn) {
             loadPreferences(R.xml.preferences_account)
             (findPreference(R.string.preference_key_logout) as LogoutPreference).activity = activity
@@ -82,13 +67,6 @@ internal class SettingsPreferenceLoader(fragment: PreferenceFragmentCompat) : Ba
     fun updateLanguagePrefSummary() {
         // TODO: resolve RTL vs LTR with multiple languages (e.g. list contains English and Hebrew)
         findPreference(R.string.preference_key_language).summary = WikipediaApp.instance.languageState.appLanguageLocalizedNames
-    }
-
-    fun updateRecommendedReadingListSummary() {
-        val summary = if (Prefs.isRecommendedReadingListEnabled) {
-            R.string.recommended_reading_list_settings_toggle_enable_message
-        } else R.string.recommended_reading_list_settings_toggle_disable_message
-        findPreference(R.string.preference_key_recommended_reading_list_enabled).summary = activity.getString(summary)
     }
 
 }

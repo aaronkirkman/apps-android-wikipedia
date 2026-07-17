@@ -19,8 +19,7 @@ class RecurringTasksExecutor {
             RemoteConfigRefreshTask(),
             DailyEventTask(app),
             TalkOfflineCleanupTask(app),
-            CategoriesTableCleanupTask(),
-            RecommendedReadingListTask()
+            CategoriesTableCleanupTask()
         ).also {
             if (ReleaseUtil.isAlphaRelease) {
                 it.add(AlphaUpdateChecker(app))

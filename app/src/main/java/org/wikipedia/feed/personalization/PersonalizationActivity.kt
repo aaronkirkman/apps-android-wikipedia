@@ -42,8 +42,7 @@ class PersonalizationActivity : BaseActivity() {
         } else {
             listOf(
                 PersonalizationPage.CURIOSITY,
-                PersonalizationPage.INTERESTS,
-                PersonalizationPage.HOME_PREFERENCE
+                PersonalizationPage.INTERESTS
             )
         }
 
@@ -93,6 +92,5 @@ class PersonalizationActivity : BaseActivity() {
 
 enum class PersonalizationPage {
     CURIOSITY,
-    INTERESTS,
-    HOME_PREFERENCE
+    INTERESTS
 }

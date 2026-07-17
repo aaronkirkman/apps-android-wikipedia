@@ -9,12 +9,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.wikipedia.R
-import org.wikipedia.WikipediaApp
 import org.wikipedia.database.AppDatabase
 import org.wikipedia.readinglist.database.ReadingList
 import org.wikipedia.readinglist.database.ReadingListPage
-import org.wikipedia.readinglist.recommended.RecommendedReadingListHelper
-import org.wikipedia.readinglist.recommended.RecommendedReadingListUpdateFrequency
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.L10nUtil
 import org.wikipedia.util.Resource
@@ -32,9 +29,6 @@ class ReadingListFragmentViewModel : ViewModel() {
 
     private val _deleteSelectedPagesFlow = MutableSharedFlow<Resource<List<ReadingListPage>>>()
     val deleteSelectedPagesFlow = _deleteSelectedPagesFlow.asSharedFlow()
-
-    private val _recommendedListFlow = MutableStateFlow(Resource<ReadingList>())
-    val recommendedListFlow = _recommendedListFlow.asStateFlow()
 
     private val _yirListFlow = MutableStateFlow(Resource<ReadingList>())
     val yirListFlow = _yirListFlow.asStateFlow()
@@ -90,54 +84,6 @@ class ReadingListFragmentViewModel : ViewModel() {
             if (pages.isNotEmpty()) {
                 AppDatabase.instance.readingListPageDao().markPagesForDeletion(readingList, pages)
                 _deleteSelectedPagesFlow.emit(Resource.Success(pages))
-            }
-        }
-    }
-
-    fun generateRecommendedReadingList() {
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
-            viewModelScope.launch {
-                _recommendedListFlow.value = Resource.Error(throwable)
-            }
-        }) {
-            _recommendedListFlow.value = Resource.Loading()
-            RecommendedReadingListHelper.generateRecommendedReadingList(shouldExpireOldPages = Prefs.resetRecommendedReadingList).let { list ->
-                val context = WikipediaApp.instance
-                if (list.isNotEmpty()) {
-                    val description = when (Prefs.recommendedReadingListUpdateFrequency) {
-                        RecommendedReadingListUpdateFrequency.DAILY -> R.string.recommended_reading_list_page_description_daily
-                        RecommendedReadingListUpdateFrequency.WEEKLY -> R.string.recommended_reading_list_page_description_weekly
-                        RecommendedReadingListUpdateFrequency.MONTHLY -> R.string.recommended_reading_list_page_description_monthly
-                    }
-
-                    // Get the recommended reading list from the database
-                    val recommendedListPages = list.map {
-                        ReadingListPage(
-                            wiki = it.wiki,
-                            lang = it.wiki.languageCode,
-                            namespace = it.namespace,
-                            displayTitle = it.displayTitle,
-                            apiTitle = it.apiTitle,
-                            description = it.description,
-                            thumbUrl = it.thumbUrl,
-                            remoteId = 0
-                        ).apply {
-                            mtime = System.currentTimeMillis()
-                            atime = mtime
-                        }
-                    }
-                    val recommendedList = ReadingList(
-                        listTitle = context.getString(R.string.recommended_reading_list_title),
-                        description = context.getString(description)
-                    ).apply {
-                        pages.addAll(recommendedListPages)
-                        mtime = System.currentTimeMillis()
-                        atime = mtime
-                    }
-                    _recommendedListFlow.value = Resource.Success(recommendedList)
-                } else {
-                    _recommendedListFlow.value = Resource.Error(Throwable(context.getString(R.string.error_message_generic)))
-                }
             }
         }
     }

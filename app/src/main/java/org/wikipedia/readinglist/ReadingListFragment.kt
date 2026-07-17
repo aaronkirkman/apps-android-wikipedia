@@ -42,10 +42,8 @@ import org.wikipedia.Constants.InvokeSource
 import org.wikipedia.R
 import org.wikipedia.activity.BaseActivity
 import org.wikipedia.analytics.eventplatform.ReadingListsAnalyticsHelper
-import org.wikipedia.analytics.eventplatform.RecommendedReadingListEvent
 import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.databinding.FragmentReadingListBinding
-import org.wikipedia.events.NewRecommendedReadingListEvent
 import org.wikipedia.events.PageDownloadEvent
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.history.SearchActionModeCallback
@@ -56,8 +54,6 @@ import org.wikipedia.page.PageAvailableOfflineHandler
 import org.wikipedia.page.PageTitle
 import org.wikipedia.readinglist.database.ReadingList
 import org.wikipedia.readinglist.database.ReadingListPage
-import org.wikipedia.readinglist.recommended.RecommendedReadingListNotificationManager
-import org.wikipedia.readinglist.recommended.RecommendedReadingListSettingsActivity
 import org.wikipedia.readinglist.sync.ReadingListSyncEvent
 import org.wikipedia.settings.Prefs
 import org.wikipedia.settings.RemoteConfig
@@ -77,7 +73,6 @@ import org.wikipedia.views.MultiSelectActionModeCallback.Companion.isTagType
 import org.wikipedia.views.PageItemView
 import org.wikipedia.views.SwipeableItemTouchHelperCallback
 import java.util.Date
-import java.util.Locale
 
 class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDialog.Callback {
 
@@ -105,7 +100,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
     private var articleLimitMessageShown = false
     private var exclusiveTooltipRunnable: Runnable? = null
     private val isPreview get() = readingListMode == ReadingListMode.PREVIEW
-    private val isRecommendedList get() = readingListMode == ReadingListMode.RECOMMENDED
     var readingList: ReadingList? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -129,9 +123,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
         setRecyclerView()
         setSwipeRefreshView()
 
-        if (isRecommendedList) {
-            RecommendedReadingListEvent.submit("impression", "rrl_discover", source = invokeSource?.value)
-        }
         return binding.root
     }
 
@@ -183,10 +174,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
                     viewModel.saveReadingListFlow.collect { resource ->
                         when (resource) {
                             is Resource.Success -> {
-                                if (isRecommendedList) {
-                                    RecommendedReadingListEvent.submit("add_list_new", "rrl_discover", countSaved = resource.data.pages.size)
-                                }
-
                                 requireActivity().startActivity(MainActivity.newIntent(requireContext())
                                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra(Constants.INTENT_EXTRA_PREVIEW_SAVED_READING_LISTS, true))
                                 requireActivity().finish()
@@ -212,41 +199,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
                             is Resource.Error -> {
                                 L.e(resource.throwable)
                                 FeedbackUtil.showError(requireActivity(), resource.throwable)
-                            }
-                        }
-                    }
-                }
-                launch {
-                    viewModel.recommendedListFlow.collect {
-                        when (it) {
-                            is Resource.Loading -> {
-                                binding.progressBar.isVisible = true
-                                binding.errorView.isVisible = false
-                                binding.readingListHeader.isVisible = false
-                                binding.readingListSwipeRefresh.isVisible = false
-                            }
-                            is Resource.Success -> {
-                                readingList = it.data
-                                binding.progressBar.isVisible = false
-                                binding.errorView.isVisible = false
-                                binding.readingListHeader.isVisible = true
-                                binding.readingListSwipeRefresh.isVisible = true
-                                binding.readingListSwipeRefresh.isRefreshing = false
-                                update()
-                                maybeShowCustomizeSnackbar()
-                                Prefs.isNewRecommendedReadingListGenerated = false
-                                FlowEventBus.post(NewRecommendedReadingListEvent())
-                            }
-                            is Resource.Error -> {
-                                L.e(it.throwable)
-                                binding.progressBar.isVisible = false
-                                binding.errorView.isVisible = true
-                                binding.readingListHeader.isVisible = false
-                                binding.readingListSwipeRefresh.isVisible = false
-                                binding.errorView.backClickListener = View.OnClickListener {
-                                    requireActivity().onBackPressedDispatcher.onBackPressed()
-                                }
-                                binding.errorView.setError(it.throwable)
                             }
                         }
                     }
@@ -465,9 +417,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
     }
 
     private fun setSwipeRefreshView() {
-        if (isRecommendedList) {
-            return
-        }
         binding.readingListSwipeRefresh.setOnRefreshListener { ReadingListsFragment.refreshSync(this, binding.readingListSwipeRefresh) }
         if (RemoteConfig.config.disableReadingListSync) {
             binding.readingListSwipeRefresh.isEnabled = false
@@ -505,19 +454,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
                     viewModel.updateList(emptyTitle, emptyDescription, encoded = true)
                 } else {
                     update()
-                }
-            }
-            ReadingListMode.RECOMMENDED -> {
-                if (!Prefs.isRecommendedReadingListEnabled) {
-                    requireActivity().finish()
-                    return
-                }
-                if (readingList == null || Prefs.isNewRecommendedReadingListGenerated) {
-                    viewModel.generateRecommendedReadingList()
-                } else {
-                    update()
-                    Prefs.isNewRecommendedReadingListGenerated = false
-                    FlowEventBus.post(NewRecommendedReadingListEvent())
                 }
             }
         }
@@ -650,9 +586,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
                     it.pages.clear()
                     it.pages.addAll(savedPages)
                     it.listTitle = readingListTitle
-                    if (readingListMode == ReadingListMode.RECOMMENDED) {
-                        it.description = null
-                    }
                     viewModel.saveReadingList(it)
                 }
                 .setNegativeButton(R.string.reading_lists_preview_save_dialog_cancel, null)
@@ -762,64 +695,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
         return readingList?.pages?.firstOrNull { it.id == id }
     }
 
-    private fun maybeShowCustomizeSnackbar() {
-        if (isRecommendedList && !Prefs.isRecommendedReadingListOnboardingShown) {
-            // Register the notification permission and schedule the notification for the first time.
-            requestPermissionAndScheduleRecommendedReadingNotification()
-            val message = getString(
-                R.string.recommended_reading_list_page_snackbar,
-                Prefs.recommendedReadingListArticlesNumber,
-                getString(Prefs.recommendedReadingListUpdateFrequency.snackbarStringRes).lowercase(Locale.getDefault())
-            )
-            FeedbackUtil.makeSnackbar(requireActivity(), message)
-                .setAction(R.string.recommended_reading_list_page_snackbar_action) {
-                    RecommendedReadingListEvent.submit("customize_click", "rrl_discover")
-                   startActivity(RecommendedReadingListSettingsActivity.newIntent(requireContext()))
-                }
-                .show()
-
-            Prefs.isRecommendedReadingListOnboardingShown = true
-        }
-    }
-
-    private fun showRecommendedReadingListNotificationOffDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.recommended_reading_list_settings_notifications_dialog_title)
-            .setMessage(R.string.recommended_reading_list_settings_notifications_dialog_message)
-            .setPositiveButton(R.string.recommended_reading_list_settings_notifications_dialog_negative_button) { _, _ ->
-                if (Prefs.isRecommendedReadingListNotificationEnabled) {
-                    return@setPositiveButton
-                }
-                Prefs.isRecommendedReadingListNotificationEnabled = true
-                requestPermissionAndScheduleRecommendedReadingNotification()
-                update()
-            }
-            .setNegativeButton(R.string.recommended_reading_list_settings_notifications_dialog_positive_button) { _, _ ->
-                Prefs.isRecommendedReadingListNotificationEnabled = false
-                RecommendedReadingListNotificationManager.cancelRecommendedReadingListNotification(requireContext())
-                update()
-            }
-            .show()
-    }
-
-    private fun requestPermissionAndScheduleRecommendedReadingNotification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val permission = android.Manifest.permission.POST_NOTIFICATIONS
-            when {
-                ContextCompat.checkSelfPermission(requireActivity(), permission) == PackageManager.PERMISSION_GRANTED -> {
-                    RecommendedReadingListNotificationManager.scheduleRecommendedReadingListNotification(requireActivity())
-                    Prefs.isRecommendedReadingListNotificationEnabled = true
-                    update()
-                }
-                else -> (requireActivity() as ReadingListActivity).requestPermissionLauncher.launch(permission)
-            }
-        } else {
-            RecommendedReadingListNotificationManager.scheduleRecommendedReadingListNotification(requireActivity())
-            Prefs.isRecommendedReadingListNotificationEnabled = true
-            update()
-        }
-    }
-
     private inner class AppBarListener : OnOffsetChangedListener {
         override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
             if (verticalOffset > -appBarLayout.totalScrollRange && showOverflowMenu) {
@@ -837,7 +712,7 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
                     actionMode == null && appBarLayout.totalScrollRange + verticalOffset > appBarLayout.totalScrollRange / 2)
             (requireActivity() as ReadingListActivity).updateNavigationBarColor()
             // prevent swiping when collapsing the view
-            binding.readingListSwipeRefresh.isEnabled = verticalOffset == 0 && !isRecommendedList
+            binding.readingListSwipeRefresh.isEnabled = verticalOffset == 0
         }
     }
 
@@ -869,9 +744,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
             view.setActionHint(R.string.reading_list_article_make_offline)
             view.setSearchQuery(currentSearchQuery)
             PageAvailableOfflineHandler.check(page) { view.setViewsGreyedOut(!it) }
-            if (isRecommendedList) {
-                PageAvailableOfflineHandler.checkHistory(viewLifecycleOwner.lifecycleScope, pageTitle) { view.setViewsRead(it) }
-            }
             if (!currentSearchQuery.isNullOrEmpty()) {
                 view.setTitleMaxLines(2)
                 view.setTitleEllipsis()
@@ -894,7 +766,7 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
                         }
                     }
                 }
-                ReadingListMode.RECOMMENDED, ReadingListMode.PREVIEW -> { }
+                ReadingListMode.PREVIEW -> { }
             }
         }
 
@@ -987,39 +859,19 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
         }
 
         override fun onShare(readingList: ReadingList) {
-            if (isRecommendedList) {
-                RecommendedReadingListEvent.submit("share_click", "rrl_discover_menu")
-            }
             ReadingListsShareHelper.shareReadingList(requireActivity() as AppCompatActivity, readingList)
         }
 
         override fun onCustomize() {
-            RecommendedReadingListEvent.submit("customize_click", "rrl_discover_menu")
-            startActivity(RecommendedReadingListSettingsActivity.newIntent(requireContext()))
         }
 
         override fun onAbout() {
-            if (isRecommendedList) {
-                RecommendedReadingListEvent.submit("about_click", "rrl_discover_menu")
-            }
-            UriUtil.visitInExternalBrowser(requireContext(), getString(R.string.recommended_reading_list_url).toUri())
         }
 
         override fun onNotification() {
-            RecommendedReadingListEvent.submit("notifications_click", "rrl_discover")
-            if (Prefs.isRecommendedReadingListNotificationEnabled) {
-                showRecommendedReadingListNotificationOffDialog()
-            } else {
-                Prefs.isRecommendedReadingListNotificationEnabled = true
-                requestPermissionAndScheduleRecommendedReadingNotification()
-                update()
-            }
         }
 
         override fun onSaveToList(readingList: ReadingList) {
-            if (isRecommendedList) {
-                RecommendedReadingListEvent.submit("save_click", "rrl_discover")
-            }
             previewSaveDialog()
         }
     }
@@ -1060,11 +912,8 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
                 toggleSelectPage(item)
             } else if (item != null) {
                 val title = ReadingListPage.toPageTitle(item)
-                val entry = HistoryEntry(title, if (isRecommendedList) HistoryEntry.SOURCE_RECOMMENDED_READING_LIST else HistoryEntry.SOURCE_READING_LIST)
+                val entry = HistoryEntry(title, HistoryEntry.SOURCE_READING_LIST)
                 ReadingListBehaviorsUtil.updateReadingListPage(item)
-                if (isRecommendedList) {
-                    RecommendedReadingListEvent.submit("reading_list_click", "rrl_discover")
-                }
                 startActivity(PageActivity.newIntentForCurrentTab(requireContext(), entry, entry.title))
             }
         }

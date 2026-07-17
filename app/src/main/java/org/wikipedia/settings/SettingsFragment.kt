@@ -26,7 +26,6 @@ class SettingsFragment : PreferenceLoaderFragment(), MenuProvider {
     override fun onResume() {
         super.onResume()
         preferenceLoader.updateLanguagePrefSummary()
-        preferenceLoader.updateRecommendedReadingListSummary()
         requireActivity().invalidateOptionsMenu()
     }
 

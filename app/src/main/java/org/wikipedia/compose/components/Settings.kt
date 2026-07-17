@@ -33,7 +33,6 @@ import org.wikipedia.R
 import org.wikipedia.compose.theme.BaseTheme
 import org.wikipedia.compose.theme.WikipediaTheme
 import org.wikipedia.settings.homefeed.CommunityModuleType
-import org.wikipedia.settings.homefeed.ForYouModuleType
 import org.wikipedia.theme.Theme
 
 @Composable
@@ -233,23 +232,6 @@ private fun SettingsRowWithSwitchPreview() {
                     onCheckedChange = { /* Handle switch state change */ }
                 )
             }
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun ToggleListForYouScreenPreview() {
-    BaseTheme(
-        currentTheme = Theme.LIGHT
-    ) {
-        ToggleListScreen(
-            title = "For you",
-            description = stringResource(R.string.home_feed_settings_for_you_modules_description),
-            modules = ForYouModuleType.entries(),
-            hiddenModules = setOf(ForYouModuleType.BECAUSE_YOU_READ.name),
-            onToggle = { _, _ -> },
-            onBack = { },
         )
     }
 }

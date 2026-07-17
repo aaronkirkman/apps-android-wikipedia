@@ -41,13 +41,6 @@
             android:summary="@string/settings_app_icon_preference_subtitle" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:key="@string/preference_category_recommended_reading_list"
-        android:title="@string/recommended_reading_list_settings_section_header">
-        <org.wikipedia.settings.PreferenceMultiLine
-            android:key="@string/preference_key_recommended_reading_list_enabled"
-            android:title="@string/recommended_reading_list_settings_toggle" />
-    </PreferenceCategory>
-    <PreferenceCategory
         android:title="@string/preferences_heading_data_usage">
         <org.wikipedia.settings.SwitchPreferenceMultiLine
             android:key="@string/preference_key_download_reading_list_articles"

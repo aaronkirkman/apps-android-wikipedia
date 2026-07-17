@@ -69,7 +69,6 @@ fun HomeScreen(
     languageState: AppLanguageState? = null,
     selectedTab: HomeTab,
     communityContentState: CommunityContentState,
-    forYouContentState: ForYouContentState,
     overflowMenuState: PageOverflowMenuViewModel.PageOverflowMenuState? = null,
     tabsState: TabsState,
     notificationBellState: NotificationBellState,
@@ -80,7 +79,7 @@ fun HomeScreen(
         DimenUtil.roundedPxToDp((context.getStatusBarInsets()?.top ?: 0).toFloat())
     } else 64
     val pullToRefreshState = rememberPullToRefreshState()
-    val isRefreshing = pullToRefreshState.isAnimating && (communityContentState.isInitialLoading || forYouContentState.isInitialLoading)
+    val isRefreshing = pullToRefreshState.isAnimating && communityContentState.isInitialLoading
 
     PullToRefreshBox(
         modifier = Modifier.fillMaxSize(),
@@ -137,61 +136,6 @@ fun HomeScreen(
                     }
                 }
 
-                HomeTab.FOR_YOU -> {
-                    ForYouContentTab(
-                        topInset = topInset,
-                        state = forYouContentState,
-                        wikiSite = wikiSite,
-                        onAction = onAction
-                    )
-
-                    // Floating toolbar with gradient scrim, wordmark, and tab selector.
-                    Column(modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .fillMaxWidth()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color.Black.copy(alpha = 0.80f))
-                        ) {
-                            HomeToolbar(
-                                topInset = topInset,
-                                tabsState = tabsState,
-                                onTabClick = { onAction(HomeAction.TabClick) },
-                                onUpdateTabCount = { onAction(HomeAction.UpdateTabCount) },
-                                notificationBellState = notificationBellState,
-                                onNotificationClick = { onAction(HomeAction.NotificationClick) }
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    Brush.verticalGradient(
-                                        colorStops = arrayOf(
-                                            0.0f to Color.Black.copy(alpha = 0.80f),
-                                            0.18f to Color.Black.copy(alpha = 0.64f),
-                                            0.38f to Color.Black.copy(alpha = 0.40f),
-                                            0.58f to Color.Black.copy(alpha = 0.20f),
-                                            0.76f to Color.Black.copy(alpha = 0.08f),
-                                            0.90f to Color.Black.copy(alpha = 0.02f),
-                                            1.0f to Color.Transparent
-                                        )
-                                    )
-                                )
-                        ) {
-                            HomeTabBar(
-                                modifier = Modifier.padding(top = 8.dp, bottom = 64.dp),
-                                wikiSite = wikiSite,
-                                selectedTab = selectedTab,
-                                languageState = languageState,
-                                onSelectTab = { tab, card -> onAction(HomeAction.SelectTab(tab, card)) },
-                                onLanguageSelected = { onAction(HomeAction.LanguageSelected(it)) },
-                                onManageLanguagesClick = { onAction(HomeAction.ManageLanguagesClick) }
-                            )
-                        }
-                    }
-                }
             }
         }
     }
@@ -289,7 +233,6 @@ fun HomeTabBar(
                 val isSelected = tab == selectedTab
                 val label = when (tab) {
                     HomeTab.COMMUNITY -> LocalContext.current.getString(wikiSite.languageCode, R.string.explore_feed_community_tab_label)
-                    HomeTab.FOR_YOU -> LocalContext.current.getString(wikiSite.languageCode, R.string.explore_feed_for_you_tab_label)
                 }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -300,7 +243,7 @@ fun HomeTabBar(
                 ) {
                     Text(
                         text = label,
-                        color = if (selectedTab == HomeTab.FOR_YOU) WikipediaTheme.colors.primaryColor else if (isSelected) WikipediaTheme.colors.progressiveColor else WikipediaTheme.colors.primaryColor,
+                        color = if (isSelected) WikipediaTheme.colors.progressiveColor else WikipediaTheme.colors.primaryColor,
                         style = MaterialTheme.typography.titleSmall
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -310,10 +253,7 @@ fun HomeTabBar(
                             .height(3.dp)
                             .clip(RoundedCornerShape(1.5.dp))
                             .background(
-                                if (isSelected) {
-                                    if (selectedTab == HomeTab.FOR_YOU) WikipediaTheme.colors.primaryColor
-                                    else WikipediaTheme.colors.progressiveColor
-                                } else Color.Transparent
+                                if (isSelected) WikipediaTheme.colors.progressiveColor else Color.Transparent
                             )
                     )
                 }
@@ -447,22 +387,6 @@ private fun HomeScreenCommunityAllModulesOffPreview() {
             wikiSite = WikiSite.preview(),
             selectedTab = HomeTab.COMMUNITY,
             communityContentState = CommunityContentState(emptyState = FeedEmptyState.ALL_MODULES_HIDDEN, wikiSite = WikiSite.preview()),
-            forYouContentState = ForYouContentState(isInitialLoading = true, wikiSite = WikiSite.preview()),
-            tabsState = TabsState(1, false),
-            notificationBellState = NotificationBellState(unreadCount = 5, canShow = true)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenForYouAllModulesOffPreview() {
-    BaseTheme(currentTheme = Theme.LIGHT) {
-        HomeScreen(
-            wikiSite = WikiSite.preview(),
-            selectedTab = HomeTab.FOR_YOU,
-            communityContentState = CommunityContentState(isInitialLoading = true, wikiSite = WikiSite.preview()),
-            forYouContentState = ForYouContentState(emptyState = FeedEmptyState.ALL_MODULES_HIDDEN, wikiSite = WikiSite.preview()),
             tabsState = TabsState(1, false),
             notificationBellState = NotificationBellState(unreadCount = 5, canShow = true)
         )
@@ -477,24 +401,8 @@ fun HomeScreenCommunityPreview() {
             wikiSite = WikiSite.preview(),
             selectedTab = HomeTab.COMMUNITY,
             communityContentState = CommunityContentState(isInitialLoading = true, wikiSite = WikiSite.preview()),
-            forYouContentState = ForYouContentState(isInitialLoading = true, wikiSite = WikiSite.preview()),
             tabsState = TabsState(1, false),
             notificationBellState = NotificationBellState(unreadCount = 5, canShow = true)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenForYouPreview() {
-    BaseTheme(currentTheme = Theme.LIGHT) {
-        HomeScreen(
-            wikiSite = WikiSite.preview(),
-            selectedTab = HomeTab.FOR_YOU,
-            communityContentState = CommunityContentState(isInitialLoading = true, wikiSite = WikiSite.preview()),
-            forYouContentState = ForYouContentState(isInitialLoading = true, wikiSite = WikiSite.preview()),
-            tabsState = TabsState(1, false),
-            notificationBellState = NotificationBellState(unreadCount = 99, canShow = true)
         )
     }
 }

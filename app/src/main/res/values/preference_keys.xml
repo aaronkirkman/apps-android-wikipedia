@@ -185,18 +185,6 @@
     <string name="preference_key_year_in_review_visited" translatable="false">yearInReviewVisited</string>
     <string name="preference_key_yir_survey_state" translatable="false">yirSurveyState</string>
     <string name="preference_key_selected_app_icon" translatable="false">selectedAppIcon</string>
-    <string name="preference_category_recommended_reading_list" translatable="false">recommendedReadingListSettings</string>
-    <string name="preference_key_recommended_reading_list_enabled" translatable="false">recommendedReadingListEnabled</string>
-    <string name="preference_key_recommended_reading_list_articles_number" translatable="false">recommendedReadingListArticlesNumber</string>
-    <string name="preference_key_recommended_reading_list_update_frequency" translatable="false">recommendedReadingListUpdateFrequency</string>
-    <string name="preference_key_recommended_reading_list_interests" translatable="false">recommendedReadingListInterests</string>
-    <string name="preference_key_recommended_reading_list_source" translatable="false">recommendedReadingListSource</string>
-    <string name="preference_key_recommended_reading_list_notification_enabled" translatable="false">recommendedReadingListNotificationEnabled</string>
-    <string name="preference_key_recommended_reading_list_titles_with_offset" translatable="false">recommendedReadingListTitlesWithOffset</string>
-    <string name="preference_key_recommended_reading_list_onboarding_shown" translatable="false">recommendedReadingListOnboardingShown</string>
-    <string name="preference_key_recommended_reading_list_notification_simulator" translatable="false">recommendedReadingListNotificationSimulator</string>
-    <string name="preference_key_recommended_reading_list_new_list_generated" translatable="false">recommendedReadingListNewListGenerated</string>
-    <string name="preference_key_recommended_reading_list_reset" translatable="false">recommendedReadingListReset</string>
     <string name="preference_key_donation_reminder_config" translatable="false">donationReminderConfig</string>
     <string name="preference_key_donation_reminders" translatable="false">donationReminder</string>
     <string name="preference_key_donation_reminders_dev_reset" translatable="false">donationReminderDevReset</string>
@@ -220,9 +208,6 @@
     <string name="preference_key_reading_challenge_widget_fast_cycle" translatable="false">readingChallengeWidgetFastCycle</string>
     <string name="preference_key_explore_feed_update_prompt_shown" translatable="false">exploreFeedUpdatePromptShown</string>
     <string name="preference_key_home_language_code" translatable="false">homeLanguageCode</string>
-    <string name="preference_key_home_preference_selection" translatable="false">exploreFeedPreferenceSelection</string>
-    <string name="preference_key_home_for_you_modules_today" translatable="false">homeForYouModulesToday</string>
-    <string name="preference_key_home_swipe_to_explore_prompt_shown" translatable="false">homeSwipeToExplorePromptShown</string>
     <string name="preference_key_home_feed_update_tooltip_shown" translatable="false">homeFeedUpdateTooltipShown</string>
     <string name="preference_key_search_widget_install_prompt_shown" translatable="false">searchWidgetInstallPromptShown</string>
     <string name="preference_key_randomizer_shake_prompt_shown" translatable="false">randomizerShakePromptShown</string>

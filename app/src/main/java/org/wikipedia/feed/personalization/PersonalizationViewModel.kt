@@ -12,14 +12,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.wikipedia.WikipediaApp
 import org.wikipedia.database.AppDatabase
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.feed.personalization.homepreference.HomeContentState
-import org.wikipedia.feed.personalization.homepreference.HomePreferenceContent
-import org.wikipedia.feed.personalization.homepreference.HomePreferenceRepository
-import org.wikipedia.feed.personalization.homepreference.HomePreferenceType
-import org.wikipedia.feed.personalization.homepreference.HomePreferenceUiState
 import org.wikipedia.feed.personalization.interest.ArticlesState
 import org.wikipedia.feed.personalization.interest.InterestSelectionRepository
 import org.wikipedia.feed.personalization.interest.InterestUiState
@@ -30,7 +24,7 @@ import org.wikipedia.topics.ArticleTopics
 import org.wikipedia.util.log.L
 
 // this is a raw, flat, internal representation of ALL state
-// needed across the personalization flow (interest and feed preference)
+// needed across the personalization flow (interest selection)
 // this enables SINGLE SOURCE OF TRUTH — one place to update, no risk of states going out of sync
 // DERIVED UI STATES — each screen gets its own UI state derived from a function like toInterestUIState()
 // instead of maintaining separate StateFlows per screen or one giant combined UI state
@@ -42,16 +36,7 @@ private data class PersonalizedViewModelState(
     val articlesError: Throwable? = null,
     val selectedArticles: Set<PageTitle> = emptySet(),
     val selectedTopics: List<OnboardingTopic> = emptyList(),
-    val topicPreviewContent: Map<String, List<HomePreferenceContent>> = emptyMap(),
-    val languageCode: String,
-    // Feed preference screen properties
-    val homePreferenceType: HomePreferenceType = Prefs.homePreferenceSelection,
-    val communityContent: List<HomePreferenceContent> = emptyList(),
-    val communityLoading: Boolean = false,
-    val communityError: Throwable? = null,
-    val personalizedContent: List<HomePreferenceContent> = emptyList(),
-    val personalizedLoading: Boolean = false,
-    val personalizedError: Throwable? = null
+    val languageCode: String
 ) {
     fun toInterestUiState(): InterestUiState {
         return InterestUiState(
@@ -71,30 +56,12 @@ private data class PersonalizedViewModelState(
             languageCode = languageCode
         )
     }
-
-    fun toFeedPreferenceUiState(): HomePreferenceUiState {
-        return HomePreferenceUiState(
-            selectedType = homePreferenceType,
-            communityState = when {
-                communityLoading -> HomeContentState.Loading
-                communityError != null -> HomeContentState.Error(communityError)
-                else -> HomeContentState.Success(communityContent)
-            },
-            personalizedState = when {
-                personalizedLoading -> HomeContentState.Loading
-                personalizedError != null -> HomeContentState.Error(personalizedError)
-                personalizedContent.isEmpty() -> HomeContentState.Empty
-                else -> HomeContentState.Success(personalizedContent)
-            }
-        )
-    }
 }
 
 class PersonalizationViewModel(
-    private val interestSelectionRepository: InterestSelectionRepository,
-    private val homePreferenceRepository: HomePreferenceRepository
+    private val interestSelectionRepository: InterestSelectionRepository
 ) : ViewModel() {
-    // Single source of truth for all personalization state, can be easily extended to include feed preference and language selection states as well
+    // Single source of truth for all personalization state, can be easily extended to include language selection state as well
     private val state = MutableStateFlow(PersonalizedViewModelState(
         languageCode = interestSelectionRepository.wikiSite.languageCode
     ))
@@ -111,18 +78,9 @@ class PersonalizationViewModel(
             initialValue = state.value.toInterestUiState()
         )
 
-    val feedPreferenceUiState = state
-        .map { it.toFeedPreferenceUiState() }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = state.value.toFeedPreferenceUiState()
-        )
-
     fun onPageChanged(screen: PersonalizationPage) {
         when (screen) {
             PersonalizationPage.INTERESTS -> loadInterestSelectionScreen()
-            PersonalizationPage.HOME_PREFERENCE -> loadFeedPreferenceScreen()
             else -> {}
         }
     }
@@ -132,38 +90,6 @@ class PersonalizationViewModel(
             L.e(throwable)
          }) {
             initialize()
-        }
-    }
-
-    private fun loadFeedPreferenceScreen() {
-        if (state.value.communityContent.isEmpty()) {
-            loadCommunityPreviewContent()
-        }
-        loadPersonalizedPreviewContent()
-    }
-
-    private fun loadCommunityPreviewContent() {
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
-            state.update { it.copy(communityLoading = false, communityError = throwable) }
-            L.e(throwable)
-        }) {
-            state.update { it.copy(communityLoading = true, communityError = null) }
-            val communityContent = homePreferenceRepository.getCommunityPreviewContent()
-            state.update { it.copy(communityContent = communityContent, communityLoading = false) }
-        }
-    }
-
-    private fun loadPersonalizedPreviewContent() {
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
-            state.update { it.copy(personalizedLoading = false, personalizedError = throwable) }
-            L.e(throwable)
-        }) {
-            state.update { it.copy(personalizedLoading = true, personalizedError = null) }
-            val personalizedContent = homePreferenceRepository.getPersonalizedPreviewContent(
-                selectedArticles = state.value.selectedArticles,
-                contentByTopic = state.value.topicPreviewContent
-            )
-            state.update { it.copy(personalizedContent = personalizedContent, personalizedLoading = false) }
         }
     }
 
@@ -229,10 +155,9 @@ class PersonalizationViewModel(
             state.update { it.copy(articlesLoading = true, articlesError = null) }
 
             val articles = interestSelectionRepository.getArticlesByTopic(topic.topic.queryTopicId)
-            val previewContent = HomePreferenceContent.fromPageTitles(pageTitles = articles, topic = topic)
             state.update { current ->
                 val newArticles = (current.selectedArticles.toList() + articles).distinct()
-                current.copy(articles = newArticles, topicPreviewContent = current.topicPreviewContent + (topic.topic.topicId to previewContent), articlesLoading = false)
+                current.copy(articles = newArticles, articlesLoading = false)
             }
         }
     }
@@ -243,7 +168,6 @@ class PersonalizationViewModel(
         viewModelScope.launch(CoroutineExceptionHandler { _, _ ->
         }) {
             interestsUpdated = true
-            clearForYouCache()
             val currentTopics = state.value.selectedTopics
             val isSelected = currentTopics.any { selected -> selected.topic.topicId == topic.topic.topicId }
 
@@ -262,11 +186,6 @@ class PersonalizationViewModel(
             state.update { current ->
                 current.copy(
                     selectedTopics = selectedTopics,
-                    topicPreviewContent = if (isSelected) {
-                        current.topicPreviewContent - topic.topic.topicId
-                    } else {
-                        current.topicPreviewContent
-                    },
                     articles = emptyList(),
                     articlesError = null
                 )
@@ -283,7 +202,6 @@ class PersonalizationViewModel(
             }
         ) {
             interestsUpdated = true
-            clearForYouCache()
             interestSelectionRepository.saveArticle(title, interestSelectionRepository.wikiSite.languageCode)
             state.update {
                 val newItems = listOf(title) + it.articles
@@ -300,7 +218,6 @@ class PersonalizationViewModel(
             state.update { it.copy(articlesError = throwable) }
         }) {
             interestsUpdated = true
-            clearForYouCache()
             val current = state.value
             val isSelected = current.selectedArticles.contains(title)
 
@@ -328,14 +245,12 @@ class PersonalizationViewModel(
             }
         ) {
             interestsUpdated = true
-            clearForYouCache()
             interestSelectionRepository.deleteAllInterests()
 
             state.update {
                 it.copy(
                     selectedArticles = emptySet(),
                     selectedTopics = emptyList(),
-                    topicPreviewContent = emptyMap(),
                     articlesLoading = false,
                     articlesError = null
                 )
@@ -352,23 +267,10 @@ class PersonalizationViewModel(
         }
     }
 
-    fun onFeedPreferenceTypeSelected(type: HomePreferenceType) {
-        homePreferenceRepository.savePreference(type)
-        state.update { it.copy(homePreferenceType = type) }
-    }
-
-    fun retryFeedPreferenceLoading(type: HomePreferenceType) {
-        when (type) {
-            HomePreferenceType.COMMUNITY -> loadCommunityPreviewContent()
-            HomePreferenceType.PERSONALIZED -> loadPersonalizedPreviewContent()
-        }
-    }
-
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val appDatabase = AppDatabase.instance
-                val instance = WikipediaApp.instance
                 val wikiSite = WikiSite.forLanguageCode(Prefs.homeLanguageCode)
                 PersonalizationViewModel(
                     interestSelectionRepository = InterestSelectionRepository(
@@ -377,18 +279,9 @@ class PersonalizationViewModel(
                         historyEntryWithImageDao = appDatabase.historyEntryWithImageDao(),
                         readingListPageDao = appDatabase.readingListPageDao(),
                         wikiSite = wikiSite
-                    ),
-                    homePreferenceRepository = HomePreferenceRepository(
-                        context = instance,
-                        historyEntryWithImageDao = appDatabase.historyEntryWithImageDao(),
-                        wikiSite = wikiSite
                     )
                 )
             }
-        }
-
-        private fun clearForYouCache() {
-            Prefs.homeForYouModulesToday = ""
         }
     }
 }

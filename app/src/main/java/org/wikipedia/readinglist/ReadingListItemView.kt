@@ -18,11 +18,8 @@ import androidx.core.widget.TextViewCompat
 import org.wikipedia.R
 import org.wikipedia.activity.BaseActivity
 import org.wikipedia.analytics.eventplatform.BreadCrumbLogEvent
-import org.wikipedia.analytics.eventplatform.RecommendedReadingListEvent
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.databinding.ItemReadingListBinding
 import org.wikipedia.readinglist.database.ReadingList
-import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.DimenUtil
 import org.wikipedia.util.FeedbackUtil
@@ -165,45 +162,7 @@ class ReadingListItemView(context: Context, attrs: AttributeSet? = null) : Const
         binding.itemPreviewSaveButton.isVisible = readingListMode == ReadingListMode.PREVIEW
         binding.itemOverflowMenu.isVisible = readingListMode != ReadingListMode.PREVIEW
         binding.itemReadingListStatisticalDescription.isVisible = readingListMode == ReadingListMode.DEFAULT
-        binding.itemRecommendedListInfoContainer.isVisible = readingListMode == ReadingListMode.RECOMMENDED
-        binding.itemNotificationButton.isVisible = readingListMode == ReadingListMode.RECOMMENDED
-        binding.itemSaveToListButton.isVisible = readingListMode == ReadingListMode.RECOMMENDED
         binding.itemShareButton.isVisible = readingListMode == ReadingListMode.DEFAULT
-
-        if (readingListMode == ReadingListMode.RECOMMENDED) {
-            val madeForText = if (AccountUtil.isLoggedIn) {
-                context.getString(R.string.recommended_reading_list_page_subtitle_made_for, "<b>" + AccountUtil.userName + "</b>")
-            } else {
-                context.getString(R.string.recommended_reading_list_page_logged_out_subtitle_made_for_you)
-            }
-            val articleSize = readingList?.pages?.size ?: 0
-            binding.itemRecommendedListMadeFor.text = StringUtil.fromHtml(madeForText)
-            binding.itemRecommendedListNumberOfArticles.text = context.resources.getQuantityString(
-                R.plurals.recommended_reading_list_page_subtitle_articles, articleSize, articleSize
-            )
-
-            binding.itemNotificationButton.setImageResource(
-                if (Prefs.isRecommendedReadingListNotificationEnabled) {
-                    R.drawable.ic_notifications_active
-                } else {
-                    R.drawable.outline_notifications_off_24
-                }
-            )
-
-            // Reset the overflow menu
-            binding.itemOverflowMenu.setOnClickListener {
-                RecommendedReadingListEvent.submit("menu_click", "rrl_discover")
-                readingList?.let {
-                    showOverflowMenu(
-                        isLongPress = false,
-                        readingList = it,
-                        readingListMode = readingListMode,
-                        anchorView = binding.itemOverflowMenu,
-                        gravity = Gravity.FILL_HORIZONTAL
-                    )
-                }
-            }
-        }
 
         setOnLongClickListener {
             // Ignore onLongClick action
@@ -282,17 +241,13 @@ class ReadingListItemView(context: Context, attrs: AttributeSet? = null) : Const
                 builder.findItem(R.id.menu_reading_list_select)?.title =
                     context.getString(if (readingList.selected) R.string.reading_list_menu_unselect else R.string.reading_list_menu_select)
             } else {
-                if (readingListMode == ReadingListMode.RECOMMENDED) {
-                    activity.menuInflater.inflate(R.menu.menu_recommended_reading_list_item, builder)
-                } else {
-                    activity.menuInflater.inflate(R.menu.menu_reading_list_item, builder)
-                    builder.findItem(R.id.menu_reading_list_select).isVisible = false
-                    if (readingList.isDefault) {
-                        builder.findItem(R.id.menu_reading_list_rename).isVisible = false
-                        builder.findItem(R.id.menu_reading_list_delete).isVisible = false
-                    }
-                    builder.findItem(R.id.menu_reading_list_share).isVisible = false
+                activity.menuInflater.inflate(R.menu.menu_reading_list_item, builder)
+                builder.findItem(R.id.menu_reading_list_select).isVisible = false
+                if (readingList.isDefault) {
+                    builder.findItem(R.id.menu_reading_list_rename).isVisible = false
+                    builder.findItem(R.id.menu_reading_list_delete).isVisible = false
                 }
+                builder.findItem(R.id.menu_reading_list_share).isVisible = false
             }
             builder.setCallback(OverflowMenuClickListener(readingList))
             val helper = MenuPopupHelper(activity, builder, anchorView)

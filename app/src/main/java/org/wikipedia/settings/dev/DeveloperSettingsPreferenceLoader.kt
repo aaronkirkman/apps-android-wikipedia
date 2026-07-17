@@ -18,15 +18,12 @@ import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.database.AppDatabase
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.feed.personalization.homepreference.HomePreferenceType
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.notifications.NotificationPollBroadcastReceiver
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
 import org.wikipedia.readinglist.database.ReadingListPage
-import org.wikipedia.readinglist.recommended.RecommendedReadingListNotificationManager
-import org.wikipedia.readinglist.recommended.RecommendedReadingListUpdateFrequency
 import org.wikipedia.settings.BasePreferenceLoader
 import org.wikipedia.settings.Prefs
 import org.wikipedia.settings.dev.playground.CategoryDeveloperPlayGround
@@ -156,24 +153,6 @@ internal class DeveloperSettingsPreferenceLoader(fragment: PreferenceFragmentCom
             activity.startActivity(Intent(activity, CategoryDeveloperPlayGround::class.java))
             true
         }
-        (findPreference(R.string.preference_key_recommended_reading_list_notification_simulator) as ListPreference).apply {
-            val frequencies = RecommendedReadingListUpdateFrequency.entries
-            val names = frequencies.map { it.name }.toTypedArray()
-            entries = names
-            entryValues = names
-            setOnPreferenceChangeListener { _, newValue ->
-                val selectedFrequency = newValue as String
-                val source = when (selectedFrequency) {
-                    "DAILY" -> RecommendedReadingListUpdateFrequency.DAILY
-                    "WEEKLY" -> RecommendedReadingListUpdateFrequency.WEEKLY
-                    else -> RecommendedReadingListUpdateFrequency.MONTHLY
-                }
-                Prefs.recommendedReadingListUpdateFrequency = source
-                RecommendedReadingListNotificationManager.scheduleRecommendedReadingListNotification(context)
-                RecommendedReadingListNotificationManager.showNotification(context = activity, source)
-                true
-            }
-        }
         (findPreference(R.string.preference_key_event_platform_intake_base_uri_list) as ListPreference).setOnPreferenceChangeListener { _, newValue ->
             val selectedState = newValue as String
             Prefs.eventPlatformIntakeUriOverride = selectedState
@@ -184,23 +163,6 @@ internal class DeveloperSettingsPreferenceLoader(fragment: PreferenceFragmentCom
             isVisible = ReleaseUtil.isPreProdRelease
             onPreferenceClickListener = Preference.OnPreferenceClickListener {
                 ExclusiveBottomSheetPresenter.show((activity as AppCompatActivity).supportFragmentManager, ReadingChallengePlayGroundDialog())
-                true
-            }
-        }
-        (findPreference(R.string.preference_key_home_preference_selection) as ListPreference).apply {
-            value = Prefs.homePreferenceSelection.name
-            val states = HomePreferenceType.entries
-            val names = states.map { it.name }.toTypedArray()
-            entries = names
-            entryValues = names
-            setOnPreferenceChangeListener { _, newValue ->
-                val selectedState = newValue as String
-                val source = when (selectedState) {
-                    "COMMUNITY" -> HomePreferenceType.COMMUNITY
-                    "PERSONALIZED" -> HomePreferenceType.PERSONALIZED
-                    else -> HomePreferenceType.COMMUNITY
-                }
-                Prefs.homePreferenceSelection = source
                 true
             }
         }

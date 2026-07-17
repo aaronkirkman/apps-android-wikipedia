@@ -4,7 +4,6 @@ import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.analytics.eventplatform.DailyStatsEvent
 import org.wikipedia.analytics.eventplatform.EventPlatformClient
-import org.wikipedia.analytics.eventplatform.RecommendedReadingListEvent
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
@@ -18,6 +17,5 @@ class DailyEventTask(private val app: WikipediaApp) : RecurringTask() {
     override suspend fun run(lastRun: Date) {
         DailyStatsEvent.log(app)
         EventPlatformClient.refreshStreamConfigs()
-        RecommendedReadingListEvent.submit("launch", "rrl_launch")
     }
 }

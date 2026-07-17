@@ -41,4 +41,4 @@ class HomeFeedSettingsActivity : BaseActivity() {
     }
 }
 
-enum class HomeFeedSettingsStartDestination { ROOT, COMMUNITY_MODULES, FOR_YOU_MODULES, DEFAULT_FEED_VIEW }
+enum class HomeFeedSettingsStartDestination { ROOT, COMMUNITY_MODULES }

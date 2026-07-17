@@ -28,8 +28,6 @@ import org.wikipedia.main.MainActivity
 import org.wikipedia.notifications.db.Notification
 import org.wikipedia.page.PageTitle
 import org.wikipedia.push.WikipediaFirebaseMessagingService
-import org.wikipedia.readinglist.recommended.RecommendedReadingListNotificationManager
-import org.wikipedia.readinglist.recommended.RecommendedReadingListUpdateFrequency
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.ReleaseUtil
@@ -64,19 +62,12 @@ class NotificationPollBroadcastReceiver : BroadcastReceiver() {
                 }
                 PollNotificationWorker.schedulePollNotificationJob(context)
             }
-            ACTION_RECOMMENDED_READING_LIST == intent.action -> {
-                if (Prefs.recommendedReadingListUpdateFrequency == RecommendedReadingListUpdateFrequency.MONTHLY) {
-                    RecommendedReadingListNotificationManager.scheduleRecommendedReadingListNotification(context)
-                }
-                RecommendedReadingListNotificationManager.showNotification(context, Prefs.recommendedReadingListUpdateFrequency)
-            }
         }
     }
 
     companion object {
         const val ACTION_POLL = "action_notification_poll"
         const val ACTION_CANCEL = "action_notification_cancel"
-        const val ACTION_RECOMMENDED_READING_LIST = "action_recommended_reading_list"
         const val TYPE_MULTIPLE = "multiple"
 
         private const val FIRST_EDITOR_REACTIVATION_NOTIFICATION_SHOW_ON_DAY = 3
