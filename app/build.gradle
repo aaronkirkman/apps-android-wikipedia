@@ -3,7 +3,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id 'com.android.application'
     id 'com.google.devtools.ksp'
-    id 'com.google.gms.google-services'
     id 'kotlin-parcelize'
     id 'kotlinx-serialization'
     alias(libs.plugins.compose.compiler)
@@ -36,7 +35,7 @@ android {
     }
 
     defaultConfig {
-        applicationId 'org.wikipedia'
+        applicationId 'com.redwoodlake.wikipedia'
         minSdk = 23
         targetSdk = 37
         versionCode 50598
@@ -226,13 +225,6 @@ dependencies {
     alphaImplementation libs.com.google.mlkit.language.id
     devImplementation libs.com.google.mlkit.language.id
     customImplementation libs.com.google.mlkit.language.id
-
-    // For receiving push notifications for logged-in users.
-    prodImplementation libs.com.google.firebase.firebase.messaging.ktx3
-    betaImplementation libs.com.google.firebase.firebase.messaging.ktx3
-    alphaImplementation libs.com.google.firebase.firebase.messaging.ktx3
-    devImplementation libs.com.google.firebase.firebase.messaging.ktx3
-    customImplementation libs.com.google.firebase.firebase.messaging.ktx3
 
     // For integrating with Google Pay for donations
     prodImplementation libs.com.google.android.gms.play.services.wallet2

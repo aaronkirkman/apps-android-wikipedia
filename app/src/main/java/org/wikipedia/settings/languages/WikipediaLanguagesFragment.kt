@@ -22,7 +22,6 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.databinding.FragmentWikipediaLanguagesBinding
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.language.addlanguages.AddLanguagesListActivity
-import org.wikipedia.push.WikipediaFirebaseMessagingService
 import org.wikipedia.settings.SettingsActivity
 import org.wikipedia.views.DefaultViewHolder
 import org.wikipedia.views.MultiSelectActionModeCallback
@@ -62,7 +61,6 @@ class WikipediaLanguagesFragment : Fragment(), MenuProvider, WikipediaLanguagesI
             prepareWikipediaLanguagesList()
             requireActivity().invalidateOptionsMenu()
             adapter.notifyDataSetChanged()
-            WikipediaFirebaseMessagingService.updateSubscription()
         }
     }
 

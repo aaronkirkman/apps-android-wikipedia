@@ -10,10 +10,6 @@
         <meta-data android:name="com.google.android.gms.wallet.api.enabled"
             tools:node="remove"/>
 
-        <service
-            android:name=".push.WikipediaFirebaseMessagingService"
-            tools:node="remove"/>
-
     </application>
 
 </manifest>

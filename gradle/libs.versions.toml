@@ -9,12 +9,10 @@ coreKtx = "1.19.0"
 desugar_jdk_libs = "2.1.5"
 drawerlayout = "1.2.0"
 espressoVersion = "3.7.0"
-firebaseMessagingVersion = "24.1.2"
 flexbox = "3.0.0"
 fragmentKtx = "1.8.9"
 glance = "1.1.1"
 googlePayVersion = "20.0.0"
-googleServices = "4.5.0"
 gradle = "9.2.1"
 hcaptcha = "4.4.0"
 installreferrer = "2.2"
@@ -73,7 +71,6 @@ coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
 coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coilCompose" }
 com-google-android-gms-play-services-wallet2 = { module = "com.google.android.gms:play-services-wallet", version.ref = "googlePayVersion" }
-com-google-firebase-firebase-messaging-ktx3 = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebaseMessagingVersion" }
 com-google-mlkit-language-id = { module = "com.google.mlkit:language-id", version.ref = "mlKitVersion" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commonsLang3" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
@@ -136,7 +133,6 @@ androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", ve
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "gradle" }
-gms-plugin = { id = 'com.google.gms.google-services', version.ref = "googleServices" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinStdlibJdk8" }
 ksp-plugin = { id = 'com.google.devtools.ksp', version.ref = "kspPlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinStdlibJdk8" }

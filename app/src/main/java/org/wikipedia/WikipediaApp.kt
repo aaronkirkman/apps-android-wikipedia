@@ -32,7 +32,6 @@ import org.wikipedia.language.AcceptLanguageUtil
 import org.wikipedia.language.AppLanguageState
 import org.wikipedia.notifications.NotificationCategory
 import org.wikipedia.page.tabs.Tab
-import org.wikipedia.push.WikipediaFirebaseMessagingService
 import org.wikipedia.settings.Prefs
 import org.wikipedia.theme.Theme
 import org.wikipedia.util.DimenUtil
@@ -168,10 +167,6 @@ class WikipediaApp : Application() {
 
         InstallReferrerListener.newInstance(this)
 
-        // For good measure, explicitly call our token subscription function, in case the
-        // API failed in previous attempts.
-        WikipediaFirebaseMessagingService.updateSubscription()
-
         EventPlatformClient.setUpStreamConfigs()
 
         ImageService.setImplementation(CoilImageServiceLoader())
@@ -246,7 +241,6 @@ class WikipediaApp : Application() {
         }) {
             L.d("Logging out")
             ServiceFactory.get(wikiSite).getToken().query?.csrfToken()?.let { token ->
-                WikipediaFirebaseMessagingService.unsubscribePushToken(token, Prefs.pushNotificationToken)
                 ServiceFactory.get(wikiSite).postLogout(token)
             }
         }.invokeOnCompletion {
