@@ -221,6 +221,9 @@ object Prefs {
     val isCollapseTablesEnabled
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_collapse_tables, true)
 
+    val isArticleImagesHidden
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_hide_article_images, false)
+
     fun getReadingListSortMode(defaultValue: Int): Int {
         return PrefsIoUtil.getInt(R.string.preference_key_reading_list_sort_mode, defaultValue)
     }

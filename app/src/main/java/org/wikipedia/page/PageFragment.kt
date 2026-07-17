@@ -460,6 +460,9 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         }
         updateProgressBar(false)
         webView.visibility = View.VISIBLE
+        if (Prefs.isArticleImagesHidden) {
+            bridge.execute(JavaScriptActionHandler.toggleImagePlaceholders(true, getString(R.string.image_hidden_placeholder)))
+        }
         bridge.evaluate(JavaScriptActionHandler.getRevision()) { value ->
             if (!isAdded || value == null || value == "null") {
                 return@evaluate

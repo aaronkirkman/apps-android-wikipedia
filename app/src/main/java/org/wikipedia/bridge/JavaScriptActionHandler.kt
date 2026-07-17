@@ -178,6 +178,62 @@ object JavaScriptActionHandler {
                 "})();"
     }
 
+    fun toggleImagePlaceholders(hide: Boolean, placeholderText: String): String {
+        if (!hide) {
+            return "(function() {" +
+                    "var overlays = document.getElementsByClassName('pcs-image-hidden-overlay');" +
+                    "while (overlays.length) { overlays[0].parentNode.removeChild(overlays[0]); }" +
+                    "var wrappers = document.getElementsByClassName('pcs-image-hidden-wrapper');" +
+                    "while (wrappers.length) {" +
+                    "  var wrapper = wrappers[0];" +
+                    "  wrapper.parentNode.insertBefore(wrapper.firstElementChild, wrapper);" +
+                    "  wrapper.parentNode.removeChild(wrapper);" +
+                    "}" +
+                    "var imgs = document.getElementsByClassName('pcs-image-processed');" +
+                    "while (imgs.length) {" +
+                    "  imgs[0].style.visibility = '';" +
+                    "  imgs[0].classList.remove('pcs-image-processed');" +
+                    "}" +
+                    "})();"
+        }
+        return "(function() {" +
+                "if (!document.getElementById('pcs-image-hidden-style')) {" +
+                "  var style = document.createElement('style');" +
+                "  style.id = 'pcs-image-hidden-style';" +
+                "  style.innerHTML = '.pcs-image-hidden-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0;" +
+                "    display: flex; align-items: center; justify-content: center; text-align: center;" +
+                "    background: rgba(128,128,128,0.35); color: inherit; font-size: 0.85em; padding: 4px;" +
+                "    box-sizing: border-box; cursor: pointer; }';" +
+                "  document.head.appendChild(style);" +
+                "}" +
+                "var imgs = document.querySelectorAll('img:not(.pcs-image-processed)');" +
+                "for (var i = 0; i < imgs.length; i++) {" +
+                "  (function(img) {" +
+                "    img.classList.add('pcs-image-processed');" +
+                "    var computedDisplay = window.getComputedStyle(img).display;" +
+                "    var wrapper = document.createElement('span');" +
+                "    wrapper.className = 'pcs-image-hidden-wrapper';" +
+                "    wrapper.style.position = 'relative';" +
+                "    wrapper.style.display = (computedDisplay === 'inline') ? 'inline-block' : computedDisplay;" +
+                "    if (img.style.float) { wrapper.style.float = img.style.float; }" +
+                "    img.parentNode.insertBefore(wrapper, img);" +
+                "    wrapper.appendChild(img);" +
+                "    img.style.visibility = 'hidden';" +
+                "    var overlay = document.createElement('span');" +
+                "    overlay.className = 'pcs-image-hidden-overlay';" +
+                "    overlay.textContent = '${placeholderText.replace("'", "\\'")}';" +
+                "    overlay.addEventListener('click', function(e) {" +
+                "      e.stopPropagation();" +
+                "      e.preventDefault();" +
+                "      img.style.visibility = '';" +
+                "      overlay.parentNode.removeChild(overlay);" +
+                "    });" +
+                "    wrapper.appendChild(overlay);" +
+                "  })(imgs[i]);" +
+                "}" +
+                "})();"
+    }
+
     fun mobileWebSetDarkMode(): String {
         return "(function() {" +
                 "document.documentElement.classList.add('skin-theme-clientpref-night');" +

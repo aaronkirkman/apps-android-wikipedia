@@ -35,6 +35,7 @@
     <string name="preference_key_customize_home_feed" translatable="false">customizeHomeFeed</string>
     <string name="preference_key_show_link_previews" translatable="false">showLinkPreviews</string>
     <string name="preference_key_collapse_tables" translatable="false">collapseTables</string>
+    <string name="preference_key_hide_article_images" translatable="false">hideArticleImages</string>
     <string name="preference_key_session_data" translatable="false">session_data</string>
     <string name="preference_key_session_timeout" translatable="false">session_timeout</string>
     <string name="preference_key_crashed_before_activity_created" translatable="false">crashedBeforeActivityCreated</string>
