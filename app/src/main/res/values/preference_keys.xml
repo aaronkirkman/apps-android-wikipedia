@@ -65,7 +65,6 @@
     <string name="preference_key_last_anon_notification_lang" translatable="false">lastAnonNotificationLang</string>
     <string name="preference_key_last_anon_edit_time" translatable="false">lastAnonEditTime</string>
     <string name="preference_key_last_anon_notification_time" translatable="false">lastAnonNotificationTime</string>
-    <string name="preference_key_empty_placeholder" translatable="false">emptyPlaceholder</string>
     <string name="preference_key_prefer_offline_content" translatable="false">preferOfflineContent</string>
     <string name="preference_key_feed_cards_order" translatable="false">feedCardsOrder</string>
     <string name="preference_key_feed_cards_enabled" translatable="false">feedCardsEnabled</string>
@@ -118,7 +117,6 @@
     <string name="preference_key_event_platform_intake_base_uri_list" translatable="false">eventPlatformIntakeBaseUriList</string>
     <string name="preference_key_event_platform_stored_stream_configs" translatable="false">eventPlatformStoredStreamConfigs</string>
     <string name="preference_key_crash_report_local_class_name" translatable="false">crashReportLocalClassName</string>
-    <string name="preference_key_watchlist_disabled_langs" translatable="false">watchlistDisabledLangs</string>
     <string name="preference_key_excluded_wiki_codes_notification" translatable="false">filterNotificationExcludedWikiCodes</string>
     <string name="preference_key_excluded_type_codes_notification" translatable="false">filterNotificationExcludedTypeCodes</string>
     <string name="preference_key_auto_show_edit_notices" translatable="false">autoShowEditNotices</string>
@@ -134,7 +132,6 @@
     <string name="preference_key_reading_focus_mode" translatable="false">readingFocusMode</string>
     <string name="preference_key_edit_history_filter_type" translatable="false">editHistoryFilterType</string>
     <string name="preference_key_talk_topic_expand_all" translatable="false">talkTopicExpandAll</string>
-    <string name="preference_key_user_contrib_filter_ns" translatable="false">userContribFilterNamespaces</string>
     <string name="preference_key_user_contrib_filter_excluded_ns" translatable="false">userContribFilterNamespaces</string>
     <string name="preference_key_user_contrib_filter_lang_code" translatable="false">userContribFilterLangCode</string>
     <string name="preference_key_import_reading_lists_new_install_dialog_shown" translatable="false">importReadingListsNewInstallDialogShown</string>
@@ -150,11 +147,8 @@
     <string name="preference_key_reading_lists_recent_receive_id" translatable="false">readingListRecentReceiveId</string>
     <string name="preference_key_se_machine_generated_descriptions_tooltip_shown" translatable="false">seMachineGeneratedDescriptionsTooltipShown</string>
     <string name="preference_key_se_image_recs_onboarding_shown" translatable="false">seImageRecsOnboardingShown</string>
-    <string name="preference_key_excluded_wiki_codes_watchlist" translatable="false">filterWatchlistExcludedWikiCodes</string>
-    <string name="preference_key_included_type_codes_watchlist" translatable="false">filterWatchlistIncludedTypeCodesV2</string>
     <string name="preference_key_event_platform_queue_size" translatable="false">eventPlatformQueueSize</string>
     <string name="preference_key_recent_edits_wiki_code" translatable="false">filterRecentEditsWikiCode</string>
-    <string name="preference_key_recent_edits_included_type_codes" translatable="false">filterRecentEditsIncludedTypeCodes</string>
     <string name="preference_key_recent_edits_onboarding_shown" translatable="false">recentEditsOnboardingShown</string>
     <string name="preference_key_show_sequential_recent_edits_diff_tooltip" translatable="false">showSequentialRecentEditsDiffTooltip</string>
     <string name="preference_key_show_recent_edits_feedback_form" translatable="false">showRecentEditsFeedbackForm</string>
@@ -177,22 +171,15 @@
     <string name="preference_key_impact_last_query_time" translatable="false">impactLastQueryTime</string>
     <string name="preference_key_impact_last_response_body" translatable="false">impactLastResponseBody</string>
     <string name="preference_key_default_places_location_latlng" translatable="false">placesDefaultLocationLatLng</string>
-    <string name="preference_key_delete_local_donation_history" translatable="false">deleteLocalDonationHistory</string>
     <string name="preference_key_playground_category" translatable="false">categoryPlayground</string>
-    <string name="preference_key_otd_is_archive_game_playing" translatable="false">isArchiveGamePlaying</string>
     <string name="preference_key_otd_sound_on" translatable="false">isOtdSoundOn</string>
-    <string name="preference_key_year_in_review_is_enabled" translatable="false">isYearInReviewEnabled</string>
     <string name="preference_key_year_in_review_visited" translatable="false">yearInReviewVisited</string>
     <string name="preference_key_yir_survey_state" translatable="false">yirSurveyState</string>
     <string name="preference_key_selected_app_icon" translatable="false">selectedAppIcon</string>
     <string name="preference_key_donation_reminder_config" translatable="false">donationReminderConfig</string>
-    <string name="preference_key_donation_reminders" translatable="false">donationReminder</string>
     <string name="preference_key_donation_reminders_dev_reset" translatable="false">donationReminderDevReset</string>
     <string name="preference_key_donation_reminders_dev_reset_seen_date" translatable="false">donationReminderDevResetSeenDate</string>
-    <string name="preference_category_donations" translatable="false">donations</string>
-    <string name="preference_key_activity_tab_modules" translatable="false">activityTabModules</string>
     <string name="preference_key_activity_tab_onboarding_shown" translatable="false">activityTabOnboardingShown</string>
-    <string name="preference_key_yir_model_data" translatable="false">yirModelData</string>
     <string name="preference_key_hybrid_search_onboarding_shown" translatable="false">hybridSearchOnboardingShown</string>
     <string name="preference_key_hybrid_search_enabled" translatable="false">hybridSearchEnabled</string>
     <string name="preference_key_game_stats_snackbar_shown" translatable="false">gameStatsSnackbarShown</string>
