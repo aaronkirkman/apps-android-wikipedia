@@ -14,10 +14,6 @@
             android:name=".push.WikipediaFirebaseMessagingService"
             tools:node="remove"/>
 
-        <activity
-            android:name=".donate.GooglePayActivity"
-            tools:node="remove"/>
-
     </application>
 
 </manifest>

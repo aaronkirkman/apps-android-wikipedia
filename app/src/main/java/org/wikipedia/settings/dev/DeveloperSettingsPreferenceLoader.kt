@@ -18,10 +18,7 @@ import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.database.AppDatabase
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.donate.donationreminder.DonationReminderConfig
 import org.wikipedia.feed.personalization.homepreference.HomePreferenceType
-import org.wikipedia.games.onthisday.OnThisDayGameNotificationManager
-import org.wikipedia.games.onthisday.OnThisDayGameNotificationState
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.notifications.NotificationPollBroadcastReceiver
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
@@ -39,7 +36,6 @@ import org.wikipedia.suggestededits.provider.EditingSuggestionsProvider
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.ReleaseUtil
 import org.wikipedia.util.StringUtil.fromHtml
-import org.wikipedia.yearinreview.YearInReviewSurveyState
 
 internal class DeveloperSettingsPreferenceLoader(fragment: PreferenceFragmentCompat) : BasePreferenceLoader(fragment) {
     private val setMediaWikiBaseUriChangeListener = Preference.OnPreferenceChangeListener { _, _ ->
@@ -205,16 +201,6 @@ internal class DeveloperSettingsPreferenceLoader(fragment: PreferenceFragmentCom
             setupLeakCanary()
             true
         }
-        findPreference(R.string.preferences_developer_otd_show_notification).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            OnThisDayGameNotificationManager.showNotification(activity)
-            true
-        }
-        findPreference(R.string.preference_key_otd_notification_state).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            Prefs.otdNotificationState = OnThisDayGameNotificationState.NO_INTERACTED
-            OnThisDayGameNotificationManager.cancelDailyGameNotification(activity)
-            FeedbackUtil.showMessage(activity, "Notification state reset.")
-            true
-        }
         findPreference(R.string.preference_key_playground_category).onPreferenceClickListener = Preference.OnPreferenceClickListener {
             activity.startActivity(Intent(activity, CategoryDeveloperPlayGround::class.java))
             true
@@ -234,36 +220,6 @@ internal class DeveloperSettingsPreferenceLoader(fragment: PreferenceFragmentCom
                 Prefs.recommendedReadingListUpdateFrequency = source
                 RecommendedReadingListNotificationManager.scheduleRecommendedReadingListNotification(context)
                 RecommendedReadingListNotificationManager.showNotification(context = activity, source)
-                true
-            }
-        }
-        findPreference(R.string.preference_key_donation_reminders_dev_reset).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            Prefs.donationReminderConfig = DonationReminderConfig()
-            Toast.makeText(activity, "donationReminderConfig has been reset", Toast.LENGTH_SHORT).show()
-            fragment.requireActivity().finish()
-            true
-        }
-        findPreference(R.string.preference_key_donation_reminders_dev_reset_seen_date).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            Prefs.donationReminderConfig = Prefs.donationReminderConfig.copy(
-                promptLastSeen = 0
-            )
-            Toast.makeText(activity, "promptLastSeen has been reset", Toast.LENGTH_SHORT).show()
-            fragment.requireActivity().finish()
-            true
-        }
-        (findPreference(R.string.preference_key_yir_survey_state) as ListPreference).apply {
-            val states = YearInReviewSurveyState.entries
-            val names = states.map { it.name }.toTypedArray()
-            entries = names
-            entryValues = names
-            setOnPreferenceChangeListener { _, newValue ->
-                val selectedState = newValue as String
-                val source = when (selectedState) {
-                    "NOT_TRIGGERED" -> YearInReviewSurveyState.NOT_TRIGGERED
-                    "SHOULD_SHOW" -> YearInReviewSurveyState.SHOULD_SHOW
-                    else -> YearInReviewSurveyState.SHOWN
-                }
-                Prefs.yearInReviewSurveyState = source
                 true
             }
         }

@@ -65,7 +65,7 @@ fun EditingInsightsModule(
     modifier: Modifier = Modifier,
     uiState: UiState<Pair<GrowthUserImpact, Int>>,
     onPageItemClick: (PageTitle) -> Unit,
-    onContributionClick: (() -> Unit),
+    onContributionClick: (() -> Unit) = {},
     onSuggestedEditsClick: (() -> Unit),
     wikiErrorClickEvents: WikiErrorClickEvents? = null
 ) {

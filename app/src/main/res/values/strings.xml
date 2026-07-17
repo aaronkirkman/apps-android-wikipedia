@@ -139,10 +139,6 @@
     <string name="dialog_message_leaving_edit">Your changes have not been published yet. Are you sure you want to leave this page?</string>
     <string name="dialog_message_leaving_edit_leave">Leave</string>
     <string name="dialog_message_leaving_edit_stay">Stay</string>
-    <string name="dialog_confirm_delete_donation_history_title">Confirm deletion</string>
-    <string name="dialog_confirm_delete_donation_history_message">This will only apply to donations made from this device.</string>
-    <string name="dialog_confirm_delete_donation_history_delete">Delete</string>
-    <string name="dialog_confirm_delete_donation_history_cancel">Cancel</string>
     <string name="menu_show_toc">Table of Contents</string>
     <string name="search_no_results_found">No results found</string>
     <string name="search_reading_list_no_results">No results found in \"%s\"</string>
@@ -410,8 +406,6 @@
     <string name="preference_title_hide_article_images">Hide images in articles</string>
     <string name="preference_summary_hide_article_images">Temporarily hide images while reading articles. Tap a hidden image to reveal it.</string>
     <string name="image_hidden_placeholder">Image hidden — tap to show</string>
-    <string name="nav_item_donate">Donate</string>
-    <string name="nav_item_year_in_review">Year In Review</string>
     <string name="error_voice_search_not_available">Sorry, voice recognition is not available.</string>
     <string name="location_service_disabled">Location services are disabled.</string>
     <string name="enable_location_service">Enable</string>
@@ -439,7 +433,6 @@
     <string name="theme_chooser_dialog_image_dimming_switch_label">Image dimming (in Dark theme)</string>
     <string name="preference_title_prefer_offline_content">Prefer offline content</string>
     <string name="preference_summary_prefer_offline_content">Save data usage by loading articles that are available offline rather than always loading the latest version of an article</string>
-    <string name="preference_title_delete_local_donation_history">Clear donation history</string>
     <string name="theme_chooser_dialog_match_system_theme_switch_label">Match system theme</string>
     <string name="page_footer_license_text">Content is available under $1 unless otherwise noted</string>
     <string name="empty_tab_title">New tab</string>
@@ -1209,12 +1202,9 @@
     <string name="activity_tab_monthly_top_categories">Top categories read this month</string>
     <string name="activity_tab_explore_wikipedia">Discover through Wikipedia</string>
     <string name="activity_tab_discover_encourage">Looking for something new to read?</string>
-    <string name="activity_tab_donation_unknown">Unknown</string>
-    <string name="activity_tab_donation_last_donation"><![CDATA[<b>Last donation</b> in app]]></string>
     <string name="activity_tab_total_edits_all_projects">Total edits across projects</string>
     <string name="activity_tab_game_stats">Game stats</string>
     <string name="activity_tab_game_stats_best_streak">Best streak</string>
-    <string name="activity_tab_play_wiki_games">Play WikiGames</string>
     <string name="activity_tab_report_email_subject">Issue report - Activity Tab</string>
     <string name="activity_tab_report_email_body">I have encountered a problem with Activity Tab feature:\n- [Describe specific problem]\n\nThe behavior I would like to see is:\n- [Describe proposed solution]</string>
     <string name="activity_tab_menu_feedback">Problem with feature</string>
@@ -1266,7 +1256,6 @@
     <string name="activity_tab_customize_screen_editing_insights_switch_title">Editing insights</string>
     <string name="activity_tab_customize_screen_impact_switch_title">All time impact</string>
     <string name="activity_tab_customize_screen_games_switch_title">Game stats</string>
-    <string name="activity_tab_customize_screen_donations_switch_title">Last in app donation</string>
     <string name="activity_tab_customize_screen_timeline_switch_title">Timeline of behavior</string>
     <string name="activity_tab_customize_screen_no_modules_message"><![CDATA[Activity modules are turned off. <a href=\"#\">Switch them on</a> to see updates in this tab.]]></string>
     <string name="activity_tab_timeline_today">Today</string>
@@ -1542,7 +1531,6 @@
     <string name="menu_option_share_talk_discussion">Share discussion</string>
     <string name="menu_option_share_talk_page">Share talk page</string>
     <string name="menu_option_share_edit">Share edit</string>
-    <string name="menu_option_user_contributions">%s\'s contributions</string>
     <string name="menu_option_edit_source">Edit source</string>
     <string name="menu_option_user_page">%s user page</string>
     <string name="menu_option_find_in_talk_page_topic">Find in talk page topic</string>
@@ -1563,7 +1551,6 @@
     <string name="thank_success_message">Your \'Thanks\' was sent to %s 👍</string>
     <string name="menu_option_view_user_profile">View user page</string>
     <string name="menu_option_view_user_talk">View talk page</string>
-    <string name="menu_option_view_user_contributions">View user contributions</string>
     <string name="revision_diff_compare">Compare revisions</string>
     <string name="revision_diff_compare_title">Compare revisions: %s</string>
     <string name="revision_diff_from">From:</string>
@@ -1675,16 +1662,10 @@
     <string name="subcategory_empty">No subcategories found in this category.</string>
     <string name="search_namespaces">Namespaces</string>
     <string name="revision_initial_none">None (this is the first revision)</string>
-    <string name="user_contrib_activity_title">Contributions of %s</string>
     <string name="archive_empty">No archived pages found.</string>
-    <string name="user_contrib_filter_ns">Filter by namespace</string>
-    <string name="user_contrib_filter_all">All namespaces</string>
-    <string name="user_contrib_filter_ns_header">Namespace filter</string>
     <string name="namespace_article">Article</string>
     <string name="user_contrib_current">current</string>
     <string name="media_playback_error">Error playing media.</string>
-    <string name="user_contrib_menu_label">Contributions</string>
-    <string name="user_contrib_filter_activity_title">Filter contributions</string>
     <string name="action_item_view_on_map">View on map</string>
     <string name="action_item_view_on_map_unavailable">Geographical coordinates are not available for this page</string>
 
@@ -1736,7 +1717,6 @@
     <string name="patroller_tasks_edits_list_card_overflow_view_user_page">View user page</string>
     <string name="patroller_tasks_edits_list_card_overflow_view_talk_page">View talk page</string>
     <string name="patroller_tasks_edits_list_card_overflow_user_information">User information</string>
-    <string name="patroller_tasks_edits_list_card_overflow_view_user_contributions">View user contributions</string>
     <string name="patroller_tasks_edits_list_card_overflow_thank">Thank</string>
     <string name="patroller_tasks_edits_list_user_information_dialog_title">User information</string>
     <string name="patroller_tasks_edits_list_user_information_dialog_joined_date_text"><![CDATA[<b>Account from: </b> %s]]></string>
@@ -1850,32 +1830,15 @@
     <string name="email_report_patroller_tasks_body">I have encountered a problem with the Edit Patrol Feature:\n- [Describe specific problem]\n\nThe behavior I would like to see is:\n- [Describe proposed solution]\n\n[Screenshots or Links]</string>
 
     <!-- Donor experience -->
-    <string name="donation_campaign_maybe_later_snackbar">We will remind you again tomorrow.</string>
-    <string name="donation_campaign_donated_snackbar">Thank you, dear donor! Your generosity helps keep Wikipedia and other free knowledge projects thriving.</string>
     <string name="donation_campaign_go_back_button">Go back</string>
     <string name="menu_single_webview_open_external">Open in system browser</string>
     <string name="donate_gpay_dialog_title">Donate with Google Pay?</string>
     <string name="donate_gpay_dialog_description">Donate with Google Pay or choose another payment method.</string>
     <string name="donate_gpay_dialog_pay_button">Donate with Google Pay</string>
     <string name="donate_gpay_dialog_other_button">Other payment method</string>
-    <string name="donate_gpay_activity_title">Select an amount</string>
-    <string name="donate_gpay_activity_title_with_currency">Select an amount (%s)</string>
-    <string name="donate_gpay_check_transaction_fee">I\'ll generously add %s to cover the transaction fees so you can keep 100%% of my donation.</string>
-    <string name="donate_gpay_check_recurring">Make this a monthly recurring donation.</string>
-    <string name="donate_gpay_check_send_email">Yes, the Wikimedia Foundation can send me an occasional email.</string>
-    <string name="donate_gpay_minimum_amount">Please select an amount (minimum %s)</string>
-    <string name="donate_gpay_maximum_amount">We cannot accept donations greater than %s through our app. Please contact our major gifts staff at benefactors@wikimedia.org.</string>
-    <string name="donate_gpay_success_message"><![CDATA[<b>Thank you!</b> Your generosity to Wikipedia means so much to us.]]></string>
-    <string name="donate_gpay_help_problems">Problems donating?</string>
-    <string name="donate_gpay_help_other_ways">Other ways to give</string>
-    <string name="donate_gpay_help_faq">Frequently asked questions</string>
-    <string name="donate_gpay_help_tax">Tax deductibility information</string>
-    <string name="donation_history_deleted_message_snackbar">Donation history cleared.</string>
-    <string name="donation_history_no_history_message_snackbar">You have no donation history to clear.</string>
     <!-- Donor experience -->
 
     <!-- Places -->
-    <string name="places_title">Places</string>
     <string name="places_permissions_denied">Location permission is required to see your location on the map. Please try again.</string>
     <string name="places_search_hint">Search places</string>
     <string name="places_filter_title">Filter language</string>
@@ -1911,9 +1874,6 @@
     <string name="survey_dialog_submitted_snackbar">Feedback submitted. Thank you!</string>
 
     <!-- Games Hub -->
-    <string name="games_hub_activity_title">Games</string>
-    <string name="games_hub_activity_games_unavailable_message">No games available in this language yet! Games leverage content created by volunteer editors for each language\'s Wikipedia.</string>
-    <string name="games_hub_activity_games_unavailable_message_learn_more_action">Learn more</string>
     <string name="games_hub_activity_overflow_view_game_stats">View game stats</string>
     <string name="games_hub_activity_overflow_learn_more">Learn more</string>
 
@@ -1921,132 +1881,34 @@
     <string name="on_this_day_game_entry_dialog_title">Introducing</string>
     <string name="on_this_day_game_entry_dialog_subtitle">Wikipedia games</string>
     <string name="on_this_day_game_entry_dialog_button">Play</string>
-    <string name="on_this_day_game_entry_dialog_snackbar_message">Wikipedia games are available in the Games Hub, found in the MORE menu.</string>
     <string name="on_this_day_game_title">Which came first?</string>
-    <string name="on_this_day_game_dialog_button">Play</string>
     <string name="on_this_day_game_splash_message">Guess which event came first on this day in history.</string>
-    <string name="on_this_day_game_progress">%1$d of %2$d</string>
-    <string name="on_this_day_game_score">Score: %d</string>
-    <string name="on_this_day_game_submit">Submit</string>
-    <string name="on_this_day_game_correct">Correct!</string>
-    <string name="on_this_day_game_incorrect">Incorrect!</string>
-    <string name="on_this_day_game_point">+1 point</string>
-    <string name="on_this_day_game_next">Next question</string>
-    <string name="on_this_day_game_finish">Final results</string>
     <string name="on_this_day_game_share_button">Share score</string>
     <string name="on_this_day_game_feed_entry_card_heading">Wikipedia games</string>
-    <string name="on_this_day_game_feed_entry_card_title">Which came first?</string>
-    <string name="on_this_day_game_result">You scored %1$d/%2$d.</string>
-    <string name="on_this_day_game_next_in">Next game in %s</string>
     <string name="on_this_day_game_your_stats">Your stats</string>
     <plurals name="on_this_day_game_stats_games_played">
         <item quantity="one">Game played</item>
         <item quantity="other">Games played</item>
     </plurals>
-    <string name="on_this_day_game_stats_average_score">Average score</string>
-    <string name="on_this_day_game_stats_streak">Current streak</string>
     <string name="on_this_day_game_result_subtitle">Articles referenced in today\'s game</string>
-    <string name="on_this_day_game_completed_message">Thank you for playing. A new game of \"Which came first?\" is available daily on the Home feed.</string>
     <string name="on_this_day_game_menu_notifications">Game notifications</string>
     <string name="on_this_day_game_menu_info">Learn more</string>
     <string name="on_this_day_game_menu_feedback">Problem with feature</string>
     <string name="on_this_day_game_article_read_button">Read article</string>
     <string name="on_this_day_game_article_related_event_title">Event related to this article</string>
     <string name="on_this_day_game_article_answer_correct_stats_message">You got this question right</string>
-    <string name="on_this_day_game_article_answer_incorrect_stats_message">You got this question wrong</string>
-    <string name="on_this_day_game_turn_off_notification_dialog_title">Turn off game notifications?</string>
-    <string name="on_this_day_game_turn_off_notification_dialog_subtitle">If you turn push notifications off, you will no longer receive a reminder every day when a new game is available to play.</string>
-    <string name="on_this_day_game_turn_on_notification_dialog_title">Turn on game notifications?</string>
-    <string name="on_this_day_game_turn_on_notification_dialog_subtitle">Game notifications alert you daily when a new game is available to play.</string>
-    <string name="on_this_day_game_turn_off_notification_dialog_positive_btn_label">No, keep them on</string>
-    <string name="on_this_day_game_turn_off_notification_dialog_negative_btn_label">Turn them off</string>
-    <string name="on_this_day_game_turn_on_notification_dialog_positive_btn_label">Yes, turn them on</string>
-    <string name="on_this_day_game_turn_on_notification_dialog_negative_btn_label">Keep them off</string>
-    <string name="on_this_day_game_notification_turned_off_snackbar_message">Game notifications off.</string>
-    <string name="on_this_day_game_notification_turned_on_snackbar_message">Game notifications on.</string>
-    <string name="on_this_day_game_notification_text">Today\'s game of \"Which came first?\" is ready to play.</string>
-    <string name="on_this_day_game_report_email_subject">Issue Report - Wikipedia games</string>
-    <string name="on_this_day_game_report_email_body">I have encountered a problem with the Wikipedia games feature:\n- [Describe specific problem]\n\nThe behavior I would like to see is:\n- [Describe proposed solution]</string>
-    <string name="on_this_day_game_notification_undo">Undo</string>
-    <string name="on_this_day_game_share_link_message">I\'m playing \"Which came first?\" a daily trivia game on the Wikipedia Android app %s</string>
-    <string name="on_this_day_game_share_screen_title">I scored %1$d/%2$d on \n\"Which came first?\" \ntoday.</string>
     <string name="on_this_day_game_share_screen_subtitle">Topics included:</string>
-    <string name="on_this_day_game_archive_calendar_title">Choose a game by date to play.</string>
-    <string name="on_this_day_game_score_toast_message">You scored %1$d/%2$d on this day.</string>
-    <string name="on_this_day_game_continue_btn_text">Continue today\'s game</string>
-    <string name="on_this_day_game_current_progress_message">You\'re on question %d.</string>
     <string name="on_this_day_game_archive_btn_text">Play the archive</string>
-    <string name="on_this_day_game_review_results_btn_text">Review results</string>
-    <string name="on_this_day_game_score_message">You scored %1$d/%2$d on today\'s game.</string>
-    <string name="on_this_day_game_play_today_btn_text">Play today\'s game</string>
-    <string name="on_this_day_game_continue_playing_btn_text">Continue playing</string>
     <string name="on_this_day_game_sound_on">Turn sound on</string>
-    <string name="on_this_day_game_sound_off">Turn sound off</string>
-    <string name="on_this_day_game_more_label">More</string>
-    <string name="on_this_day_game_card_progress_label">You\'re on question %d. Continue guessing which event came first on this day in history.</string>
-    <string name="on_this_day_game_card_progress_short_label">You\'re on question %d.</string>
-    <string name="on_this_day_game_explore_feed_card_score_message">You scored %1$d/%2$d on today\'s game. Next game in %3$s</string>
-    <string name="on_this_day_game_explore_feed_card_score_short_message">You scored %1$d/%2$d on today\'s game.</string>
-    <string name="on_this_day_game_card_archive_label">Archive</string>
-    <string name="on_this_day_game_stats_log_in_prompt_card_button">Log in</string>
-    <string name="on_this_day_game_stats_log_in_prompt_card_title">Log in to view your game stats</string>
-    <string name="on_this_day_game_stats_log_in_prompt_card_description">See your streaks, scores, and more</string>
     <string name="wikipedia_games_title">Wikipedia games</string>
     <string name="wikipedia_games_subtitle">Daily trivia games based Wikipedia content.</string>
 
     <!-- Year In Review -->
-    <string name="year_in_review_learn_more">Learn more</string>
-    <string name="year_in_review_get_started">Get started</string>
-    <string name="year_in_review_topbar_w_icon">Wikipedia W Icon</string>
-    <string name="year_in_review_navigate_left">Navigate left</string>
-    <string name="year_in_review_close">Close</string>
-    <string name="year_in_review_share_icon">Share Icon</string>
-    <string name="year_in_review_heart_icon">Heart Icon</string>
-    <string name="year_in_review_navigate_right">Navigate Right</string>
-    <string name="year_in_review_donate">Donate</string>
     <string name="year_in_review_information_icon">Information Icon</string>
-    <string name="year_in_review_get_started_headline">Explore your Wikipedia Year in Review</string>
-    <string name="year_in_review_get_started_bodytext">See insights about which articles you read on the Wikipedia app and the edits you made.</string>
-    <string name="year_in_review_get_started_info">Your reading history is kept protected. Reading insights are calculated using locally stored data on your device.</string>
-    <string name="year_in_review_get_started_later">You can access your Year in Review later in the More menu.</string>
-    <string name="year_in_review_survey_title">Help improve Year in Review</string>
-    <string name="year_in_review_survey_subtitle">Are you satisfied with this feature?</string>
-    <string name="year_in_review_reading_list_survey_title">Help improve the Year in Review %d reading list.</string>
-    <string name="year_in_review_reading_list_survey_subtitle">Are you satisfied with your reading list?</string>
-    <string name="year_in_review_survey_very_satisfied">Very satisfied</string>
-    <string name="year_in_review_survey_satisfied">Satisfied</string>
-    <string name="year_in_review_survey_neutral">Neutral</string>
-    <string name="year_in_review_survey_unsatisfied">Unsatisfied</string>
-    <string name="year_in_review_survey_very_unsatisfied">Very unsatisfied</string>
-    <string name="year_in_review_survey_placeholder_text">Any additional thoughts?</string>
-    <string name="year_in_review_survey_cancel">Cancel</string>
-    <string name="year_in_review_survey_submit">Submit</string>
-    <string name="year_in_review_disable_title">Are you sure you want to turn off Year in Review?</string>
-    <string name="year_in_review_disable_positive_button">Yes, I\'m sure</string>
-    <string name="year_in_review_disable_negative_button">No, thanks</string>
-    <string name="year_in_review_setting_subtitle">Turning off Year in Review will clear all stored personalized insights, and hide the Year in Review.</string>
-    <string name="year_in_review_screendeck_image_content_description">Image resource for the Year in Review main screen deck</string>
-    <string name="year_in_review_screenshot_error">Could not generate screenshot: %s</string>
-    <string name="year_in_review_share_subject">My Wikipedia Year in Review</string>
-    <string name="year_in_review_share_body">Here\'s my Wikipedia Year in Review. Created with the Wikipedia Android app %1$s %2$s</string>
-    <string name="year_in_review_globe_icon">Globe icon</string>
     <string name="settings_app_icon_title">App icon</string>
     <string name="settings_app_icon_subtitle">Contributor benefit</string>
     <string name="settings_app_icon_preference_subtitle">You have access to a custom icon that celebrates your %d in-app contributions to Wikipedia. It will remain until the next Year in Review.</string>
     <string name="settings_app_icon_updated">Your app icon has been updated.</string>
-    <string name="year_in_review_slide_app_icon_title_unlocked">New app icon unlocked for your home screen</string>
-    <string name="year_in_review_slide_app_icon_title_unlock">Unlock your contributor reward for next year!</string>
-    <string name="year_in_review_slide_app_icon_body_unlocked"><![CDATA[Activate your new app icon in Settings under App icon. Thank you for investing in the future of free knowledge. Your contributions as %1$s in %2$d are helping pave the way to a world of free information, and as a result you have unlocked a custom contributor icon for Wikipedia on your home screen.]]></string>
-    <string name="year_in_review_slide_app_icon_body_unlock"><![CDATA[We\'re glad Wikipedia was part of your %1$d! Unlock a special reward in your %2$d Year in Review by becoming a contributor—whether by <a href="%3$s">editing Wikipedia</a> or by donating from the app to the <a href="%4$s">Wikimedia Foundation</a>, the nonprofit behind it. If Wikipedia is useful to you, please consider donating to help sustain its future and keep it free, ad-free, trustworthy, and accessible to all. If you donated elsewhere, your support is deeply appreciated.]]></string>
-    <string name="year_in_review_slide_app_icon_donor">a donor</string>
-    <string name="year_in_review_slide_app_icon_editor">an editor</string>
-    <string name="year_in_review_slide_app_icon_donor_and_editor">a donor and editor</string>
-    <string name="year_in_review_slide_geo_headline">Articles you read are closest to %s</string>
-    <string name="year_in_review_slide_geo_body"><![CDATA[The country that is closest to many articles you\'ve read seems to be: %1$s, based on articles like <b>%2$s</b> and <b>%3$s</b>.]]></string>
-    <string name="year_in_review_login_dialog_title">Log in for personalization?</string>
-    <string name="year_in_review_login_dialog_body">Logging in gives you access to personalized insights. You can still see collective insights without logging in.</string>
-    <string name="year_in_review_login_dialog_positive">Log in / Join Wikipedia</string>
-    <string name="year_in_review_login_dialog_negative">Continue without logging in</string>
     <plurals name="year_in_review_slide_top_articles_headline">
         <item quantity="one">Your top article</item>
         <item quantity="other">Your top articles</item>
@@ -2055,9 +1917,6 @@
         <item quantity="one"><![CDATA[Here was the article you visited the most in %1$d: %2$s]]></item>
         <item quantity="other"><![CDATA[Here were the articles you visited the most in %1$d: %2$s]]></item>
     </plurals>
-    <string name="year_in_review_slide_top_categories_headline">Your most interesting categories</string>
-    <string name="year_in_review_slide_top_categories_body"><![CDATA[Categories group articles on similar subjects together. In %1$d, you visited articles in these interesting categories multiple times: %2$s]]></string>
-    <string name="year_in_review_slide_most_read_english_articles_headline">English Wikipedia\'s most read articles</string>
     <plurals name="year_in_review_slide_most_read_english_articles_body">
         <item quantity="one"><![CDATA[When people want to learn about our world, they turn to Wikipedia. The top %1$d visited article on English Wikipedia was: %2$s <br />Read more in our <a href=\"%3$s\">dedicated blog post</a>.]]></item>
         <item quantity="other"><![CDATA[When people want to learn about our world, they turn to Wikipedia. The top %1$d visited articles on English Wikipedia were: %2$s <br />Read more in our <a href=\"%3$s\">dedicated blog post</a>.]]></item>
@@ -2074,7 +1933,6 @@
         <item quantity="one">Wikipedia was edited %,d time per minute</item>
         <item quantity="other">Wikipedia was edited %,d times per minute</item>
     </plurals>
-    <string name="year_in_review_slide_edited_per_minute_body"><![CDATA[Articles are collaboratively created and improved using reliable sources. All of us have knowledge to share, <a href="%s">learn how to participate.</a>]]></string>
     <plurals name="year_in_review_slide_bytes_added_headline">
         <item quantity="one">%,d byte added</item>
         <item quantity="other">%,d bytes added</item>
@@ -2095,7 +1953,6 @@
         <item quantity="one">Editors on the official Wikipedia apps made %,d edit</item>
         <item quantity="other">Editors on the official Wikipedia apps made %,d edits</item>
     </plurals>
-    <string name="year_in_review_slide_app_edited_times_body">The heart and soul of Wikipedia is our global community of volunteer contributors, donors, and billions of readers like yourself – all united to share unlimited access to reliable information.</string>
     <plurals name="year_in_review_slide_english_edited_times_headline">
         <item quantity="one">Editors made %,d change this year</item>
         <item quantity="other">Editors made %,d changes this year</item>
@@ -2120,17 +1977,6 @@
         <item quantity="one">App users had %,d saved article</item>
         <item quantity="other">App users had %,d saved articles</item>
     </plurals>
-    <string name="year_in_review_slide_global_saved_articles_body">Adding articles to reading lists allows you to access articles even while offline. You can also log in to sync reading lists across devices.</string>
-    <string name="year_in_review_slide_reading_patterns_headline">You have clear reading patterns</string>
-    <string name="year_in_review_slide_reading_patterns_body_favorite_time">Favorite time to read</string>
-    <string name="year_in_review_slide_reading_patterns_body_favorite_day">Favorite day to read</string>
-    <string name="year_in_review_slide_reading_patterns_body_favorite_month">Month you did the most reading</string>
-    <string name="year_in_review_slide_reading_pattern_morning">Morning</string>
-    <string name="year_in_review_slide_reading_pattern_midday">Midday</string>
-    <string name="year_in_review_slide_reading_pattern_afternoon">Afternoon</string>
-    <string name="year_in_review_slide_reading_pattern_evening">Evening</string>
-    <string name="year_in_review_slide_reading_pattern_night">Night</string>
-    <string name="year_in_review_slide_reading_pattern_late_night">Late night</string>
     <plurals name="year_in_review_slide_english_reading_hours_headline">
         <item quantity="one">We spent %,d hour reading</item>
         <item quantity="other">We spent %,d hours reading</item>
@@ -2187,16 +2033,7 @@
         <item quantity="one">App users viewed Wikipedia articles %,d time</item>
         <item quantity="other">App users viewed Wikipedia articles %,d times</item>
     </plurals>
-    <string name="year_in_review_slide_viewed_articles_times_body">For people around the world, Wikipedia is the first stop when answering a question, looking up information for school or work, or learning a new fact.</string>
-    <string name="year_in_review_reading_list_dialog_title">Create your Year in Review %d reading list?</string>
-    <string name="year_in_review_reading_list_dialog_message"><![CDATA[Wikipedia Year in Review will create a reading list of the articles you spent the most time with in %1$d. <a href="%2$s">Learn more</a>]]></string>
-    <string name="year_in_review_reading_list_dialog_positive_button_label">Create</string>
-    <string name="year_in_review_reading_list_dialog_negative_button_label">No thanks</string>
-    <string name="year_in_review_reading_list_title">Year in Review %d</string>
-    <string name="year_in_review_reading_list_description">Made for %1$s. Articles you spent the most time with in %2$d.</string>
 
-    <string name="year_in_review_highlights_thank_you_message">Thank you for spending your year with Wikipedia.</string>
-    <string name="year_in_review_highlights_looking_forward_message">We look forward to next year!</string>
     <plurals name="year_in_review_highlights_logged_out_en_most_read_title">
         <item quantity="one">Most read article on English Wikipedia</item>
         <item quantity="other">Most read articles on English Wikipedia</item>
@@ -2217,7 +2054,6 @@
         <item quantity="one">Edit on-app</item>
         <item quantity="other">Edits on-app</item>
     </plurals>
-    <string name="year_in_review_highlights_logged_out_non_en_wikipedia_edited_title">How often Wikipedia was edited</string>
     <plurals name="year_in_review_highlights_logged_out_non_en_wikipedia_per_minute_label">
         <item quantity="one">%d time per minute</item>
         <item quantity="other">%d times per minute</item>
@@ -2230,7 +2066,6 @@
         <item quantity="one">Minute read</item>
         <item quantity="other">Minutes read</item>
     </plurals>
-    <string name="year_in_review_highlights_logged_in_favorite_day_title">Favorite day to read</string>
     <plurals name="year_in_review_highlights_logged_in_articles_read_title">
         <item quantity="one">Article read</item>
         <item quantity="other">Articles read</item>
@@ -2243,8 +2078,6 @@
         <item quantity="one">Time edited</item>
         <item quantity="other">Times edited</item>
     </plurals>
-    <string name="year_in_review_highlights_share_button_title">Share highlights</string>
-    <string name="year_in_review_highlights_logo_description">Wikipedia logo</string>
     <!--Recommended Reading list -->
     <string name="recommended_reading_list_title">Discover</string>
     <string name="recommended_reading_list_onboarding_card_title">Discover articles picked just for you</string>
@@ -2330,42 +2163,11 @@
     <string name="recommended_reading_list_settings_toggle_enable_message">Discover is on. Wikipedia will recommend you articles to read.</string>
 
     <!-- Donation Reminder -->
-    <string name="donation_reminders_prompt_dismiss_snackbar">Donation reminders can be modified anytime in Settings.</string>
-    <string name="donation_settings_section_header">Donations</string>
-    <string name="donation_reminders_settings_title">How should we remind you?</string>
-    <string name="donation_reminders_settings_option_title">Donation reminders</string>
-    <string name="donation_reminders_settings_thank_you_message">Your generosity helps keep Wikipedia thriving. Set up a donation reminder based on the number of articles you read.</string>
-    <string name="donation_reminders_settings_donation_info">Donations go to the Wikimedia Foundation and affiliates, proud hosts of Wikipedia and other free knowledge projects.</string>
-    <string name="donation_reminders_settings_article_frequency_label">When I read</string>
-    <string name="donation_reminders_settings_amount_label">Remind me to donate</string>
-    <string name="donation_reminders_settings_confirm_btn_label">Confirm reminder</string>
-    <string name="donation_reminders_settings_about_experiment_btn_label">About this experiment</string>
-    <string name="donation_reminders_settings_article_frequency_input_suffix_label">articles</string>
-    <string name="donation_reminders_settings_warning_min_amount">Please enter at least %s</string>
-    <string name="donation_reminders_settings_warning_max_amount">Maximum %s is allowed</string>
-    <string name="donation_reminders_settings_option_custom">Custom…</string>
-    <string name="donation_reminders_snacbkbar_confirmation_label">Thank you! We\'ll remind you to donate %1$s when you read %2$s while this experiment runs.</string>
-    <string name="donation_reminders_first_milestone_reached_prompt_title">You\'ve read %1$s since you pledged %2$s</string>
-    <string name="donation_reminders_subsequent_milestone_reached_prompt_title">You\'ve read another %1$s</string>
-    <string name="donation_reminders_prompt_message">You set up a donation reminder on %1$s to give %3$s every %2$s you read. Ready to follow through on your pledge to support Wikipedia?</string>
-    <string name="donation_reminders_prompt_positive_button">Donate now</string>
-    <string name="donation_reminders_prompt_negative_button">Not now</string>
-    <string name="donation_reminders_gpay_text">Donate %s with Google Pay</string>
     <string name="donation_reminders_gpay_different_amount_text">Donate a different amount with Google Pay</string>
-    <string name="donation_reminders_settings_description_on">Donation reminders are on. Wikipedia will remind you to donate %1$s every %2$s you read while this experiment runs.</string>
-    <string name="donation_reminders_settings_description_off">Donation reminders are off.</string>
-    <string name="donation_reminders_settings_tooltip_info_label">Article count is stored locally on your device</string>
     <plurals name="donation_reminders_text_articles">
         <item quantity="one">%d article</item>
         <item quantity="other">%d articles</item>
     </plurals>
-    <string name="donation_reminders_settings_no_thanks_btn_label">No thanks</string>
-    <string name="donation_reminders_experiment_label">EXPERIMENT</string>
-    <string name="donation_reminders_settings_learn_more_button">Learn more</string>
-    <string name="donation_reminders_settings_report_button">Problem with feature</string>
-    <string name="donation_reminders_settings_report_email_subject">Issue Report-Donation Reminders</string>
-    <string name="donation_reminders_settings_report_email_body">I have encountered a problem with the Donation reminders feature:\n- [Describe specific problem]\n- [Screenshots or links]\n\nThe behavior I would like to see is:\n- [Describe proposed solution]</string>
-    <string name="donation_reminders_snackbar_modify_button_label">Modify</string>
 
     <!-- Hybrid Search -->
     <string name="hybrid_search_search_hint">Search or ask anything</string>

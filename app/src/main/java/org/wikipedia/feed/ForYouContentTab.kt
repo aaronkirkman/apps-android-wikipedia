@@ -65,11 +65,7 @@ import org.wikipedia.feed.interests.BasedOnInterestModule
 import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.DiscoverEnablePromptCard
 import org.wikipedia.feed.model.EmptyForYouCard
-import org.wikipedia.feed.model.PlacesOfInterestLocationPromptCard
-import org.wikipedia.feed.places.PlacesOfInterestArticlesModule
-import org.wikipedia.feed.places.PlacesOfInterestLocationPromptModule
 import org.wikipedia.feed.random.RandomModule
-import org.wikipedia.feed.wikigames.GamesModule
 import org.wikipedia.theme.Theme
 import org.wikipedia.util.L10nUtil
 
@@ -297,52 +293,6 @@ private fun LazyListScope.forYouModuleItem(
                 )
             }
         }
-        is ForYouModule.PlacesOfInterest -> {
-            item(key = key) {
-                when {
-                    module.isLoading -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(viewPortHeight),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            LoadingIndicator()
-                        }
-                    }
-                    !module.hasLocationPermission -> {
-                        onCardImpression(PlacesOfInterestLocationPromptCard(), index)
-                        PlacesOfInterestLocationPromptModule(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(viewPortHeight)
-                                .background(ComposeColors.Green800)
-                                .padding(horizontal = 16.dp)
-                                .padding(top = (topInset * 2 + 64).dp)
-                                .navigationBarsPadding(),
-                            wikiSite = wikiSite,
-                            onGoToPlacesClick = { onAction(HomeAction.PlacesTeaserClick) }
-                        )
-                    }
-                    else -> {
-                        PlacesOfInterestArticlesModule(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(viewPortHeight),
-                            wikiSite = wikiSite,
-                            module = module,
-                            onPageClick = { card, entry -> onAction(HomeAction.PageClick(card, entry)) },
-                            onPageShareClick = { card, entry -> onAction(HomeAction.PageShareClick(card, entry)) },
-                            onPageBookmarkClick = { card, entry -> onAction(HomeAction.PageBookmarkClick(card, entry)) },
-                            onHideCardClick = { module, card -> onAction(HomeAction.HideForYouCard(module, card)) },
-                            onHideModuleClick = { onAction(HomeAction.HideModule(module.moduleKey())) },
-                            onCardInView = { onCardImpression(it, index) },
-                            onCustomizeClick = { onAction(HomeAction.CustomizeClick(it)) }
-                        )
-                    }
-                }
-            }
-        }
         is ForYouModule.Discover -> {
             item(key = key) {
                 when {
@@ -387,39 +337,6 @@ private fun LazyListScope.forYouModuleItem(
                             onCardInView = { onCardImpression(it, index) },
                             onCustomizeClick = { onAction(HomeAction.CustomizeClick(it)) },
                             onSeeAllRecommendationsClick = { onAction(HomeAction.SeeAllRecommendationsClick) }
-                        )
-                    }
-                }
-            }
-        }
-        is ForYouModule.Games -> {
-            item(key = key) {
-                when {
-                    module.isLoading -> {
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(viewPortHeight),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            LoadingIndicator()
-                        }
-                    }
-                    else -> {
-                        GamesModule(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(viewPortHeight)
-                                .background(ComposeColors.Green800)
-                                .padding(top = (topInset * 2 + 64).dp)
-                                .navigationBarsPadding(),
-                            wikiSite = wikiSite,
-                            module = module,
-                            onGameActionClick = { onAction(HomeAction.GameActionClick(it)) },
-                            onGoToGamesHubClick = { onAction(HomeAction.GoToGamesHubClick) },
-                            onHideCardClick = { module, card -> onAction(HomeAction.HideForYouCard(module, card)) },
-                            onHideModuleClick = { onAction(HomeAction.HideModule(module.moduleKey())) },
-                            onCardInView = { onCardImpression(it, index) },
-                            onCustomizeInterestsClick = { onAction(HomeAction.CustomizeClick(it)) }
                         )
                     }
                 }

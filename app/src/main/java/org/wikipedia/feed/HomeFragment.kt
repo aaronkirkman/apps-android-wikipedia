@@ -33,9 +33,6 @@ import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.DiscoverCard
 import org.wikipedia.feed.model.EmptyCommunityCard
 import org.wikipedia.feed.model.EmptyForYouCard
-import org.wikipedia.feed.model.GamesModulePromptCard
-import org.wikipedia.feed.model.PlacesOfInterestLocationPromptCard
-import org.wikipedia.feed.model.WikiGameCard
 import org.wikipedia.feed.onboarding.ExploreFeedUpdatePromptActivity
 import org.wikipedia.feed.onthisday.OnThisDayActivity
 import org.wikipedia.feed.onthisday.OnThisDayCard
@@ -44,17 +41,11 @@ import org.wikipedia.feed.personalization.PersonalizationActivity.Companion.RESU
 import org.wikipedia.feed.personalization.homepreference.HomePreferenceType
 import org.wikipedia.feed.topread.TopReadArticlesActivity
 import org.wikipedia.feed.topread.TopReadCard
-import org.wikipedia.feed.wikigames.OnThisDayCardGameState
-import org.wikipedia.feed.wikigames.WikiGame
-import org.wikipedia.games.GamesHubActivity
-import org.wikipedia.games.db.DailyGameHistory
-import org.wikipedia.games.onthisday.OnThisDayGameActivity
 import org.wikipedia.main.MainActivity
 import org.wikipedia.main.MainFragment
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.notifications.NotificationActivity
 import org.wikipedia.page.tabs.TabActivity
-import org.wikipedia.places.PlacesActivity
 import org.wikipedia.random.RandomActivity
 import org.wikipedia.readinglist.ReadingListActivity
 import org.wikipedia.readinglist.ReadingListMode
@@ -377,10 +368,6 @@ class HomeFragment : Fragment() {
                 instrument.submitInteraction("click", elementId = "random_card_shuffle_button")
                 startActivity(RandomActivity.newIntent(requireActivity(), wikiSite, InvokeSource.FEED))
             }
-            HomeAction.PlacesTeaserClick -> {
-                instrument.submitInteraction("click", actionSource = PlacesOfInterestLocationPromptCard::class.java.simpleName, elementId = "go_to_places")
-                requireActivity().startActivity(PlacesActivity.newIntent(requireContext()))
-            }
             HomeAction.DiscoverTeaserClick -> {
                 instrument.submitInteraction("click", elementId = "enable_discover_reading_list_button")
                 requireActivity().startActivity(RecommendedReadingListOnboardingActivity.newIntent(requireContext()))
@@ -388,33 +375,6 @@ class HomeFragment : Fragment() {
             HomeAction.SeeAllRecommendationsClick -> {
                 instrument.submitInteraction("click", elementId = "explore_all_recommendations_button")
                 startActivity(ReadingListActivity.newIntent(requireContext(), readingListMode = ReadingListMode.RECOMMENDED))
-            }
-            is HomeAction.GameActionClick -> {
-                when (val wikiGame = action.wikiGame) {
-                    is WikiGame.OnThisDayGame -> {
-                        val gameStatus = when (wikiGame.state) {
-                            is OnThisDayCardGameState.Completed -> DailyGameHistory.GAME_COMPLETED
-                            is OnThisDayCardGameState.InProgress,
-                            is OnThisDayCardGameState.Preview -> DailyGameHistory.GAME_IN_PROGRESS
-                        }
-                        val elementId = when (wikiGame.state) {
-                            is OnThisDayCardGameState.Preview -> "play_click"
-                            is OnThisDayCardGameState.InProgress -> "continue_click"
-                            is OnThisDayCardGameState.Completed -> "review_click"
-                        }
-                        instrument.submitInteraction("click", actionSource = WikiGameCard::class.java.simpleName, elementId = elementId, actionContext = mapOf("game" to wikiGame.game.name))
-                        requireActivity().startActivity(OnThisDayGameActivity.newIntent(
-                            context = requireContext(),
-                            invokeSource = InvokeSource.FEED,
-                            wikiSite = wikiSite,
-                            gameStatus = gameStatus
-                        ))
-                    }
-                }
-            }
-            HomeAction.GoToGamesHubClick -> {
-                instrument.submitInteraction("click", actionSource = GamesModulePromptCard::class.java.simpleName, elementId = "go_to_games_hub")
-                requireActivity().startActivity(GamesHubActivity.newIntent(requireContext()))
             }
         }
     }

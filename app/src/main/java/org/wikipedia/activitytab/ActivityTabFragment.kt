@@ -81,7 +81,6 @@ import kotlinx.coroutines.launch
 import org.wikipedia.Constants
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
-import org.wikipedia.activity.BaseActivity
 import org.wikipedia.activity.FragmentUtil.getCallback
 import org.wikipedia.activitytab.timeline.ActivitySource
 import org.wikipedia.activitytab.timeline.TimelineDateSeparator
@@ -106,10 +105,6 @@ import org.wikipedia.diff.ArticleEditDetailsActivity
 import org.wikipedia.events.LoggedInEvent
 import org.wikipedia.events.LoggedOutEvent
 import org.wikipedia.events.LoggedOutInBackgroundEvent
-import org.wikipedia.games.GamesHubActivity
-import org.wikipedia.games.WikiGames
-import org.wikipedia.games.onthisday.OnThisDayGameActivity
-import org.wikipedia.games.onthisday.OnThisDayGameViewModel
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.history.HistoryFragment
 import org.wikipedia.login.LoginActivity
@@ -120,7 +115,6 @@ import org.wikipedia.page.PageTitle
 import org.wikipedia.settings.Prefs
 import org.wikipedia.suggestededits.SuggestedEditsTasksActivity
 import org.wikipedia.theme.Theme
-import org.wikipedia.usercontrib.UserContribListActivity
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.UiState
 import org.wikipedia.util.UriUtil
@@ -160,9 +154,7 @@ class ActivityTabFragment : Fragment() {
                 viewModel.allDataLoaded.collectLatest {
                     if (it) {
                         val isAllDataEmpty = viewModel.hasNoReadingHistoryData() &&
-                                viewModel.hasNoImpactData() &&
-                                viewModel.hasNoGameStats() &&
-                                viewModel.hasNoDonationData()
+                                viewModel.hasNoImpactData()
                         ActivityTabEvent.submit(
                             activeInterface = "activity_tab",
                             action = "impression",
@@ -190,24 +182,15 @@ class ActivityTabFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 BaseTheme {
-                    val scrollToGames = viewModel.scrollToGames.collectAsState().value
                     ActivityTabScreen(
                         isLoggedIn = AccountUtil.isLoggedIn && !AccountUtil.isTemporaryAccount,
                         userName = AccountUtil.userName,
                         languageCode = WikipediaApp.instance.wikiSite.languageCode,
                         modules = Prefs.activityTabModules,
-                        haveAtLeastOneDonation = Prefs.donationResults.isNotEmpty(),
-                        areGamesAvailable = WikiGames.WHICH_CAME_FIRST.isLangSupported(WikipediaApp.instance.wikiSite.languageCode),
                         refreshSilently = viewModel.shouldRefreshTimelineSilently,
-                        scrollToGames = scrollToGames,
                         readingHistoryState = viewModel.readingHistoryState.collectAsState().value,
-                        donationUiState = viewModel.donationUiState.collectAsState().value,
-                        wikiGamesUiState = viewModel.wikiGamesUiState.collectAsState().value,
                         impactUiState = viewModel.impactUiState.collectAsState().value,
-                        timelineFlow = viewModel.timelineFlow,
-                        onScrollToGamesConsumed = {
-                            viewModel.onScrollToGamesConsumed()
-                        }
+                        timelineFlow = viewModel.timelineFlow
                     )
                 }
             }
@@ -217,17 +200,6 @@ class ActivityTabFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner)
-        if (requireActivity().intent.getBooleanExtra(Constants.INTENT_EXTRA_SCROLL_TO_GAMES, false)) {
-            viewModel.onScrollToGames()
-            requireActivity().intent.removeExtra(Constants.INTENT_EXTRA_SCROLL_TO_GAMES)
-        }
-        if (!Prefs.isGameStatsUnavailableSnackbarShown) {
-            requireActivity().intent.getStringExtra(Constants.INTENT_EXTRA_SNACKBAR_MESSAGE)?.let {
-                FeedbackUtil.makeSnackbar(requireView(), it).show()
-                requireActivity().intent.removeExtra(Constants.INTENT_EXTRA_SNACKBAR_MESSAGE)
-                Prefs.isGameStatsUnavailableSnackbarShown = true
-            }
-        }
         maybeShowReadingChallengeRewardDialog()
         viewModel.loadAll()
         requireActivity().invalidateOptionsMenu()
@@ -253,46 +225,13 @@ class ActivityTabFragment : Fragment() {
         userName: String,
         languageCode: String,
         modules: ActivityTabModules,
-        haveAtLeastOneDonation: Boolean,
-        areGamesAvailable: Boolean,
         refreshSilently: Boolean,
-        scrollToGames: Boolean = false,
         readingHistoryState: UiState<ActivityTabViewModel.ReadingHistory>,
-        donationUiState: UiState<String?>,
-        wikiGamesUiState: UiState<OnThisDayGameViewModel.GameStatistics?>,
         impactUiState: UiState<Pair<GrowthUserImpact, Int>>,
-        timelineFlow: Flow<PagingData<TimelineDisplayItem>>,
-        onScrollToGamesConsumed: () -> Unit = {}
+        timelineFlow: Flow<PagingData<TimelineDisplayItem>>
     ) {
         val timelineItems = timelineFlow.collectAsLazyPagingItems()
         val listState = rememberLazyListState()
-        var gamesModuleOffsetInItem by remember { mutableIntStateOf(0) }
-
-        LaunchedEffect(scrollToGames) {
-            if (scrollToGames && modules.isModuleVisible(ModuleType.GAMES, areGamesAvailable = areGamesAvailable)) {
-                val containerIndex = if (
-                    modules.isModuleVisible(ModuleType.TIME_SPENT) ||
-                    modules.isModuleVisible(ModuleType.READING_INSIGHTS)
-                ) 1 else 0
-
-                gamesModuleOffsetInItem = 0
-
-                // since we don't have index per module, this will move to the container holding games module
-                // so that the lazy column can compose it and onGloballyPositioned executes
-                listState.scrollToItem(containerIndex)
-
-                // now we wait for the games module to be laid out
-                snapshotFlow { gamesModuleOffsetInItem }
-                    .first { it > 0 }
-
-                // then animate to the correct offset
-                listState.animateScrollToItem(
-                    index = containerIndex,
-                    scrollOffset = gamesModuleOffsetInItem
-                )
-                onScrollToGamesConsumed()
-            }
-        }
 
         Scaffold(
             modifier = Modifier
@@ -390,7 +329,7 @@ class ActivityTabFragment : Fragment() {
                 return@Scaffold
             }
 
-            if (modules.noModulesVisible(haveAtLeastOneDonation = haveAtLeastOneDonation, areGamesAvailable = areGamesAvailable)) {
+            if (modules.noModulesVisible()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -549,13 +488,6 @@ class ActivityTabFragment : Fragment() {
                                             title = it
                                         ))
                                     },
-                                    onContributionClick = {
-                                        requireActivity().startActivity(
-                                            UserContribListActivity.newIntent(
-                                            context = requireActivity(),
-                                            userName = userName
-                                        ))
-                                    },
                                     onSuggestedEditsClick = {
                                         ActivityTabEvent.submit(activeInterface = "activity_tab", action = "sugg_edit_click", editCount = viewModel.getTotalEditsCount())
                                         requireActivity().startActivity(
@@ -577,9 +509,6 @@ class ActivityTabFragment : Fragment() {
                                         .fillMaxWidth()
                                         .padding(start = 16.dp, end = 16.dp, top = 16.dp),
                                     uiState = impactUiState,
-                                    onTotalEditsClick = {
-                                        startActivity(UserContribListActivity.newIntent(requireContext(), userName))
-                                    },
                                     wikiErrorClickEvents = WikiErrorClickEvents(
                                         retryClickListener = {
                                             viewModel.loadImpact()
@@ -588,65 +517,7 @@ class ActivityTabFragment : Fragment() {
                                 )
                             }
 
-                            if (modules.isModuleVisible(ModuleType.GAMES, areGamesAvailable = areGamesAvailable) || modules.isModuleVisible(ModuleType.DONATIONS)) {
-                                Text(
-                                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp),
-                                    text = stringResource(R.string.activity_tab_highlights),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Medium,
-                                    color = WikipediaTheme.colors.primaryColor
-                                )
-                            }
-
-                            if (modules.isModuleVisible(ModuleType.GAMES, areGamesAvailable = areGamesAvailable)) {
-                                WikiGamesModule(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-                                        .onGloballyPositioned { coordinates ->
-                                            val offset = coordinates.positionInParent().y.toInt()
-                                            gamesModuleOffsetInItem = offset
-                                        },
-                                    uiState = wikiGamesUiState,
-                                    onPlayGameCardClick = {
-                                        requireActivity().startActivity(OnThisDayGameActivity.newIntent(
-                                            context = requireContext(),
-                                            invokeSource = Constants.InvokeSource.ACTIVITY_TAB,
-                                            wikiSite = WikipediaApp.instance.wikiSite
-                                        ))
-                                    },
-                                    onStatsCardClick = {
-                                        requireActivity().startActivity(GamesHubActivity.newIntent(
-                                            context = requireContext()
-                                        ))
-                                    },
-                                    wikiErrorClickEvents = WikiErrorClickEvents(
-                                        retryClickListener = {
-                                            viewModel.loadWikiGamesStats()
-                                        }
-                                    )
-                                )
-                            }
-
-                            if (modules.isModuleVisible(ModuleType.DONATIONS, haveAtLeastOneDonation = haveAtLeastOneDonation)) {
-                                DonationModule(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-                                    uiState = donationUiState,
-                                    onClick = {
-                                        ActivityTabEvent.submit(activeInterface = "activity_tab", action = "last_donation_click",
-                                            editCount = viewModel.getTotalEditsCount(), state = if (viewModel.hasNoDonationData()) "empty" else "complete")
-                                        (requireActivity() as? BaseActivity)?.launchDonateDialog(
-                                            campaignId = ActivityTabViewModel.CAMPAIGN_ID
-                                        )
-                                    }
-                                )
-                            }
-
-                            if (modules.isModuleVisible(ModuleType.DONATIONS, haveAtLeastOneDonation = haveAtLeastOneDonation) ||
-                                modules.isModuleVisible(ModuleType.GAMES, areGamesAvailable = areGamesAvailable) ||
-                                modules.isModuleVisible(ModuleType.EDITING_INSIGHTS) ||
+                            if (modules.isModuleVisible(ModuleType.EDITING_INSIGHTS) ||
                                 modules.isModuleEnabled(ModuleType.IMPACT)) {
                                 // Add bottom padding only if at least one of the modules in this gradient box is enabled.
                                 Spacer(modifier = Modifier.size(16.dp))
@@ -742,9 +613,7 @@ class ActivityTabFragment : Fragment() {
                 isLoggedIn = true,
                 userName = "User",
                 languageCode = "en",
-                modules = ActivityTabModules(isDonationsEnabled = true),
-                haveAtLeastOneDonation = true,
-                areGamesAvailable = true,
+                modules = ActivityTabModules(),
                 refreshSilently = false,
                 readingHistoryState = UiState.Success(ActivityTabViewModel.ReadingHistory(
                     timeSpentThisWeek = 12345,
@@ -765,13 +634,6 @@ class ActivityTabFragment : Fragment() {
                         Category(2025, 1, "Category:World literature", "en", 1),
                     )
                 )),
-                donationUiState = UiState.Success("5 days ago"),
-                wikiGamesUiState = UiState.Success(OnThisDayGameViewModel.GameStatistics(
-                    totalGamesPlayed = 10,
-                    averageScore = 4.5,
-                    currentStreak = 15,
-                    bestStreak = 25
-                )),
                 impactUiState = UiState.Success(Pair(GrowthUserImpact(totalEditsCount = 12345), 123456)),
                 timelineFlow = emptyFlow()
             )
@@ -786,9 +648,7 @@ class ActivityTabFragment : Fragment() {
                 isLoggedIn = true,
                 userName = "User",
                 languageCode = "ru",
-                modules = ActivityTabModules(isDonationsEnabled = true),
-                haveAtLeastOneDonation = false,
-                areGamesAvailable = false,
+                modules = ActivityTabModules(),
                 refreshSilently = false,
                 readingHistoryState = UiState.Success(ActivityTabViewModel.ReadingHistory(
                     timeSpentThisWeek = 0,
@@ -800,8 +660,6 @@ class ActivityTabFragment : Fragment() {
                     articlesSaved = emptyList(),
                     topCategories = emptyList()
                 )),
-                donationUiState = UiState.Success("Unknown"),
-                wikiGamesUiState = UiState.Success(null),
                 impactUiState = UiState.Success(Pair(GrowthUserImpact(), 0)),
                 timelineFlow = emptyFlow()
             )
@@ -817,8 +675,6 @@ class ActivityTabFragment : Fragment() {
                 userName = "User",
                 languageCode = "he",
                 modules = ActivityTabModules(),
-                haveAtLeastOneDonation = false,
-                areGamesAvailable = false,
                 refreshSilently = false,
                 readingHistoryState = UiState.Success(ActivityTabViewModel.ReadingHistory(
                     timeSpentThisWeek = 0,
@@ -830,8 +686,6 @@ class ActivityTabFragment : Fragment() {
                     articlesSaved = emptyList(),
                     topCategories = emptyList()
                 )),
-                donationUiState = UiState.Success("Unknown"),
-                wikiGamesUiState = UiState.Success(null),
                 impactUiState = UiState.Success(Pair(GrowthUserImpact(), 0)),
                 timelineFlow = emptyFlow()
             )
@@ -851,12 +705,8 @@ class ActivityTabFragment : Fragment() {
                     isReadingInsightsEnabled = false,
                     isEditingInsightsEnabled = false,
                     isImpactEnabled = false,
-                    isGamesEnabled = false,
-                    isDonationsEnabled = false,
                     isTimelineEnabled = false
                 ),
-                haveAtLeastOneDonation = true,
-                areGamesAvailable = true,
                 refreshSilently = false,
                 readingHistoryState = UiState.Success(ActivityTabViewModel.ReadingHistory(
                     timeSpentThisWeek = 0,
@@ -868,8 +718,6 @@ class ActivityTabFragment : Fragment() {
                     articlesSaved = emptyList(),
                     topCategories = emptyList()
                 )),
-                donationUiState = UiState.Success("Unknown"),
-                wikiGamesUiState = UiState.Success(null),
                 impactUiState = UiState.Success(Pair(GrowthUserImpact(), 0)),
                 timelineFlow = emptyFlow()
             )
@@ -898,13 +746,6 @@ class ActivityTabFragment : Fragment() {
                 HistoryFragment.clearAllHistory(requireContext(), lifecycleScope) {
                     viewModel.loadAll()
                 }
-                true
-            }
-            R.id.menu_clear_donation_history -> {
-                ActivityTabEvent.submit(activeInterface = "activity_tab_overflow_menu", action = "clear_donation_history_click")
-                Prefs.donationResults = emptyList()
-                Prefs.activityTabModules = Prefs.activityTabModules.setModuleEnabled(ModuleType.DONATIONS, false)
-                viewModel.loadAll()
                 true
             }
             R.id.menu_learn_more -> {

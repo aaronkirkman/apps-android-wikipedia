@@ -22,10 +22,7 @@ import org.wikipedia.activitytab.ActivityTabModules
 import org.wikipedia.analytics.SessionData
 import org.wikipedia.analytics.eventplatform.AppSessionEvent
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.donate.DonationResult
-import org.wikipedia.donate.donationreminder.DonationReminderConfig
 import org.wikipedia.feed.personalization.homepreference.HomePreferenceType
-import org.wikipedia.games.onthisday.OnThisDayGameNotificationState
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.page.PageTitle
 import org.wikipedia.page.action.PageActionItem
@@ -41,8 +38,6 @@ import org.wikipedia.util.ReleaseUtil.isDevRelease
 import org.wikipedia.util.StringUtil
 import org.wikipedia.watchlist.WatchlistFilterTypes
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeWidgetRepository
-import org.wikipedia.yearinreview.YearInReviewModel
-import org.wikipedia.yearinreview.YearInReviewSurveyState
 import java.util.Date
 
 /** Shared preferences utility for convenient POJO access.  */
@@ -792,10 +787,6 @@ object Prefs {
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_donation_test_env, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_donation_test_env, value)
 
-    var donationResults
-        get() = JsonUtil.decodeFromString<List<DonationResult>>(PrefsIoUtil.getString(R.string.preference_key_donation_results, null)).orEmpty()
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_donation_results, JsonUtil.encodeToString(value))
-
     var lastOtdGameDateOverride
         get() = PrefsIoUtil.getString(R.string.preference_key_otd_game_date_override, null).orEmpty()
         set(value) = PrefsIoUtil.setString(R.string.preference_key_otd_game_date_override, value)
@@ -824,29 +815,9 @@ object Prefs {
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_otd_game_first_played_shown, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_otd_game_first_played_shown, value)
 
-    var otdNotificationState: OnThisDayGameNotificationState
-        get() = PrefsIoUtil.getString(R.string.preference_key_otd_notification_state, null)?.let {
-            OnThisDayGameNotificationState.valueOf(it)
-        } ?: OnThisDayGameNotificationState.NO_INTERACTED
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_otd_notification_state, value.name)
-
     var isOtdSoundOn
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_otd_sound_on, true)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_otd_sound_on, value)
-
-    var isYearInReviewEnabled: Boolean
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_year_in_review_is_enabled, true)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_year_in_review_is_enabled, value)
-
-    var yearInReviewVisited: Boolean
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_year_in_review_visited, false)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_year_in_review_visited, value)
-
-    var yearInReviewSurveyState: YearInReviewSurveyState
-        get() = PrefsIoUtil.getString(R.string.preference_key_yir_survey_state, null)?.let {
-            YearInReviewSurveyState.valueOf(it)
-        } ?: YearInReviewSurveyState.NOT_TRIGGERED
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_yir_survey_state, value.name)
 
     var isRecommendedReadingListEnabled
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_recommended_reading_list_enabled, false)
@@ -901,12 +872,6 @@ object Prefs {
             ?: emptyMap()
         set(langSupportedMap) = PrefsIoUtil.setString(R.string.preference_key_impact_last_response_body, JsonUtil.encodeToString(langSupportedMap))
 
-    var donationReminderConfig
-        get() = JsonUtil.decodeFromString<DonationReminderConfig>(
-            PrefsIoUtil.getString(R.string.preference_key_donation_reminder_config, null)
-        ) ?: DonationReminderConfig()
-        set(types) = PrefsIoUtil.setString(R.string.preference_key_donation_reminder_config, JsonUtil.encodeToString(types))
-
     var activityTabModules: ActivityTabModules
         get() = JsonUtil.decodeFromString<ActivityTabModules>(PrefsIoUtil.getString(R.string.preference_key_activity_tab_modules, null))
             ?: ActivityTabModules()
@@ -915,11 +880,6 @@ object Prefs {
     var isActivityTabOnboardingShown
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_activity_tab_onboarding_shown, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_activity_tab_onboarding_shown, value)
-
-    var yearInReviewModelData
-        get() = JsonUtil.decodeFromString<Map<Int, YearInReviewModel>>(PrefsIoUtil.getString(R.string.preference_key_yir_model_data, null))
-            ?: emptyMap()
-        set(modelDataWithYear) = PrefsIoUtil.setString(R.string.preference_key_yir_model_data, JsonUtil.encodeToString(modelDataWithYear))
 
     var selectedAppIcon
         get() = PrefsIoUtil.getString(R.string.preference_key_selected_app_icon, LauncherIcon.DEFAULT.key)
@@ -932,10 +892,6 @@ object Prefs {
     var isHybridSearchEnabled
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_hybrid_search_enabled, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_hybrid_search_enabled, value)
-
-    var isGameStatsUnavailableSnackbarShown
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_game_stats_snackbar_shown, false)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_game_stats_snackbar_shown, value)
 
     var readingChallengeStreak
         get() = PrefsIoUtil.getInt(R.string.preference_key_reading_challenge_streak, 0)

@@ -13,7 +13,6 @@ import org.wikipedia.Constants.ImageEditType
 import org.wikipedia.Constants.InvokeSource
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
-import org.wikipedia.analytics.eventplatform.DonorExperienceEvent
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.bridge.JavaScriptActionHandler
 import org.wikipedia.commons.ImageTagsProvider
@@ -22,9 +21,6 @@ import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.dataclient.mwapi.MwQueryPage
 import org.wikipedia.descriptions.DescriptionEditActivity
-import org.wikipedia.donate.DonateDialog
-import org.wikipedia.donate.donationreminder.DonationReminderActivity
-import org.wikipedia.donate.donationreminder.DonationReminderHelper
 import org.wikipedia.gallery.GalleryActivity
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.PageFragment
@@ -86,8 +82,7 @@ class LeadImagesHandler(private val parentFragment: PageFragment,
         }
 
     val topMargin get() = DimenUtil.roundedPxToDp(
-        ((if (isLeadImageEnabled) DimenUtil.leadImageHeightForDevice(activity) else parentFragment.toolbarMargin.toFloat()).toFloat()) +
-                getDonationReminderCardViewHeight(true)
+        (if (isLeadImageEnabled) DimenUtil.leadImageHeightForDevice(activity) else parentFragment.toolbarMargin.toFloat()).toFloat()
     )
     val callToActionEditLang get() =
         if (callToActionIsTranslation) callToActionTargetSummary?.pageTitle?.wikiSite?.languageCode else callToActionSourceSummary?.pageTitle?.wikiSite?.languageCode
@@ -205,39 +200,7 @@ class LeadImagesHandler(private val parentFragment: PageFragment,
                     }
                 }
             }
-
-            override fun donationReminderCardPositiveClicked() {
-                hideDonationReminderCard()
-                DonorExperienceEvent.logDonationReminderAction(
-                    activeInterface = "reminder_milestone",
-                    action = "donate_start_click",
-                    campaignId = DonationReminderHelper.getCampaignId()
-                )
-                ExclusiveBottomSheetPresenter.show(parentFragment.parentFragmentManager, DonateDialog.newInstance(fromDonationReminder = true))
-            }
-
-            override fun donationReminderCardNegativeClicked() {
-                hideDonationReminderCard()
-                DonorExperienceEvent.logDonationReminderAction(
-                    activeInterface = "reminder_milestone",
-                    action = "notnow_click"
-                )
-                FeedbackUtil.makeSnackbar(activity, activity.getString(R.string.donation_reminders_prompt_dismiss_snackbar))
-                    .setAction(R.string.donation_reminders_snackbar_modify_button_label) {
-                        DonorExperienceEvent.logDonationReminderAction(
-                            activeInterface = "reminder_milestone",
-                            action = "setting_click"
-                        )
-                        activity.startActivity(DonationReminderActivity.newIntent(activity, isFromSettings = true))
-                    }.show()
-            }
         }
-    }
-
-    private fun hideDonationReminderCard() {
-        pageHeaderView.hideDonationReminderCard()
-        loadLeadImage()
-        parentFragment.refreshPage()
     }
 
     fun hide() {
@@ -246,21 +209,6 @@ class LeadImagesHandler(private val parentFragment: PageFragment,
 
     fun refreshCallToActionVisibility() {
         pageHeaderView.refreshCallToActionVisibility()
-    }
-
-    fun getDonationReminderCardViewHeight(adjustBottomMargin: Boolean = false): Int {
-        if (pageHeaderView.donationReminderCardViewHeight == 0) {
-            return 0
-        }
-        return pageHeaderView.donationReminderCardViewHeight - if (adjustBottomMargin) {
-            if (DimenUtil.isLandscape(activity) || !isLeadImageEnabled) {
-                DimenUtil.roundedDpToPx(64f)
-            } else {
-                DimenUtil.roundedDpToPx(24f)
-            }
-        } else {
-            0
-        }
     }
 
     fun loadLeadImage() {

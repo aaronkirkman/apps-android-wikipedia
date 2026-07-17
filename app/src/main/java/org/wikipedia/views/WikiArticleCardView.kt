@@ -9,7 +9,6 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import org.wikipedia.databinding.ViewWikiArticleCardBinding
-import org.wikipedia.donate.donationreminder.DonationReminderHelper
 import org.wikipedia.extensions.setLayoutDirectionByLang
 import org.wikipedia.page.PageTitle
 import org.wikipedia.settings.Prefs
@@ -55,10 +54,8 @@ class WikiArticleCardView(context: Context, attrs: AttributeSet? = null) : Const
 
     fun prepareForTransition(title: PageTitle) {
         setImageUri(title.thumbUrl?.toUri())
-        if (!DonationReminderHelper.hasActiveReminder) {
-            setTitle(title.displayText)
-            setDescription(title.description)
-        }
+        setTitle(title.displayText)
+        setDescription(title.description)
         binding.articleDivider.visibility = GONE
         setLayoutDirectionByLang(title.wikiSite.languageCode)
     }

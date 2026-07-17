@@ -1,10 +1,6 @@
 package org.wikipedia.feed
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.location.Location
 import androidx.compose.ui.util.fastJoinToString
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -19,8 +15,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
@@ -50,19 +44,12 @@ import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.ContinueReadingCard
 import org.wikipedia.feed.model.DiscoverCard
 import org.wikipedia.feed.model.ForYouCard
-import org.wikipedia.feed.model.GamesModulePromptCard
-import org.wikipedia.feed.model.PlacesOfInterestCard
 import org.wikipedia.feed.model.RandomCard
 import org.wikipedia.feed.model.SeeAllRecommendationCard
-import org.wikipedia.feed.model.WikiGameCard
 import org.wikipedia.feed.news.NewsCard
 import org.wikipedia.feed.onthisday.OnThisDayCard
 import org.wikipedia.feed.personalization.homepreference.HomePreferenceType
 import org.wikipedia.feed.topread.TopReadCard
-import org.wikipedia.feed.wikigames.WikiGame
-import org.wikipedia.games.WikiGames
-import org.wikipedia.games.db.DailyGameHistory
-import org.wikipedia.games.onthisday.OnThisDayGameProvider
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.json.LocalDateTimeSerializer
@@ -77,18 +64,14 @@ import org.wikipedia.settings.homefeed.CommunityModuleType
 import org.wikipedia.settings.homefeed.ForYouModuleType
 import org.wikipedia.staticdata.MainPageNameData
 import org.wikipedia.topics.ArticleTopics
-import org.wikipedia.util.GeoUtil
 import org.wikipedia.util.StringUtil
 import org.wikipedia.util.log.L
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Locale
 
 enum class HomeTab { COMMUNITY, FOR_YOU }
 private const val MAX_STOP_TIMEOUT_MILLIS = 5000L
 private const val MAX_DISCOVER_ARTICLE_CARDS = 4
-private const val PLACES_ARTICLES_REQUEST_LIMIT = 10
-private const val PLACES_SEARCH_RADIUS_METERS = 10000
 
 @Serializable
 sealed class ForYouModule {
@@ -130,18 +113,6 @@ sealed class ForYouModule {
     }
 
     @Serializable
-    data class PlacesOfInterest(
-        override val age: Int,
-        override val index: Int,
-        override val cards: List<ForYouCard>,
-        val hasLocationPermission: Boolean,
-        val isLoading: Boolean = false
-    ) : ForYouModule() {
-        override fun withCards(cards: List<ForYouCard>): ForYouModule = copy(cards = cards)
-        override fun moduleKey(): String = ForYouModuleType.PLACES_OF_INTEREST.name
-    }
-
-    @Serializable
     data class Discover(
         override val age: Int,
         override val index: Int,
@@ -162,16 +133,6 @@ sealed class ForYouModule {
     ) : ForYouModule() {
         override fun withCards(cards: List<ForYouCard>): ForYouModule = copy(cards = cards)
         override fun moduleKey(): String = ForYouModuleType.RANDOM.name
-    }
-
-    data class Games(
-        override val age: Int,
-        override val index: Int,
-        override val cards: List<ForYouCard>,
-        val isLoading: Boolean = false
-    ) : ForYouModule() {
-        override fun withCards(cards: List<ForYouCard>): ForYouModule = copy(cards = cards)
-        override fun moduleKey(): String = ForYouModuleType.GAMES.name
     }
 }
 
@@ -238,32 +199,6 @@ class HomeViewModel : ViewModel() {
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(MAX_STOP_TIMEOUT_MILLIS), CommunityContentState())
 
     /**
-     * The Places of Interest module is loaded differently from the other "For you" modules, because it depends on location permission
-     * and the user's saved location from Places. So it lives in its own flow that reacts to those changes directly.
-     * Whenever the saved location or the feed language changes, we rebuild just this module (emitting a loading
-     * placeholder first when permission is granted) rather than reloading the entire tab. The result is merged into
-     * forYouState and sorted into its usual position by using ForYouModuleType enum ordinal.
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val placesModule: StateFlow<ForYouModule.PlacesOfInterest?> =
-        combine(Prefs.placesLastLocationFlow, _wikiSite) { _, _ -> }
-        .transformLatest {
-            if (hasLocationPermission()) {
-                emit(ForYouModule.PlacesOfInterest(age = 0, index = 0, cards = emptyList(), isLoading = true, hasLocationPermission = true))
-            }
-            emit(buildPlacesModule())
-        }
-        .catch {
-            L.e(it)
-            emit(null)
-        }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(MAX_STOP_TIMEOUT_MILLIS),
-            null
-        )
-
-    /**
      * The Discover module (recommended reading list) loads independently of the batched "For you"
      * modules, like Places. It reacts to the Discover settings (enabled state, article count, source, update frequency)
      * and to NewRecommendedReadingListEvent posted when a new list is generated by RecommendedReadingListTask or the settings screen.
@@ -298,46 +233,8 @@ class HomeViewModel : ViewModel() {
             null
         )
 
-    /**
-     * The Games module is loaded reactively, like Places, because its content should reflect live game progress.
-     * We observe today's game as a Room Flow in [DailyGameHistory] DB, so every write during play re-emits and rebuilds the
-     * module, moving the card through Preview -> InProgress -> Completed without a manual feed refresh.
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val gameModule: StateFlow<ForYouModule.Games?> =
-        _wikiSite.flatMapLatest { site ->
-            val supportedGames = getSupportedGames(site.languageCode)
-            // short-circuit if no games are supported for this language
-            if (supportedGames.isEmpty()) {
-                return@flatMapLatest flowOf(null)
-            }
-            val today = LocalDate.now()
-            AppDatabase.instance.dailyGameHistoryDao().findGameHistoryByDateFlow(
-                gameName = WikiGames.WHICH_CAME_FIRST.ordinal,
-                language = site.languageCode,
-                year = today.year,
-                month = today.monthValue,
-                day = today.dayOfMonth
-            )
-            .transformLatest<DailyGameHistory?, ForYouModule.Games?> {
-                emit(ForYouModule.Games(age = 0, index = 0, cards = emptyList(), isLoading = true))
-                emit(buildGameModule(supportedGames))
-            }
-        }
-        .catch {
-            L.e(it)
-            emit(null)
-        }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(MAX_STOP_TIMEOUT_MILLIS),
-            null
-        )
-
     // Combine the reactive modules first so the outer combine stays within the 5-flow typed overloads.
-    private val reactiveModules = combine(placesModule, discoverModule, gameModule) { places, discover, game ->
-        listOfNotNull(places, discover, game)
-    }
+    private val reactiveModules = discoverModule.map { discover -> listOfNotNull(discover) }
 
     private val _forYouState = MutableStateFlow(ForYouContentState())
     val forYouState = combine(
@@ -802,76 +699,6 @@ class HomeViewModel : ViewModel() {
                 }
         }.onFailure { L.e(it) }
         AppDatabase.instance.recommendedPageDao().updateAll(missing.filter { it.extract != null })
-    }
-
-    private suspend fun buildPlacesModule(): ForYouModule.PlacesOfInterest? {
-        if (!hasLocationPermission()) {
-            return ForYouModule.PlacesOfInterest(age = 0, index = 0, cards = emptyList(), hasLocationPermission = false)
-        }
-        val location = Prefs.placesLastLocationAndZoomLevel?.first
-            ?: return ForYouModule.PlacesOfInterest(age = 0, index = 0, cards = emptyList(), hasLocationPermission = false)
-
-        val cards = getPlacesCards(location)
-        if (cards.isEmpty()) {
-            return null
-        }
-        return ForYouModule.PlacesOfInterest(age = 0, index = 0, cards = cards, hasLocationPermission = true)
-    }
-
-    private suspend fun buildGameModule(supportedGames: List<WikiGames>): ForYouModule.Games {
-        val today = LocalDate.now()
-        val gameCards = supportedGames
-            .mapNotNull { buildWikiGame(it, today)?.let { game -> WikiGameCard(game, today.toString()) } }
-        val cards = gameCards + GamesModulePromptCard()
-
-        return ForYouModule.Games(age = 0, index = 0, cards = cards)
-    }
-
-    private suspend fun buildWikiGame(game: WikiGames, date: LocalDate): WikiGame? = when (game) {
-        WikiGames.WHICH_CAME_FIRST -> {
-            val state = OnThisDayGameProvider.getGameState(wikiSite.value, date)
-            WikiGame.OnThisDayGame(state)
-        }
-    }
-
-    private suspend fun getPlacesCards(savedLocation: Location): List<PlacesOfInterestCard> {
-        val coordinates = "${savedLocation.latitude}|${savedLocation.longitude}"
-        return ServiceFactory.get(wikiSite.value)
-            .getGeoSearchWithExtracts(coordinates, PLACES_SEARCH_RADIUS_METERS, PLACES_ARTICLES_REQUEST_LIMIT, PLACES_ARTICLES_REQUEST_LIMIT)
-            .query?.pages.orEmpty()
-            .filter { it.coordinates != null }
-            .sortedBy {
-                savedLocation.distanceTo(Location("").apply {
-                    latitude = it.coordinates!![0].lat
-                    longitude = it.coordinates[0].lon
-                })
-            }
-            .map { page ->
-                val title = PageTitle(
-                    text = page.title,
-                    wiki = wikiSite.value,
-                    thumbUrl = page.thumbUrl(),
-                    description = page.description,
-                    displayText = page.displayTitle(wikiSite.value.languageCode),
-                    extract = page.extract
-                )
-                val articleLocation = Location("").apply {
-                    latitude = page.coordinates!![0].lat
-                    longitude = page.coordinates[0].lon
-                }
-                val distance = GeoUtil.getDistanceWithUnit(savedLocation, articleLocation, Locale.getDefault())
-                PlacesOfInterestCard(title, distance)
-            }
-    }
-
-    private fun getSupportedGames(languageCode: String): List<WikiGames> {
-        return WikiGames.entries.filter { it.isLangSupported(languageCode) }
-    }
-
-    private fun hasLocationPermission(): Boolean {
-        val context = WikipediaApp.instance
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
     fun refreshUnreadNotificationCount() {

@@ -1,4 +1,4 @@
-package org.wikipedia.usercontrib
+package org.wikipedia.suggestededits
 
 import org.wikipedia.dataclient.mwapi.UserContribution
 import org.wikipedia.settings.Prefs

@@ -30,14 +30,12 @@ import org.wikipedia.appshortcuts.AppShortcuts
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.connectivity.ConnectionStateMonitor
-import org.wikipedia.donate.DonateDialog
 import org.wikipedia.events.LoggedOutInBackgroundEvent
 import org.wikipedia.events.ReadingListsEnableDialogEvent
 import org.wikipedia.events.ReadingListsNoLongerSyncedEvent
 import org.wikipedia.events.SplitLargeListsEvent
 import org.wikipedia.events.ThemeFontChangeEvent
 import org.wikipedia.events.UnreadNotificationsEvent
-import org.wikipedia.games.onthisday.OnThisDayGameResultFragment
 import org.wikipedia.login.LoginActivity
 import org.wikipedia.main.MainActivity
 import org.wikipedia.notifications.NotificationPresenter
@@ -57,8 +55,6 @@ import org.wikipedia.views.ImageZoomHelper
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeInstallWidgetDialog
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeOnboardingActivity
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeWidgetRepository
-import org.wikipedia.yearinreview.YearInReviewOnboardingActivity
-import org.wikipedia.yearinreview.YearInReviewViewModel
 
 abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callback {
     interface Callback {
@@ -75,13 +71,6 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
             callback?.onPermissionResult(this, isGranted)
     }
 
-    private val requestDonateActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            ExclusiveBottomSheetPresenter.dismiss(supportFragmentManager)
-            FeedbackUtil.showMessage(this, R.string.donate_gpay_success_message)
-        }
-    }
-
     private val requestReadingChallengeActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (ReadingChallengeWidgetRepository.shouldShowWidgetInstallDialog()) {
             ExclusiveBottomSheetPresenter.dismiss(supportFragmentManager)
@@ -93,12 +82,6 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
 
     private val notificationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         // TODO: Show message(s) to the user if they deny the permission
-    }
-
-    private val yearInReviewLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_CANCELED) {
-            FeedbackUtil.showMessage(this, getString(R.string.year_in_review_get_started_later))
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -259,13 +242,6 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
         return super.dispatchTouchEvent(event)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK && data?.hasExtra(OnThisDayGameResultFragment.EXTRA_GAME_COMPLETED) == true) {
-            OnThisDayGameResultFragment.maybeShowOnThisDayGameEndContent(this)
-        }
-    }
-
     protected fun setStatusBarColor(@ColorInt color: Int) {
         window.statusBarColor = color
     }
@@ -283,14 +259,6 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
     override fun onGoOffline() {}
 
     override fun onGoOnline() {}
-
-    fun launchDonateDialog(campaignId: String? = null, donateUrl: String? = null) {
-        ExclusiveBottomSheetPresenter.show(supportFragmentManager, DonateDialog.newInstance(campaignId, donateUrl))
-    }
-
-    fun launchDonateActivity(intent: Intent) {
-        requestDonateActivity.launch(intent)
-    }
 
     fun getInstrument(): InstrumentImpl? {
         return _instrument
@@ -356,13 +324,8 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
         if (Prefs.isInitialOnboardingEnabled) return
         if (!Prefs.isExploreFeedUpdatePromptShown) return
 
-        when {
-            ReadingChallengeWidgetRepository.shouldShowOnboardingDialog() -> showReadingChallenge()
-            YearInReviewViewModel.isAccessible &&
-                    Prefs.isYearInReviewEnabled &&
-                    !Prefs.yearInReviewVisited -> {
-                        yearInReviewLauncher.launch((YearInReviewOnboardingActivity.newIntent(this)))
-                    }
+        if (ReadingChallengeWidgetRepository.shouldShowOnboardingDialog()) {
+            showReadingChallenge()
         }
     }
 

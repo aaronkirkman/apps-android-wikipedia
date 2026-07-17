@@ -37,10 +37,7 @@ import org.wikipedia.Constants.InvokeSource
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.BaseActivity
-import org.wikipedia.activity.SingleWebViewActivity
 import org.wikipedia.analytics.eventplatform.BreadCrumbLogEvent
-import org.wikipedia.analytics.eventplatform.DonorExperienceEvent
-import org.wikipedia.analytics.eventplatform.YearInReviewEvent
 import org.wikipedia.analytics.testkitchen.TestKitchenAdapter
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.commons.FilePageActivity
@@ -48,7 +45,6 @@ import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.databinding.ActivityPageBinding
 import org.wikipedia.dataclient.Service
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.dataclient.donate.CampaignCollection
 import org.wikipedia.dataclient.mwapi.MwQueryPage
 import org.wikipedia.descriptions.DescriptionEditActivity
 import org.wikipedia.descriptions.DescriptionEditRevertHelpView
@@ -77,7 +73,6 @@ import org.wikipedia.suggestededits.PageSummaryForEdit
 import org.wikipedia.suggestededits.SuggestedEditsImageTagEditActivity
 import org.wikipedia.suggestededits.SuggestedEditsSnackbars
 import org.wikipedia.talk.TalkTopicsActivity
-import org.wikipedia.usercontrib.UserContribListActivity
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.DimenUtil
 import org.wikipedia.util.FeedbackUtil
@@ -91,8 +86,6 @@ import org.wikipedia.views.ObservableWebView
 import org.wikipedia.views.ViewUtil
 import org.wikipedia.watchlist.WatchlistExpiry
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeWidgetRepository
-import org.wikipedia.yearinreview.YearInReviewDialog
-import org.wikipedia.yearinreview.YearInReviewViewModel
 import java.time.LocalDate
 import java.util.Locale
 
@@ -339,7 +332,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
         app.resetWikiSite()
         updateNotificationsButton(false)
         Prefs.temporaryWikitext = null
-        YearInReviewDialog.maybeShowYearInReviewFeedbackDialog(this)
     }
 
     override fun onPause() {
@@ -552,31 +544,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
                 // "thankyou." subdomains, or the Wikiquote "quote." subdomain, and possibly others.
                 val language = wiki.languageCode.lowercase(Locale.getDefault())
                 if (Constants.NON_LANGUAGE_SUBDOMAINS.contains(language) || (title.isSpecial && !title.isContributions)) {
-                    // ...Except if the URL came as a result of a successful donation, in which case
-                    // treat it differently:
-                    if (language == "thankyou" && uri.getQueryParameter("order_id") != null) {
-                        CampaignCollection.addDonationResult(fromWeb = true,
-                            amount = (uri.getQueryParameter("amount"))?.toFloat() ?: 0f,
-                            currency = uri.getQueryParameter("currency") ?: "",
-                            recurring = uri.getQueryParameter("recurring") == "1")
-                        // Check if the donation started from the app, but completed via web, in which case
-                        // show it in a SingleWebViewActivity.
-                        val campaign = uri.getQueryParameter("wmf_campaign")
-
-                        if (campaign != null && campaign == "Android") {
-                            var pageContentInfo = SingleWebViewActivity.PAGE_CONTENT_SOURCE_DONOR_EXPERIENCE
-                            YearInReviewViewModel.currentCampaignId?.let { campaignId ->
-                                YearInReviewEvent.submit(action = "impression", slide = "webpay_processed", campaignId = campaignId)
-                                pageContentInfo = SingleWebViewActivity.PAGE_CONTENT_SOURCE_YIR
-                            } ?: run {
-                                DonorExperienceEvent.logAction("impression", "webpay_processed", wiki.languageCode)
-                            }
-                            startActivity(SingleWebViewActivity.newIntent(this@PageActivity, uri.toString(),
-                                true, pageFragment.title, pageContentInfo))
-                            finish()
-                            return
-                        }
-                    }
                     UriUtil.visitInExternalBrowser(this, it)
                     finish()
                     return
@@ -679,13 +646,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
                 finish()
                 return true
             } else if (title.isSpecial) {
-                if (title.isContributions) {
-                    title.displayText.split('/').lastOrNull()?.let {
-                        startActivity(UserContribListActivity.newIntent(this, it))
-                        finish()
-                        return true
-                    }
-                }
                 UriUtil.visitInExternalBrowser(this, title.uri.toUri())
                 finish()
                 return true

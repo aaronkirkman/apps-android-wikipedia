@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.wikipedia.R
 import org.wikipedia.concurrency.FlowEventBus
-import org.wikipedia.donate.donationreminder.DonationReminderHelper
 import org.wikipedia.events.ReadingListsEnableSyncStatusEvent
 import org.wikipedia.events.ReadingListsEnabledStatusEvent
 import org.wikipedia.events.ReadingListsNoLongerSyncedEvent
@@ -59,8 +58,6 @@ class SettingsFragment : PreferenceLoaderFragment(), MenuProvider {
         preferenceLoader.updateSyncReadingListsPrefSummary()
         preferenceLoader.updateLanguagePrefSummary()
         preferenceLoader.updateRecommendedReadingListSummary()
-        preferenceLoader.updateDonationRemindersDescription()
-        DonationReminderHelper.maybeShowSettingSnackbar(requireActivity())
         requireActivity().invalidateOptionsMenu()
     }
 

@@ -26,13 +26,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.wikipedia.R
-import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.BaseActivity
 import org.wikipedia.analytics.eventplatform.ActivityTabEvent
 import org.wikipedia.compose.components.WikiTopAppBar
 import org.wikipedia.compose.theme.BaseTheme
 import org.wikipedia.compose.theme.WikipediaTheme
-import org.wikipedia.games.WikiGames
 import org.wikipedia.settings.Prefs
 import org.wikipedia.theme.Theme
 import org.wikipedia.util.DeviceUtil
@@ -48,9 +46,7 @@ class ActivityTabCustomizationActivity : BaseActivity() {
                     onBackButtonClick = {
                         finish()
                     },
-                    modules = Prefs.activityTabModules,
-                    haveAtLeastOneDonation = Prefs.donationResults.isNotEmpty(),
-                    areGamesAvailable = WikiGames.WHICH_CAME_FIRST.isLangSupported(WikipediaApp.instance.wikiSite.languageCode)
+                    modules = Prefs.activityTabModules
                 )
             }
         }
@@ -70,12 +66,9 @@ class ActivityTabCustomizationActivity : BaseActivity() {
                 readingInsight = isReadingInsightsEnabled.toOnOffString(),
                 editingInsight = isEditingInsightsEnabled.toOnOffString(),
                 impact = isImpactEnabled.toOnOffString(),
-                games = isGamesEnabled.toOnOffString(),
-                donations = if (Prefs.donationResults.isNotEmpty()) isDonationsEnabled.toOnOffString() else null,
                 timeline = isTimelineEnabled.toOnOffString(),
                 all = when {
-                    noModulesVisible(haveAtLeastOneDonation = Prefs.donationResults.isNotEmpty(),
-                        areGamesAvailable = WikiGames.WHICH_CAME_FIRST.isLangSupported(WikipediaApp.instance.wikiSite.languageCode)) -> "off"
+                    noModulesVisible() -> "off"
                     areAllModulesEnabled() -> "on"
                     else -> null
                 }
@@ -94,9 +87,7 @@ class ActivityTabCustomizationActivity : BaseActivity() {
 fun CustomizationScreen(
     modifier: Modifier = Modifier,
     onBackButtonClick: () -> Unit,
-    modules: ActivityTabModules,
-    haveAtLeastOneDonation: Boolean = false,
-    areGamesAvailable: Boolean = false
+    modules: ActivityTabModules
 ) {
     var currentModules by remember { mutableStateOf(modules) }
 
@@ -127,10 +118,6 @@ fun CustomizationScreen(
                     )
                 }
                 itemsIndexed(ModuleType.entries) { index, moduleType ->
-                    if ((moduleType == ModuleType.DONATIONS && !haveAtLeastOneDonation) ||
-                        (moduleType == ModuleType.GAMES && !areGamesAvailable)) {
-                        return@itemsIndexed
-                    }
                     CustomizationScreenSwitch(
                         isChecked = currentModules.isModuleEnabled(moduleType),
                         title = stringResource(moduleType.displayName),

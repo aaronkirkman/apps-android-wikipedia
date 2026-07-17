@@ -28,8 +28,6 @@ import org.wikipedia.page.linkpreview.LinkPreviewDialog
 import org.wikipedia.staticdata.UserTalkAliasData
 import org.wikipedia.suggestededits.SuggestedEditsRecentEditsActivity
 import org.wikipedia.suggestededits.SuggestionsActivity
-import org.wikipedia.usercontrib.UserContribListActivity
-import org.wikipedia.usercontrib.UserInformationDialog
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.log.L
 
@@ -115,14 +113,6 @@ object UserTalkPopupHelper {
                         val newTitle = PageTitle(UserTalkAliasData.valueFor(title.wikiSite.languageCode), title.text, title.wikiSite)
                         activity.startActivity(TalkTopicsActivity.newIntent(activity, newTitle, invokeSource))
                     }
-                    R.id.menu_user_information -> {
-                        sendPatrollerExperienceEvent(activity, "menu_user_info_click")
-                        UserInformationDialog.newInstance(title.text).show(activity.supportFragmentManager, null)
-                    }
-                    R.id.menu_user_contributions_page -> {
-                        sendPatrollerExperienceEvent(activity, "menu_user_contribs_click")
-                        activity.startActivity(UserContribListActivity.newIntent(activity, title.text))
-                    }
                     R.id.menu_user_thank -> {
                         sendPatrollerExperienceEvent(activity, "menu_user_thank_click")
                         if (pageId != null && revisionId != null) {
@@ -137,8 +127,6 @@ object UserTalkPopupHelper {
         })
 
         builder.findItem(R.id.menu_user_profile_page).isVisible = !anon
-        builder.findItem(R.id.menu_user_contributions_page).isVisible = showContribs
-        builder.findItem(R.id.menu_user_information).isVisible = showUserInfo && !anon
         builder.findItem(R.id.menu_user_thank).isVisible = revisionId != null && !anon && AccountUtil.isLoggedIn
         val helper = MenuPopupHelper(activity, builder, anchorView)
         helper.setForceShowIcon(true)

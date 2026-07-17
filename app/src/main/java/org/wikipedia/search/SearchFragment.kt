@@ -29,7 +29,6 @@ import org.wikipedia.history.HistoryEntry
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
-import org.wikipedia.places.PlacesActivity
 import org.wikipedia.readinglist.ReadingListBehaviorsUtil
 import org.wikipedia.search.db.RecentSearch
 import org.wikipedia.settings.Prefs
@@ -236,7 +235,7 @@ class SearchFragment : Fragment(), SearchResultCallback, RecentSearchesFragment.
                 PlacesEvent.logAction("search_result_click", "search_view")
             }
             val intent = Intent().putExtra(SearchActivity.EXTRA_RETURN_LINK_TITLE, item)
-                .putExtra(PlacesActivity.EXTRA_LOCATION, location)
+                .putExtra(EXTRA_LOCATION, location)
             requireActivity().setResult(SearchActivity.RESULT_LINK_SUCCESS, intent)
             requireActivity().finish()
         } else {
@@ -397,6 +396,7 @@ class SearchFragment : Fragment(), SearchResultCallback, RecentSearchesFragment.
         private const val PANEL_RECENT_SEARCHES = 0
         private const val PANEL_SEARCH_RESULTS = 1
         private const val INTENT_DELAY_MILLIS = 500L
+        const val EXTRA_LOCATION = "location"
         const val RESULT_LANG_CHANGED = 98
 
         fun newInstance(source: InvokeSource, query: String?, returnLink: Boolean = false, title: String? = null, initiateHybridSearch: Boolean = false): SearchFragment =

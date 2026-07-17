@@ -1,6 +1,5 @@
 package org.wikipedia.activitytab
 
-import android.text.format.DateUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -34,7 +33,6 @@ import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.dataclient.growthtasks.GrowthUserImpact
 import org.wikipedia.extensions.toLocalDate
-import org.wikipedia.games.onthisday.OnThisDayGameViewModel
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.page.PageTitle
 import org.wikipedia.readinglist.database.ReadingListPage
@@ -51,12 +49,6 @@ import kotlin.math.abs
 class ActivityTabViewModel : ViewModel() {
     private val _readingHistoryState = MutableStateFlow<UiState<ReadingHistory>>(UiState.Loading)
     val readingHistoryState: StateFlow<UiState<ReadingHistory>> = _readingHistoryState.asStateFlow()
-
-    private val _donationUiState = MutableStateFlow<UiState<String?>>(UiState.Loading)
-    val donationUiState: StateFlow<UiState<String?>> = _donationUiState.asStateFlow()
-
-    private val _wikiGamesUiState = MutableStateFlow<UiState<OnThisDayGameViewModel.GameStatistics?>>(UiState.Loading)
-    val wikiGamesUiState: StateFlow<UiState<OnThisDayGameViewModel.GameStatistics?>> = _wikiGamesUiState.asStateFlow()
 
     private var currentTimelinePagingSource: TimelinePagingSource? = null
 
@@ -96,20 +88,13 @@ class ActivityTabViewModel : ViewModel() {
     private val _impactUiState = MutableStateFlow<UiState<Pair<GrowthUserImpact, Int>>>(UiState.Loading)
     val impactUiState: StateFlow<UiState<Pair<GrowthUserImpact, Int>>> = _impactUiState.asStateFlow()
 
-    private val _scrollToGames = MutableStateFlow(false)
-    val scrollToGames = _scrollToGames.asStateFlow()
-
     var shouldRefreshTimelineSilently: Boolean = false
 
     val allDataLoaded = combine(
         readingHistoryState,
-        donationUiState,
-        wikiGamesUiState,
         impactUiState
-    ) { reading, donation, games, impact ->
+    ) { reading, impact ->
         reading !is UiState.Loading &&
-                donation !is UiState.Loading &&
-                games !is UiState.Loading &&
                 impact !is UiState.Loading
     }.stateIn(viewModelScope, SharingStarted.Lazily, false)
 
@@ -118,8 +103,6 @@ class ActivityTabViewModel : ViewModel() {
         if (!AccountUtil.isLoggedIn) {
             return
         }
-        loadDonationResults()
-        loadWikiGamesStats()
         loadImpact()
         refreshTimeline()
     }
@@ -168,37 +151,6 @@ class ActivityTabViewModel : ViewModel() {
                 articlesSaved = articlesSaved,
                 topCategories.take(3))
             )
-        }
-    }
-
-    fun loadDonationResults() {
-        val lastDonationTime = Prefs.donationResults.lastOrNull()?.dateTime?.let {
-            val timestampInLong = LocalDateTime.parse(it).atZone(ZoneId.systemDefault()).toInstant().epochSecond
-            val relativeTime = DateUtils.getRelativeTimeSpanString(
-                timestampInLong * 1000, // Convert seconds to milliseconds
-                System.currentTimeMillis(),
-                0L
-            )
-            return@let relativeTime.toString()
-        }
-        _donationUiState.value = UiState.Success(lastDonationTime)
-    }
-
-    fun loadWikiGamesStats() {
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
-            _wikiGamesUiState.value = UiState.Error(throwable)
-        }) {
-            _wikiGamesUiState.value = UiState.Loading
-            delay(500)
-            val lastGameHistory = AppDatabase.instance.dailyGameHistoryDao().findLastGameHistory()
-            if (lastGameHistory == null) {
-                _wikiGamesUiState.value = UiState.Success(null)
-                return@launch
-            }
-
-            val gamesStats =
-                OnThisDayGameViewModel.getGameStatistics(WikipediaApp.instance.wikiSite.languageCode)
-            _wikiGamesUiState.value = UiState.Success(gamesStats)
         }
     }
 
@@ -265,13 +217,6 @@ class ActivityTabViewModel : ViewModel() {
         }
     }
 
-    fun hasNoDonationData(): Boolean {
-        return when (val currentState = _donationUiState.value) {
-            is UiState.Success -> currentState.data == null
-            else -> true
-        }
-    }
-
     fun hasNoReadingHistoryData(): Boolean {
         return when (val currentState = _readingHistoryState.value) {
             is UiState.Success -> {
@@ -292,24 +237,6 @@ class ActivityTabViewModel : ViewModel() {
         }
     }
 
-    fun hasNoGameStats(): Boolean {
-        return when (val currentState = _wikiGamesUiState.value) {
-            is UiState.Success -> {
-                val data = currentState.data ?: return true
-                data.totalGamesPlayed <= 0
-            }
-            else -> true
-        }
-    }
-
-    fun onScrollToGames() {
-        _scrollToGames.value = true
-    }
-
-    fun onScrollToGamesConsumed() {
-        _scrollToGames.value = false
-    }
-
     class ReadingHistory(
         val timeSpentThisWeek: Long,
         val articlesReadThisMonth: Int,
@@ -320,10 +247,6 @@ class ActivityTabViewModel : ViewModel() {
         val articlesSaved: List<PageTitle>,
         val topCategories: List<Category>
     )
-
-    companion object {
-        const val CAMPAIGN_ID = "appmenu_activity"
-    }
 }
 
 sealed class TimelineDisplayItem {

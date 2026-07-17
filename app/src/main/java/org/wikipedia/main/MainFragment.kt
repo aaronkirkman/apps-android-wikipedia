@@ -67,7 +67,6 @@ import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
 import org.wikipedia.page.tabs.TabActivity
-import org.wikipedia.places.PlacesActivity
 import org.wikipedia.random.RandomActivity
 import org.wikipedia.readinglist.ReadingListBehaviorsUtil
 import org.wikipedia.readinglist.ReadingListsFragment
@@ -82,7 +81,6 @@ import org.wikipedia.staticdata.UserAliasData
 import org.wikipedia.staticdata.UserTalkAliasData
 import org.wikipedia.suggestededits.SuggestedEditsTasksFragment
 import org.wikipedia.talk.TalkTopicsActivity
-import org.wikipedia.usercontrib.UserContribListActivity
 import org.wikipedia.util.ClipboardUtil
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.FeedbackUtil
@@ -93,9 +91,6 @@ import org.wikipedia.views.TabCountsView
 import org.wikipedia.views.imageservice.ImageService
 import org.wikipedia.watchlist.WatchlistActivity
 import org.wikipedia.widgets.SearchWidgetInstallDialog
-import org.wikipedia.yearinreview.YearInReviewDialog
-import org.wikipedia.yearinreview.YearInReviewOnboardingActivity
-import org.wikipedia.yearinreview.YearInReviewViewModel
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -221,11 +216,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         downloadReceiver.register(requireContext(), downloadReceiverCallback)
         // reset the last-page-viewed timer
         Prefs.pageLastShown = 0
-        YearInReviewDialog.maybeShowYearInReviewFeedbackDialog(requireActivity())
-        if (YearInReviewViewModel.getYearInReviewModel()?.isReadingListCreated == true) {
-            onNavigateTo(NavTab.READING_LISTS) // Navigate to reading lists only if Year in Review reading list is created
-            YearInReviewViewModel.updateYearInReviewModel { it.copy(isReadingListCreated = false) }
-        }
     }
 
     override fun onDestroyView() {
@@ -348,8 +338,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
             openSearchActivity(InvokeSource.APP_SHORTCUTS, null, null)
         } else if (intent.hasExtra(Constants.INTENT_APP_SHORTCUT_CONTINUE_READING)) {
             startActivity(PageActivity.newIntent(requireActivity()))
-        } else if (intent.hasExtra(Constants.INTENT_APP_SHORTCUT_PLACES)) {
-            startActivity(PlacesActivity.newIntent(requireActivity()))
         } else if (intent.hasExtra(Constants.INTENT_EXTRA_DELETE_READING_LIST)) {
             onNavigateTo(NavTab.READING_LISTS)
         } else if (intent.hasExtra(Constants.INTENT_EXTRA_GO_TO_MAIN_TAB) &&
@@ -492,20 +480,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         if (AccountUtil.isLoggedIn) {
             startActivity(WatchlistActivity.newIntent(requireActivity()))
         }
-    }
-
-    override fun contribsClick() {
-        if (AccountUtil.isLoggedIn) {
-            startActivity(UserContribListActivity.newIntent(requireActivity(), AccountUtil.userName))
-        }
-    }
-
-    override fun donateClick(campaignId: String?) {
-        (requireActivity() as? BaseActivity)?.launchDonateDialog(campaignId = campaignId)
-    }
-
-    override fun yearInReviewClick() {
-        startActivity(YearInReviewOnboardingActivity.newIntent(requireActivity()))
     }
 
     fun setBottomNavVisible(visible: Boolean) {

@@ -6,7 +6,6 @@ import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.ForYouCard
 import org.wikipedia.feed.news.NewsCard
 import org.wikipedia.feed.news.NewsItem
-import org.wikipedia.feed.wikigames.WikiGame
 import org.wikipedia.history.HistoryEntry
 
 sealed interface HomeAction {
@@ -36,9 +35,6 @@ sealed interface HomeAction {
     data object NotificationClick : HomeAction
     data object ManageModulesClick : HomeAction
     data object ShuffleClick : HomeAction
-    data object PlacesTeaserClick : HomeAction
     data object DiscoverTeaserClick : HomeAction
     data object SeeAllRecommendationsClick : HomeAction
-    data class GameActionClick(val wikiGame: WikiGame) : HomeAction
-    data object GoToGamesHubClick : HomeAction
 }

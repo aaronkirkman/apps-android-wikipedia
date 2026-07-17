@@ -9,7 +9,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.wikipedia.bridge.CommunicationBridge.JSEventListener
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.page.LinkMovementMethodExt.UrlHandlerWithText
-import org.wikipedia.places.PlacesActivity
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.StringUtil
 import org.wikipedia.util.UriUtil
@@ -112,12 +111,6 @@ abstract class LinkHandler(protected val context: Context) : JSEventListener, Ur
     }
 
     open fun onExternalLinkClicked(uri: Uri) {
-        if (uri.authority.orEmpty().contains("geohack") && context is Activity) {
-            StringUtil.geoHackToLocation(uri.getQueryParameter("params"))?.let {
-                context.startActivity(PlacesActivity.newIntent(context, null, it))
-                return
-            }
-        }
         UriUtil.handleExternalLink(context, uri)
     }
 

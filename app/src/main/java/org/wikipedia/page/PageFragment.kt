@@ -19,7 +19,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.LinearLayout
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.animation.doOnEnd
@@ -52,7 +51,6 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.FragmentUtil.getCallback
 import org.wikipedia.analytics.eventplatform.ArticleFindInPageInteractionEvent
 import org.wikipedia.analytics.eventplatform.ArticleInteractionEvent
-import org.wikipedia.analytics.eventplatform.DonorExperienceEvent
 import org.wikipedia.analytics.eventplatform.EventPlatformClient
 import org.wikipedia.analytics.eventplatform.PlacesEvent
 import org.wikipedia.analytics.eventplatform.WatchlistAnalyticsHelper
@@ -67,17 +65,13 @@ import org.wikipedia.databinding.GroupFindReferencesInPageBinding
 import org.wikipedia.dataclient.RestService
 import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.dataclient.donate.CampaignCollection
 import org.wikipedia.dataclient.mwapi.MwQueryPage
 import org.wikipedia.dataclient.okhttp.HttpStatusException
 import org.wikipedia.dataclient.okhttp.OkHttpWebViewClient
 import org.wikipedia.descriptions.DescriptionEditActivity
 import org.wikipedia.diff.ArticleEditDetailsActivity
-import org.wikipedia.donate.donationreminder.DonationReminderActivity
-import org.wikipedia.donate.donationreminder.DonationReminderHelper
 import org.wikipedia.edit.EditHandler
 import org.wikipedia.gallery.GalleryActivity
-import org.wikipedia.games.onthisday.OnThisDayGameMainMenuFragment
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.login.LoginActivity
@@ -86,7 +80,6 @@ import org.wikipedia.media.AvPlayer
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.notifications.PollNotificationWorker
 import org.wikipedia.page.action.PageActionItem
-import org.wikipedia.page.campaign.CampaignDialog
 import org.wikipedia.page.edithistory.EditHistoryListActivity
 import org.wikipedia.page.issues.PageIssuesDialog
 import org.wikipedia.page.leadimages.LeadImagesHandler
@@ -94,7 +87,6 @@ import org.wikipedia.page.references.PageReferences
 import org.wikipedia.page.references.ReferenceDialog
 import org.wikipedia.page.shareafact.ShareHandler
 import org.wikipedia.page.tabs.Tab
-import org.wikipedia.places.PlacesActivity
 import org.wikipedia.readinglist.LongPressMenu
 import org.wikipedia.readinglist.ReadingListBehaviorsUtil
 import org.wikipedia.readinglist.database.ReadingListPage
@@ -147,13 +139,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
                                          targetSummary: PageSummaryForEdit?, action: DescriptionEditActivity.Action, invokeSource: InvokeSource)
     }
 
-    private var campaignDialog: CampaignDialog? = null
-    private val donationReminderLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == DonationReminderActivity.RESULT_OK_FROM_DONATION_REMINDER) {
-            campaignDialog?.dismiss()
-        }
-    }
-
     private var _binding: FragmentPageBinding? = null
     val binding get() = _binding!!
 
@@ -186,7 +171,7 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
     override val isPreview get() = false
     override val referencesGroup get() = references?.referencesGroup
     override val selectedReferenceIndex get() = references?.selectedIndex ?: 0
-    override val messageCardHeight get() = leadImagesHandler.getDonationReminderCardViewHeight()
+    override val messageCardHeight get() = 0
 
     lateinit var sidePanelHandler: SidePanelHandler
     lateinit var shareHandler: ShareHandler
@@ -314,7 +299,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             leadImagesHandler.loadLeadImage()
         }
         articleInteractionEvent?.resume()
-        DonationReminderHelper.maybeShowSettingSnackbar(requireActivity())
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -615,9 +599,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             MainScope().launch(CoroutineExceptionHandler { _, throwable -> L.e(throwable) }) {
                 AppDatabase.instance.pageImagesDao().upsertForTimeSpent(it, timeSpentSec)
             }
-
-            // Update the article visit for Donation Reminder
-            DonationReminderHelper.increaseArticleVisitCount(timeSpentSec)
         }
     }
 
@@ -690,33 +671,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
 
     fun updateWatchlistExpiry(expiry: WatchlistExpiry) {
         model.hasWatchlistExpiry = expiry !== WatchlistExpiry.NEVER
-    }
-
-    private fun maybeShowAnnouncement() {
-        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            return
-        }
-        title?.let { pageTitle ->
-            // Check if the pause time is older than 1 day.
-            val dateDiff = Duration.between(Instant.ofEpochMilli(Prefs.announcementPauseTime), Instant.now())
-            if (Prefs.hasVisitedArticlePage && dateDiff.toDays() >= 1) {
-                lifecycleScope.launch(CoroutineExceptionHandler { _, t -> L.e(t) }) {
-                    val campaignList = CampaignCollection.getActiveCampaigns()
-                    val availableCampaign = campaignList.find { campaign -> campaign.getAssetsForLang(app.appOrSystemLanguageCode) != null }
-                    availableCampaign?.let {
-                        val campaignId = it.getIdForLang(app.appOrSystemLanguageCode)
-                        if (!Prefs.announcementShownDialogs.contains(campaignId)) {
-                            DonorExperienceEvent.logAction("impression", "article_banner", pageTitle.wikiSite.languageCode, campaignId)
-                            campaignDialog = CampaignDialog(requireActivity(), it, onNeutralButtonClick = {
-                                donationReminderLauncher.launch(DonationReminderActivity.newIntent(requireContext()))
-                            })
-                            campaignDialog?.setCancelable(false)
-                            campaignDialog?.show()
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private fun showFindReferenceInPage(referenceAnchor: String,
@@ -871,15 +825,7 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
                         }
                     }
                     "coordinate" -> {
-                        model.page?.let { page ->
-                            val location = page.pageProperties.geo
-                            if (location != null) {
-                                PlacesEvent.logAction("places_click", "article_footer")
-                                requireActivity().startActivity(PlacesActivity.newIntent(requireContext(), page.title, location))
-                            } else {
-                                FeedbackUtil.showMessage(this@PageFragment, getString(R.string.action_item_view_on_map_unavailable))
-                            }
-                        }
+                        FeedbackUtil.showMessage(this@PageFragment, getString(R.string.action_item_view_on_map_unavailable))
                     }
                     "pageIssues" -> {
                         val array = payload["payload"]
@@ -958,10 +904,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             editHandler.setPage(model.page)
             webView.visibility = View.VISIBLE
         }
-
-        maybeShowAnnouncement()
-        OnThisDayGameMainMenuFragment.maybeShowOnThisDayGameDialog(requireActivity(),
-            InvokeSource.PAGE_ACTIVITY, model.title?.wikiSite ?: WikipediaApp.instance.wikiSite)
 
         bridge.onMetadataReady()
         // Explicitly set the top margin (even though it might have already been set in the setup
@@ -1481,15 +1423,7 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         }
 
         override fun onViewOnMapSelected() {
-            title?.let {
-                val location = page?.pageProperties?.geo
-                if (location != null) {
-                    PlacesEvent.logAction("places_click", "article_more_menu")
-                    requireActivity().startActivity(PlacesActivity.newIntent(requireContext(), it, location))
-                } else {
-                    FeedbackUtil.showMessage(this@PageFragment, getString(R.string.action_item_view_on_map_unavailable))
-                }
-            }
+            FeedbackUtil.showMessage(this@PageFragment, getString(R.string.action_item_view_on_map_unavailable))
         }
 
         override fun forwardClick() {

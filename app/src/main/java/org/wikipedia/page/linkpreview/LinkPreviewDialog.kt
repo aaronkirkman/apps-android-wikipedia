@@ -41,7 +41,6 @@ import org.wikipedia.page.ExtendedBottomSheetDialogFragment
 import org.wikipedia.page.Namespace
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
-import org.wikipedia.places.PlacesActivity
 import org.wikipedia.readinglist.LongPressMenu
 import org.wikipedia.readinglist.ReadingListBehaviorsUtil
 import org.wikipedia.readinglist.database.ReadingListPage
@@ -99,14 +98,6 @@ class LinkPreviewDialog : ExtendedBottomSheetDialogFragment(), LinkPreviewErrorV
                 sendPlacesEvent("copy_link_click", "detail_overflow_menu")
                 ClipboardUtil.setPlainText(requireActivity(), text = viewModel.pageTitle.uri)
                 FeedbackUtil.showMessage(requireActivity(), R.string.address_copied)
-                dismiss()
-                true
-            }
-            R.id.menu_link_preview_view_on_map -> {
-                PlacesEvent.logAction("places_click", "article_preview_more_menu")
-                viewModel.location?.let {
-                    startActivity(PlacesActivity.newIntent(requireContext(), viewModel.pageTitle, it))
-                }
                 dismiss()
                 true
             }
@@ -205,7 +196,6 @@ class LinkPreviewDialog : ExtendedBottomSheetDialogFragment(), LinkPreviewErrorV
         popupMenu.menu.findItem(R.id.menu_link_preview_watch).isVisible = viewModel.fromPlaces && AccountUtil.isLoggedIn
         popupMenu.menu.findItem(R.id.menu_link_preview_watch).title = getString(if (viewModel.isWatched) R.string.menu_page_unwatch else R.string.menu_page_watch)
         popupMenu.menu.findItem(R.id.menu_link_preview_open_in_new_tab).isVisible = viewModel.fromPlaces
-        popupMenu.menu.findItem(R.id.menu_link_preview_view_on_map).isVisible = !viewModel.fromPlaces && viewModel.location != null
         popupMenu.menu.findItem(R.id.menu_link_preview_get_directions).isVisible = viewModel.fromPlaces
         popupMenu.setOnMenuItemClickListener(menuListener)
         popupMenu.show()

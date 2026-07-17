@@ -82,26 +82,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/main_drawer_contribs_container"
-                style="@style/SideDrawerMenuItem">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/ic_icon_user_contributions_ooui"
-                    app:tint="?attr/secondary_color" />
-
-                <TextView
-                    style="@android:style/TextAppearance"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_weight="1"
-                    android:text="@string/user_contrib_menu_label" />
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/main_drawer_edit_container"
                 style="@style/SideDrawerMenuItem"
                 android:visibility="gone">
@@ -163,46 +143,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/main_drawer_games_hub_container"
-                style="@style/SideDrawerMenuItem">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/ic_esports_24"
-                    app:tint="?attr/secondary_color" />
-
-                <TextView
-                    style="@android:style/TextAppearance"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_weight="1"
-                    android:text="@string/games_hub_activity_title" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/main_drawer_places_container"
-                style="@style/SideDrawerMenuItem">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/baseline_location_on_24"
-                    app:tint="?attr/secondary_color" />
-
-                <TextView
-                    style="@android:style/TextAppearance"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_weight="1"
-                    android:text="@string/places_title" />
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/main_drawer_settings_container"
                 style="@style/SideDrawerMenuItem">
 
@@ -220,58 +160,6 @@
                     android:layout_marginStart="24dp"
                     android:layout_weight="1"
                     android:text="@string/settings_item_preferences" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/main_drawer_donate_container"
-                style="@style/SideDrawerMenuItem">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/ic_heart_24"
-                    app:tint="?attr/secondary_color" />
-
-                <TextView
-                    style="@android:style/TextAppearance"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_weight="1"
-                    android:text="@string/nav_item_donate" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/main_drawer_year_in_review_container"
-                android:visibility="gone"
-                tools:visibility="visible"
-                style="@style/SideDrawerMenuItem">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/baseline_event_repeat_24"
-                    app:tint="?attr/secondary_color" />
-
-                <TextView
-                    style="@android:style/TextAppearance"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_weight="1"
-                    android:text="@string/nav_item_year_in_review" />
-
-                <View
-                    android:id="@+id/yearInReviewRedDot"
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/shape_circle"
-                    android:backgroundTint="?attr/destructive_color" />
-
             </LinearLayout>
 
         </LinearLayout>

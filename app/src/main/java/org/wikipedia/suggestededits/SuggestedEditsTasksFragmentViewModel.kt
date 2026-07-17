@@ -13,7 +13,7 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.settings.Prefs
-import org.wikipedia.usercontrib.UserContribStats
+import org.wikipedia.suggestededits.UserContribStats
 import org.wikipedia.util.Resource
 import org.wikipedia.util.ThrowableUtil
 import java.time.Instant

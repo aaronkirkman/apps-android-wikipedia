@@ -348,14 +348,6 @@
             android:name=".page.edithistory.EditHistoryListActivity" />
 
         <activity
-            android:name=".usercontrib.UserContribListActivity" />
-
-        <activity
-            android:name=".usercontrib.UserContribFilterActivity"
-            android:label="@string/user_contrib_filter_activity_title"
-            android:theme="@style/AppTheme.ActionBar" />
-            
-        <activity
             android:name=".edit.insertmedia.InsertMediaActivity"
             android:label="@string/insert_media_title"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
@@ -366,26 +358,11 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <activity
-            android:name=".places.PlacesActivity" />
-
-        <activity
-            android:name=".places.PlacesFilterActivity"/>
-
-        <activity
             android:name=".talk.template.TalkTemplatesActivity"
             android:theme="@style/AppTheme" />
 
         <activity
-            android:name=".donate.GooglePayActivity"/>
-
-        <activity
             android:name=".settings.AboutActivity"/>
-
-        <activity
-            android:name=".games.onthisday.OnThisDayGameActivity"/>
-
-        <activity
-            android:name=".games.GamesHubActivity"/>
 
         <activity
             android:name=".readinglist.recommended.RecommendedReadingListOnboardingActivity"/>
@@ -393,12 +370,6 @@
         <activity
             android:name=".settings.dev.playground.CategoryDeveloperPlayGround"/>
 
-        <activity
-            android:name=".yearinreview.YearInReviewOnboardingActivity"/>
-
-        <activity
-            android:name=".yearinreview.YearInReviewActivity"/>
-      
         <activity
             android:name=".readinglist.recommended.RecommendedReadingListSettingsActivity"
             android:windowSoftInputMode="adjustResize" />
@@ -411,10 +382,6 @@
 
         <activity
             android:name=".search.HybridSearchOnboardingActivity" />
-
-        <activity
-            android:name=".donate.donationreminder.DonationReminderActivity"
-            android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".widgets.readingchallenge.ReadingChallengeOnboardingActivity" />

@@ -54,7 +54,7 @@ import org.wikipedia.extensions.instrument
 import org.wikipedia.language.AppLanguageState
 import org.wikipedia.theme.Theme
 import org.wikipedia.util.FeedbackUtil
-import org.wikipedia.yearinreview.LoadingIndicator
+import org.wikipedia.feed.LoadingIndicator
 
 @Composable
 fun InitialOnboardingScreen(
