@@ -39,7 +39,6 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.BaseActivity
 import org.wikipedia.activity.FragmentUtil.getCallback
 import org.wikipedia.activitytab.ActivityTabFragment
-import org.wikipedia.activitytab.ActivityTabOnboardingActivity
 import org.wikipedia.analytics.eventplatform.ReadingListsAnalyticsHelper
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.commons.FilePageActivity
@@ -77,7 +76,6 @@ import org.wikipedia.settings.Prefs
 import org.wikipedia.settings.SettingsActivity
 import org.wikipedia.staticdata.MainPageNameData
 import org.wikipedia.staticdata.UserTalkAliasData
-import org.wikipedia.suggestededits.SuggestedEditsTasksFragment
 import org.wikipedia.talk.TalkTopicsActivity
 import org.wikipedia.util.ClipboardUtil
 import org.wikipedia.util.DeviceUtil
@@ -117,12 +115,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
             pendingDownloadImage?.let { download(it) }
         } else {
             FeedbackUtil.showMessage(this, R.string.gallery_save_image_write_permission_rationale)
-        }
-    }
-
-    private val activityTabOnboardingLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            onNavigateTo(NavTab.EDITS)
         }
     }
 
@@ -166,13 +158,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         binding.mainNavTabLayout.setOverlayDot(NavTab.READING_LISTS, shouldShowRedDotForRecommendedReadingList)
         binding.mainNavTabLayout.setOnItemSelectedListener { item ->
             navTabBackStack.clear()
-            if (item.order == NavTab.EDITS.code()) {
-                if (!Prefs.isActivityTabOnboardingShown) {
-                    activityTabOnboardingLauncher.launch(ActivityTabOnboardingActivity.newIntent(requireContext()))
-                    binding.mainNavTabLayout.setOverlayDot(NavTab.EDITS, false)
-                    return@setOnItemSelectedListener false
-                }
-            }
             if (item.order == NavTab.MORE.code()) {
                 ExclusiveBottomSheetPresenter.show(childFragmentManager, MenuNavTabDialog.newInstance())
                 return@setOnItemSelectedListener false
@@ -189,8 +174,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
             }
             true
         }
-
-        binding.mainNavTabLayout.setOverlayDot(NavTab.EDITS, !Prefs.isActivityTabOnboardingShown)
 
         maybeShowFeedNewModulesTooltip()
         Prefs.incrementExploreFeedVisitCount()
@@ -285,7 +268,7 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         menu.findItem(R.id.menu_overflow_button).isVisible = currentFragment is ReadingListsFragment
 
         val tabsItem = menu.findItem(R.id.menu_tabs)
-        if (WikipediaApp.instance.tabCount < 1 || currentFragment is SuggestedEditsTasksFragment) {
+        if (WikipediaApp.instance.tabCount < 1) {
             tabsItem.isVisible = false
             tabCountsView = null
         } else {
@@ -337,8 +320,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
                 !(binding.mainNavTabLayout.selectedItemId == NavTab.HOME.code() &&
                         intent.getIntExtra(Constants.INTENT_EXTRA_GO_TO_MAIN_TAB, NavTab.HOME.code()) == NavTab.HOME.code())) {
             onNavigateTo(NavTab.of(intent.getIntExtra(Constants.INTENT_EXTRA_GO_TO_MAIN_TAB, NavTab.HOME.code())))
-        } else if (intent.hasExtra(Constants.INTENT_EXTRA_GO_TO_SE_TAB)) {
-            onNavigateTo(NavTab.of(intent.getIntExtra(Constants.INTENT_EXTRA_GO_TO_SE_TAB, NavTab.EDITS.code())))
         } else if (intent.hasExtra(Constants.INTENT_EXTRA_PREVIEW_SAVED_READING_LISTS)) {
             onNavigateTo(NavTab.READING_LISTS)
         } else if (lastPageViewedWithin(1) && !intent.hasExtra(Constants.INTENT_RETURN_TO_MAIN) && WikipediaApp.instance.tabCount > 0) {
@@ -509,7 +490,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         when (val fragment = currentFragment) {
             is ReadingListsFragment -> fragment.updateLists()
             is HistoryFragment -> fragment.refresh()
-            is SuggestedEditsTasksFragment -> fragment.refreshContents()
         }
     }
 
@@ -563,11 +543,7 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
     }
 
     override fun onNavigateTo(navTab: NavTab) {
-        val lastNavTab = NavTab.entries.find { binding.mainNavTabLayout.selectedItemId == binding.mainNavTabLayout.menu[it.code()].itemId }
         binding.mainNavTabLayout.selectedItemId = binding.mainNavTabLayout.menu[navTab.code()].itemId
-        if (lastNavTab == NavTab.EDITS && navTab != NavTab.EDITS) {
-            navTabBackStack.add(NavTab.EDITS)
-        }
     }
 
     companion object {

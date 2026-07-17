@@ -85,7 +85,7 @@ class ChallengeRewardAction : ActionCallback {
         context.startActivity(
             MainActivity.newIntent(context)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                .putExtra(Constants.INTENT_EXTRA_GO_TO_SE_TAB, NavTab.EDITS.code())
+                .putExtra(Constants.INTENT_EXTRA_GO_TO_MAIN_TAB, NavTab.HOME.code())
                 .putExtra(Constants.INTENT_EXTRA_INVOKE_SOURCE, InvokeSource.WIDGET)
                 .putExtra(Constants.INTENT_WIDGET_TYPE, WidgetTypes.READING_CHALLENGE.value)
                 .putExtra(ReadingChallengeWidgetRepository.INTENT_EXTRA_READING_CHALLENGE_REWARD, true)

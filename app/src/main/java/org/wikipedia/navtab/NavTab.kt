@@ -2,7 +2,6 @@ package org.wikipedia.navtab
 
 import androidx.fragment.app.Fragment
 import org.wikipedia.R
-import org.wikipedia.activitytab.ActivityTabFragment
 import org.wikipedia.feed.HomeFragment
 import org.wikipedia.history.HistoryFragment
 import org.wikipedia.model.EnumCode
@@ -23,11 +22,6 @@ enum class NavTab(val text: Int, val id: Int, val icon: Int) : EnumCode {
     SEARCH(R.string.nav_item_search, R.id.nav_tab_search, R.drawable.selector_nav_search) {
         override fun newInstance(): Fragment {
             return HistoryFragment.newInstance()
-        }
-    },
-    EDITS(R.string.nav_item_activity, R.id.nav_tab_edits, R.drawable.selector_nav_activity) {
-        override fun newInstance(): Fragment {
-            return ActivityTabFragment.newInstance()
         }
     },
     MORE(R.string.nav_item_more, R.id.nav_tab_more, R.drawable.ic_menu_white_24dp) {

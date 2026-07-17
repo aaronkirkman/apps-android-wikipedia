@@ -22,8 +22,6 @@ import org.wikipedia.Constants
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.SingleFragmentActivity
-import org.wikipedia.analytics.eventplatform.ImageRecommendationsEvent
-import org.wikipedia.analytics.eventplatform.PatrollerExperienceEvent
 import org.wikipedia.analytics.testkitchen.TestKitchenAdapter
 import org.wikipedia.databinding.ActivityMainBinding
 import org.wikipedia.dataclient.WikiSite
@@ -32,7 +30,6 @@ import org.wikipedia.feed.HomeTab
 import org.wikipedia.feed.personalization.homepreference.HomePreferenceType
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.onboarding.InitialOnboardingActivity
-import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.PageActivity
 import org.wikipedia.settings.Prefs
 import org.wikipedia.theme.Theme
@@ -40,7 +37,6 @@ import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.DimenUtil
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.ResourceUtil
-import org.wikipedia.widgets.readingchallenge.ReadingChallengeInstallWidgetDialog
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeWidgetRepository
 
 class MainActivity : SingleFragmentActivity<MainFragment>(), MainFragment.Callback {
@@ -126,16 +122,6 @@ class MainActivity : SingleFragmentActivity<MainFragment>(), MainFragment.Callba
             if (tab == NavTab.SEARCH && Prefs.showSearchTabTooltip) {
                 FeedbackUtil.showTooltip(this, fragment.binding.mainNavTabLayout.findViewById(NavTab.SEARCH.id), getString(R.string.search_tab_tooltip), aboveOrBelow = true, autoDismiss = false)
                 Prefs.showSearchTabTooltip = false
-            }
-            if (tab == NavTab.EDITS) {
-                ImageRecommendationsEvent.logImpression("suggested_edit_dialog")
-                PatrollerExperienceEvent.logImpression("suggested_edits_dialog")
-
-                if (ReadingChallengeWidgetRepository.shouldShowWidgetInstallDialog()) {
-                    ExclusiveBottomSheetPresenter.show(supportFragmentManager,
-                        ReadingChallengeInstallWidgetDialog()
-                    )
-                }
             }
             binding.mainToolbarWordmark.visibility = View.GONE
             binding.mainToolbar.setTitle(tab.text)
