@@ -43,11 +43,6 @@ enum class PageActionItem constructor(val id: Int,
             cb.onShareSelected()
         }
     },
-    ADD_TO_WATCHLIST(6, R.id.page_watch, R.string.menu_page_watch, R.drawable.ic_baseline_star_outline_24, false) {
-        override fun select(cb: Callback) {
-            cb.onAddToWatchlistSelected()
-        }
-    },
     VIEW_TALK_PAGE(7, R.id.page_view_talk_page, R.string.menu_page_talk_page, R.drawable.ic_icon_speech_bubbles_ooui_ltr) {
         override fun select(cb: Callback) {
             cb.onViewTalkPageSelected()
@@ -99,7 +94,6 @@ enum class PageActionItem constructor(val id: Int,
         fun onThemeSelected()
         fun onContentsSelected()
         fun onShareSelected()
-        fun onAddToWatchlistSelected()
         fun onViewTalkPageSelected()
         fun onViewEditHistorySelected()
         fun onNewTabSelected()
@@ -112,21 +106,10 @@ enum class PageActionItem constructor(val id: Int,
 
     companion object {
         val DEFAULT_TOOLBAR_LIST = listOf(SAVE, LANGUAGE, FIND_IN_ARTICLE, THEME, CONTENTS).map { it.id }
-        val DEFAULT_OVERFLOW_MENU_LIST = listOf(SHARE, ADD_TO_WATCHLIST, VIEW_TALK_PAGE, VIEW_EDIT_HISTORY, VIEW_ON_MAP, NEW_TAB, HOME, CATEGORIES, EDIT_ARTICLE).map { it.id }
+        val DEFAULT_OVERFLOW_MENU_LIST = listOf(SHARE, VIEW_TALK_PAGE, VIEW_EDIT_HISTORY, VIEW_ON_MAP, NEW_TAB, HOME, CATEGORIES, EDIT_ARTICLE).map { it.id }
 
         fun find(id: Int): PageActionItem {
             return entries.find { id == it.id || id == it.viewId } ?: entries[0]
-        }
-
-        @DrawableRes
-        fun watchlistIcon(isWatched: Boolean, hasWatchlistExpiry: Boolean): Int {
-            return if (isWatched && !hasWatchlistExpiry) {
-                R.drawable.ic_star_24
-            } else if (!isWatched) {
-                R.drawable.ic_baseline_star_outline_24
-            } else {
-                R.drawable.ic_baseline_star_half_24
-            }
         }
 
         @DrawableRes

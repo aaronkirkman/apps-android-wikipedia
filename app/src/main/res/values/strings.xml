@@ -219,15 +219,9 @@
     <string name="wikipedia_app_faq">Wikipedia App FAQ</string>
     <string name="send_feedback">Send app feedback</string>
     <string name="create_account_account_created_toast">Account created!</string>
-    <string name="preferences_heading_syncing">Syncing</string>
     <string name="preferences_heading_data_usage">Data usage</string>
     <string name="preferences_heading_experimental">Experimental</string>
-    <string name="preference_title_sync_reading_lists_from_account">Reading list syncing</string>
     <string name="preference_title_download_reading_list_articles">Download reading list articles</string>
-    <string name="preference_summary_sync_reading_lists">Sync reading lists across different devices by saving them to your Wikipedia account</string>
-    <string name="preference_summary_sync_reading_lists_from_account">Sync reading lists across different devices by saving them to your Wikipedia account \"%s\"</string>
-    <string name="preference_dialog_of_turning_off_reading_list_sync_title">Remove synced reading lists from \"%s\"?</string>
-    <string name="preference_dialog_of_turning_off_reading_list_sync_text">This will completely delete all previously synced reading lists from remote storage. Remove all synced lists from your account \"%s\"?</string>
     <string name="preference_title_auto_upload_crash_reports">Send crash reports</string>
     <string name="preference_summary_auto_upload_crash_reports">Allow the app to send crash reports to a third-party service provider automatically so that we can review your crash and fix the bug faster and more easily.</string>
     <string name="editing_error_spamblacklist">Links to blocked domains (%s) detected. Please remove them and try again.</string>
@@ -603,10 +597,7 @@
     <string name="reading_list_confirm_remove_article_from_offline_message">%s will no longer be available offline for all reading lists:</string>
     <string name="reading_lists_sync_reminder_title">Turn on reading list syncing?</string>
     <string name="reading_lists_sync_reminder_text"><![CDATA[Articles saved to reading lists can now be synced to your Wikipedia account. <a href="https://www.mediawiki.org/wiki/Special:MyLanguage/Wikimedia_Apps/Android_FAQ#Synced_reading_lists">Learn more</a>]]></string>
-    <string name="reading_lists_login_reminder_text_with_link"><![CDATA[Reading lists can now be synced across devices. Log in to your Wikipedia account and allow your lists to be saved. <a href="https://www.mediawiki.org/wiki/Special:MyLanguage/Wikimedia_Apps/Android_FAQ#Synced_reading_lists">Learn more</a>]]></string>
     <string name="reading_lists_sync_reminder_action">Enable syncing</string>
-    <string name="reading_list_login_reminder_title">Sync reading lists</string>
-    <string name="reading_lists_login_reminder_text">Reading lists can now be synced across devices. Log in to your Wikipedia account and allow your lists to be saved.</string>
     <string name="reading_lists_login_button">Log in / join Wikipedia</string>
     <string name="reading_lists_ignore_button">Not now</string>
     <string name="reading_lists_confirm_remote_delete_yes">Yes</string>
@@ -620,10 +611,6 @@
         <item quantity="one">Are you sure you want to delete %d list?</item>
         <item quantity="other">Are you sure you want to delete %d lists?</item>
     </plurals>
-    <string name="reading_list_preference_login_to_enable_sync_dialog_title">Log in to enable sync</string>
-    <string name="reading_list_preference_login_to_enable_sync_dialog_text">Log in to allow your reading lists to be saved to your account.</string>
-    <string name="reading_list_preference_login_to_enable_sync_dialog_cancel">Cancel</string>
-    <string name="reading_list_preference_login_to_enable_sync_dialog_login">Log in</string>
     <string name="reading_list_turned_sync_off_dialog_title">Reading list sync turned off</string>
     <string name="reading_list_turned_sync_off_dialog_text">Reading list sync is off for your account, and saved articles on your logged-in devices are no longer being backed up. Turn on reading list sync in Settings.</string>
     <string name="reading_list_turned_sync_off_dialog_ok">OK</string>
@@ -646,7 +633,6 @@
     <string name="reading_lists_menu_import_list">Import list</string>
     <string name="reading_lists_menu_sort_by">Sort by</string>
     <string name="reading_lists_refresh_sync_option">Refresh sync</string>
-    <string name="reading_list_preference_login_or_signup_to_enable_sync_dialog_login">Log in / sign up</string>
     <plurals name="reading_list_article_offline_message">
         <item quantity="one">This article will now be available offline.</item>
         <item quantity="other">These articles will now be available offline.</item>
@@ -1452,7 +1438,6 @@
     <!-- /Templates -->
 
     <string name="main_drawer_help">Help</string>
-    <string name="main_drawer_login">Log in / join Wikipedia</string>
     <string name="main_tooltip_action_button">Get started</string>
     <string name="main_tooltip_watchlist_title">Watchlist</string>
     <string name="main_tooltip_watchlist_text"><![CDATA[Find articles and pages you previously added to your watchlist in the More menu under <b>Watchlist</b>.]]></string>

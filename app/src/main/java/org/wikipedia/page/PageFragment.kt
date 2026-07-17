@@ -53,7 +53,6 @@ import org.wikipedia.analytics.eventplatform.ArticleFindInPageInteractionEvent
 import org.wikipedia.analytics.eventplatform.ArticleInteractionEvent
 import org.wikipedia.analytics.eventplatform.EventPlatformClient
 import org.wikipedia.analytics.eventplatform.PlacesEvent
-import org.wikipedia.analytics.eventplatform.WatchlistAnalyticsHelper
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.bridge.CommunicationBridge
 import org.wikipedia.bridge.JavaScriptActionHandler
@@ -106,15 +105,12 @@ import org.wikipedia.util.log.L
 import org.wikipedia.views.ObservableWebView
 import org.wikipedia.views.PageActionOverflowView
 import org.wikipedia.views.ViewUtil
-import org.wikipedia.watchlist.WatchlistExpiry
-import org.wikipedia.watchlist.WatchlistExpiryDialog
-import org.wikipedia.watchlist.WatchlistViewModel
 import org.wikipedia.wiktionary.WiktionaryDialog
 import java.time.Duration
 import java.time.Instant
 
 class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.CommunicationBridgeListener, ThemeChooserDialog.Callback,
-    ReferenceDialog.Callback, WiktionaryDialog.Callback, WatchlistExpiryDialog.Callback {
+    ReferenceDialog.Callback, WiktionaryDialog.Callback {
 
     interface Callback {
         fun onPageDismissBottomSheet()
@@ -126,7 +122,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         fun onPageUpdateProgressBar(visible: Boolean)
         fun onPageStartSupportActionMode(callback: ActionMode.Callback)
         fun onPageHideSoftKeyboard()
-        fun onPageWatchlistExpirySelect(expiry: WatchlistExpiry)
         fun onPageLoadError(title: PageTitle)
         fun onPageLoadErrorBackPressed()
         fun onPageSetToolbarElevationEnabled(enabled: Boolean)
@@ -361,11 +356,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
 
     override fun wiktionaryShowDialogForTerm(term: String) {
         shareHandler.showWiktionaryDefinition(term)
-    }
-
-    override fun onExpiryChanged(expiry: WatchlistExpiry) {
-        callback()?.onPageWatchlistExpirySelect(expiry)
-        dismissBottomSheet()
     }
 
     private fun shouldLoadFromBackstack(activity: Activity): Boolean {
@@ -667,10 +657,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         leadImagesHandler.hide()
         bridge.loadBlankPage()
         webView.visibility = View.INVISIBLE
-    }
-
-    fun updateWatchlistExpiry(expiry: WatchlistExpiry) {
-        model.hasWatchlistExpiry = expiry !== WatchlistExpiry.NEVER
     }
 
     private fun showFindReferenceInPage(referenceAnchor: String,
@@ -1006,11 +992,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             val pageActionItem = PageActionItem.find(it.id)
             var enabled = model.page != null && (!model.shouldLoadAsMobileWeb || (model.shouldLoadAsMobileWeb && pageActionItem.isAvailableOnMobileWeb))
             when (pageActionItem) {
-                PageActionItem.ADD_TO_WATCHLIST -> {
-                    it.setText(if (model.isWatched) R.string.menu_page_unwatch else R.string.menu_page_watch)
-                    it.setCompoundDrawablesWithIntrinsicBounds(0, PageActionItem.watchlistIcon(model.isWatched, model.hasWatchlistExpiry), 0, 0)
-                    enabled = enabled && AccountUtil.isLoggedIn
-                }
                 PageActionItem.SAVE -> {
                     it.setCompoundDrawablesWithIntrinsicBounds(0, PageActionItem.readingListIcon(model.isInReadingList), 0, 0)
                 }
@@ -1200,21 +1181,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         return getCallback(this, Callback::class.java)
     }
 
-    fun updateWatchlist() {
-        title?.let {
-            lifecycleScope.launch(CoroutineExceptionHandler { _, throwable ->
-                FeedbackUtil.showError(requireActivity(), throwable)
-                L.d(throwable)
-            }) {
-                val pair = WatchlistViewModel.watchPageTitle(this, it, model.isWatched, WatchlistExpiry.NEVER, model.isWatched, it.namespace().talk())
-                model.isWatched = pair.first
-                updateWatchlistExpiry(WatchlistExpiry.NEVER)
-                WatchlistViewModel.showWatchlistSnackbar(requireActivity() as AppCompatActivity, childFragmentManager, it, pair.first, pair.second)
-                updateQuickActionsAndMenuOptions()
-            }
-        }
-    }
-
     fun showAnonNotification() {
         (requireActivity() as PageActivity).onAnonNotification()
     }
@@ -1373,17 +1339,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         override fun onShareSelected() {
             sharePageLink()
             articleInteractionEvent?.logShareClick()
-        }
-
-        override fun onAddToWatchlistSelected() {
-            if (model.isWatched) {
-                WatchlistAnalyticsHelper.logRemovedFromWatchlist(model.title, requireContext())
-                articleInteractionEvent?.logUnWatchClick()
-            } else {
-                WatchlistAnalyticsHelper.logAddedToWatchlist(model.title, requireContext())
-                articleInteractionEvent?.logWatchClick()
-            }
-            updateWatchlist()
         }
 
         override fun onViewTalkPageSelected() {

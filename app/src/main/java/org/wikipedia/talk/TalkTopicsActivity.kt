@@ -45,7 +45,6 @@ import org.wikipedia.page.LinkMovementMethodExt
 import org.wikipedia.page.Namespace
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
-import org.wikipedia.page.action.PageActionItem
 import org.wikipedia.page.edithistory.EditHistoryListActivity
 import org.wikipedia.settings.Prefs
 import org.wikipedia.settings.languages.WikipediaLanguagesActivity
@@ -260,7 +259,11 @@ class TalkTopicsActivity : BaseActivity(), WatchlistExpiryDialog.Callback {
                 // Watchlist
                 watchMenuItem.isVisible = true
                 watchMenuItem.title = getString(if (viewModel.isWatched) R.string.menu_page_unwatch else R.string.menu_page_watch)
-                watchMenuItem.setIcon(PageActionItem.watchlistIcon(viewModel.isWatched, viewModel.hasWatchlistExpiry))
+                watchMenuItem.setIcon(
+                    if (viewModel.isWatched && !viewModel.hasWatchlistExpiry) R.drawable.ic_star_24
+                    else if (!viewModel.isWatched) R.drawable.ic_baseline_star_outline_24
+                    else R.drawable.ic_baseline_star_half_24
+                )
             } else {
                 notificationMenuItem.isVisible = false
                 watchMenuItem.isVisible = false

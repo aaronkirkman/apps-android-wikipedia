@@ -58,7 +58,6 @@ import org.wikipedia.gallery.GalleryActivity
 import org.wikipedia.gallery.MediaDownloadReceiver
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.history.HistoryFragment
-import org.wikipedia.login.LoginActivity
 import org.wikipedia.navtab.MenuNavTabDialog
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.navtab.NavTabFragmentPagerAdapter
@@ -77,7 +76,6 @@ import org.wikipedia.search.SearchFragment
 import org.wikipedia.settings.Prefs
 import org.wikipedia.settings.SettingsActivity
 import org.wikipedia.staticdata.MainPageNameData
-import org.wikipedia.staticdata.UserAliasData
 import org.wikipedia.staticdata.UserTalkAliasData
 import org.wikipedia.suggestededits.SuggestedEditsTasksFragment
 import org.wikipedia.talk.TalkTopicsActivity
@@ -89,7 +87,6 @@ import org.wikipedia.util.TabUtil
 import org.wikipedia.views.NotificationButtonView
 import org.wikipedia.views.TabCountsView
 import org.wikipedia.views.imageservice.ImageService
-import org.wikipedia.watchlist.WatchlistActivity
 import org.wikipedia.widgets.SearchWidgetInstallDialog
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -233,10 +230,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         } else if (requestCode == Constants.ACTIVITY_REQUEST_GALLERY &&
                 resultCode == GalleryActivity.ACTIVITY_RESULT_PAGE_SELECTED && data != null) {
             startActivity(data)
-        } else if (requestCode == Constants.ACTIVITY_REQUEST_LOGIN &&
-                resultCode == LoginActivity.RESULT_LOGIN_SUCCESS) {
-            refreshContents()
-            FeedbackUtil.showMessage(this, R.string.login_success_toast)
         } else if (requestCode == Constants.ACTIVITY_REQUEST_BROWSE_TABS) {
             if (WikipediaApp.instance.tabCount == 0) {
                 // They browsed the tabs and cleared all of them, without wanting to open a new tab.
@@ -435,11 +428,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         startActivity(FilePageActivity.newIntent(requireActivity(), image.toPageTitle()))
     }
 
-    fun onLoginRequested() {
-        startActivityForResult(LoginActivity.newIntent(requireContext(), LoginActivity.SOURCE_NAV),
-                Constants.ACTIVITY_REQUEST_LOGIN)
-    }
-
     override fun onLoadPage(entry: HistoryEntry) {
         startActivity(PageActivity.newIntentForCurrentTab(requireContext(), entry, entry.title))
     }
@@ -454,16 +442,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         return false
     }
 
-    override fun usernameClick() {
-        val pageTitle = PageTitle(UserAliasData.valueFor(WikipediaApp.instance.languageState.appLanguageCode), AccountUtil.userName, WikipediaApp.instance.wikiSite)
-        val entry = HistoryEntry(pageTitle, HistoryEntry.SOURCE_MAIN_PAGE)
-        startActivity(PageActivity.newIntentForNewTab(requireContext(), entry, pageTitle))
-    }
-
-    override fun loginClick() {
-        onLoginRequested()
-    }
-
     override fun talkClick() {
         if (AccountUtil.isLoggedIn) {
             startActivity(TalkTopicsActivity.newIntent(requireActivity(),
@@ -474,12 +452,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
 
     override fun settingsClick() {
         startActivityForResult(SettingsActivity.newIntent(requireActivity()), Constants.ACTIVITY_REQUEST_SETTINGS)
-    }
-
-    override fun watchlistClick() {
-        if (AccountUtil.isLoggedIn) {
-            startActivity(WatchlistActivity.newIntent(requireActivity()))
-        }
     }
 
     fun setBottomNavVisible(visible: Boolean) {

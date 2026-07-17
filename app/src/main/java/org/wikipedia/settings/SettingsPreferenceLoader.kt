@@ -1,23 +1,18 @@
 package org.wikipedia.settings
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreferenceCompat
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.wikipedia.BuildConfig
 import org.wikipedia.Constants
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.analytics.eventplatform.RecommendedReadingListEvent
 import org.wikipedia.auth.AccountUtil
-import org.wikipedia.login.LoginActivity
 import org.wikipedia.readinglist.recommended.RecommendedReadingListOnboardingActivity
 import org.wikipedia.readinglist.recommended.RecommendedReadingListSettingsActivity
 import org.wikipedia.readinglist.recommended.RecommendedReadingListSource
-import org.wikipedia.readinglist.sync.ReadingListSyncAdapter
 import org.wikipedia.settings.homefeed.HomeFeedSettingsActivity
 import org.wikipedia.settings.languages.WikipediaLanguagesActivity
 import org.wikipedia.theme.ThemeFittingRoomActivity
@@ -26,11 +21,6 @@ import org.wikipedia.util.FeedbackUtil
 internal class SettingsPreferenceLoader(fragment: PreferenceFragmentCompat) : BasePreferenceLoader(fragment) {
     override fun loadPreferences() {
         loadPreferences(R.xml.preferences)
-        if (RemoteConfig.config.disableReadingListSync) {
-            findPreference(R.string.preference_category_sync).isVisible = false
-            findPreference(R.string.preference_key_sync_reading_lists).isVisible = false
-        }
-        findPreference(R.string.preference_key_sync_reading_lists).onPreferenceChangeListener = SyncReadingListsListener()
         loadPreferences(R.xml.preferences_about)
         updateLanguagePrefSummary()
         findPreference(R.string.preference_key_language).onPreferenceClickListener = Preference.OnPreferenceClickListener {
@@ -101,55 +91,4 @@ internal class SettingsPreferenceLoader(fragment: PreferenceFragmentCompat) : Ba
         findPreference(R.string.preference_key_recommended_reading_list_enabled).summary = activity.getString(summary)
     }
 
-    private inner class SyncReadingListsListener : Preference.OnPreferenceChangeListener {
-        override fun onPreferenceChange(preference: Preference, newValue: Any): Boolean {
-            if (AccountUtil.isLoggedIn) {
-                if (newValue as Boolean) {
-                    (preference as SwitchPreferenceCompat).isChecked = true
-                    ReadingListSyncAdapter.setSyncEnabledWithSetup()
-                } else {
-                    MaterialAlertDialogBuilder(activity)
-                            .setTitle(activity.getString(R.string.preference_dialog_of_turning_off_reading_list_sync_title, AccountUtil.userName))
-                            .setMessage(activity.getString(R.string.preference_dialog_of_turning_off_reading_list_sync_text, AccountUtil.userName))
-                            .setPositiveButton(R.string.reading_lists_confirm_remote_delete_yes, DeleteRemoteListsYesListener(preference))
-                            .setNegativeButton(R.string.reading_lists_confirm_remote_delete_no, null)
-                            .show()
-                }
-            } else {
-                MaterialAlertDialogBuilder(activity)
-                        .setTitle(R.string.reading_list_preference_login_to_enable_sync_dialog_title)
-                        .setMessage(R.string.reading_list_preference_login_to_enable_sync_dialog_text)
-                        .setPositiveButton(R.string.reading_list_preference_login_to_enable_sync_dialog_login
-                        ) { _: DialogInterface, _: Int ->
-                            val loginIntent = LoginActivity.newIntent(activity,
-                                    LoginActivity.SOURCE_SETTINGS)
-                            activity.startActivity(loginIntent)
-                        }
-                        .setNegativeButton(R.string.reading_list_preference_login_to_enable_sync_dialog_cancel, null)
-                        .show()
-            }
-            // clicks are handled and preferences updated accordingly; don't pass the result through
-            return false
-        }
-    }
-
-    fun updateSyncReadingListsPrefSummary() {
-        findPreference(R.string.preference_key_sync_reading_lists).let {
-            if (AccountUtil.isLoggedIn) {
-                it.summary = activity.getString(R.string.preference_summary_sync_reading_lists_from_account, AccountUtil.userName)
-            } else {
-                it.setSummary(R.string.preference_summary_sync_reading_lists)
-            }
-        }
-    }
-
-    private class DeleteRemoteListsYesListener(private val preference: Preference) : DialogInterface.OnClickListener {
-        override fun onClick(dialog: DialogInterface, which: Int) {
-            (preference as SwitchPreferenceCompat).isChecked = false
-            Prefs.isReadingListSyncEnabled = false
-            Prefs.isReadingListsRemoteSetupPending = false
-            Prefs.isReadingListsRemoteDeletePending = true
-            ReadingListSyncAdapter.manualSync()
-        }
-    }
 }

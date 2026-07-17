@@ -49,7 +49,6 @@
     <string name="preference_key_total_anon_descriptions_edited" translatable="false">totalAnonDescriptionsEdited</string>
     <string name="preference_key_missing_description_test" translatable="false">findArticleWithMissingDescription</string>
     <string name="preference_key_missing_description_test2" translatable="false">findArticleWithMissingSecondLangDescription</string>
-    <string name="preference_category_sync" translatable="false">syncSettings</string>
     <string name="preference_key_sync_reading_lists" translatable="false">syncReadingLists</string>
     <string name="preference_key_reading_list_sync_reminder_enabled" translatable="false">readingListSyncReminder</string>
     <string name="preference_key_reading_list_login_reminder_enabled" translatable="false">readingListLoginReminder</string>

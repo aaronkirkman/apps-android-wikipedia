@@ -4,27 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
-import androidx.core.widget.ImageViewCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import org.wikipedia.R
 import org.wikipedia.activity.FragmentUtil
 import org.wikipedia.analytics.eventplatform.ActivityTabEvent
 import org.wikipedia.analytics.eventplatform.BreadCrumbLogEvent
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.databinding.ViewMainDrawerBinding
 import org.wikipedia.page.ExtendedBottomSheetDialogFragment
 import org.wikipedia.suggestededits.SuggestedEditsTasksActivity
 import org.wikipedia.util.DimenUtil
-import org.wikipedia.util.ResourceUtil.getThemedColorStateList
 
 class MenuNavTabDialog : ExtendedBottomSheetDialogFragment() {
     interface Callback {
-        fun usernameClick()
-        fun loginClick()
         fun talkClick()
         fun settingsClick()
-        fun watchlistClick()
     }
 
     private var _binding: ViewMainDrawerBinding? = null
@@ -33,25 +25,9 @@ class MenuNavTabDialog : ExtendedBottomSheetDialogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = ViewMainDrawerBinding.inflate(inflater, container, false)
 
-        binding.mainDrawerAccountContainer.setOnClickListener {
-            BreadCrumbLogEvent.logClick(requireActivity(), binding.mainDrawerAccountContainer)
-            if (AccountUtil.isLoggedIn && !AccountUtil.isTemporaryAccount) {
-                callback()?.usernameClick()
-            } else {
-                callback()?.loginClick()
-            }
-            dismiss()
-        }
-
         binding.mainDrawerTalkContainer.setOnClickListener {
             BreadCrumbLogEvent.logClick(requireActivity(), binding.mainDrawerTalkContainer)
             callback()?.talkClick()
-            dismiss()
-        }
-
-        binding.mainDrawerWatchlistContainer.setOnClickListener {
-            BreadCrumbLogEvent.logClick(requireActivity(), binding.mainDrawerWatchlistContainer)
-            callback()?.watchlistClick()
             dismiss()
         }
 
@@ -68,7 +44,6 @@ class MenuNavTabDialog : ExtendedBottomSheetDialogFragment() {
             dismiss()
         }
 
-        updateState()
         return binding.root
     }
 
@@ -80,42 +55,6 @@ class MenuNavTabDialog : ExtendedBottomSheetDialogFragment() {
     override fun onStart() {
         super.onStart()
         BottomSheetBehavior.from(binding.root.parent as View).peekHeight = DimenUtil.displayHeightPx
-    }
-
-    private fun updateState() {
-        if (AccountUtil.isLoggedIn) {
-            if (AccountUtil.isTemporaryAccount) {
-                binding.mainDrawerAccountAvatar.setImageResource(R.drawable.ic_login_24px)
-                ImageViewCompat.setImageTintList(binding.mainDrawerAccountAvatar, getThemedColorStateList(requireContext(), R.attr.progressive_color))
-                binding.tempAccountName.text = AccountUtil.userName
-                binding.mainDrawerAccountName.isVisible = false
-                binding.mainDrawerLoginButton.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
-                binding.mainDrawerLoginButton.text = getString(R.string.main_drawer_login)
-                binding.mainDrawerLoginButton.setTextColor(getThemedColorStateList(requireContext(), R.attr.progressive_color))
-                binding.mainDrawerLoginButton.isVisible = true
-            } else {
-                binding.mainDrawerAccountAvatar.setImageResource(R.drawable.ic_baseline_person_24)
-                ImageViewCompat.setImageTintList(binding.mainDrawerAccountAvatar, getThemedColorStateList(requireContext(), R.attr.secondary_color))
-                binding.mainDrawerAccountName.text = AccountUtil.userName
-                binding.mainDrawerAccountName.isVisible = true
-                binding.mainDrawerLoginButton.isVisible = false
-            }
-            binding.mainDrawerTalkContainer.isVisible = true
-            binding.mainDrawerTempAccountContainer.isVisible = AccountUtil.isTemporaryAccount
-            binding.mainDrawerWatchlistContainer.isVisible = !AccountUtil.isTemporaryAccount
-            binding.mainDrawerEditContainer.isVisible = true
-        } else {
-            binding.mainDrawerAccountAvatar.setImageResource(R.drawable.ic_login_24px)
-            ImageViewCompat.setImageTintList(binding.mainDrawerAccountAvatar, getThemedColorStateList(requireContext(), R.attr.progressive_color))
-            binding.mainDrawerAccountName.isVisible = false
-            binding.mainDrawerTempAccountContainer.isVisible = false
-            binding.mainDrawerLoginButton.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
-            binding.mainDrawerLoginButton.text = getString(R.string.main_drawer_login)
-            binding.mainDrawerLoginButton.setTextColor(getThemedColorStateList(requireContext(), R.attr.progressive_color))
-            binding.mainDrawerTalkContainer.isVisible = false
-            binding.mainDrawerWatchlistContainer.isVisible = false
-            binding.mainDrawerEditContainer.isVisible = false
-        }
     }
 
     private fun callback(): Callback? {

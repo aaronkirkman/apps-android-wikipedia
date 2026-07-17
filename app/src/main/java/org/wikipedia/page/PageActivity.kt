@@ -84,7 +84,6 @@ import org.wikipedia.util.log.L
 import org.wikipedia.views.FrameLayoutNavMenuTriggerer
 import org.wikipedia.views.ObservableWebView
 import org.wikipedia.views.ViewUtil
-import org.wikipedia.watchlist.WatchlistExpiry
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeWidgetRepository
 import java.time.LocalDate
 import java.util.Locale
@@ -450,10 +449,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
 
     override fun onPageHideSoftKeyboard() {
         DeviceUtil.hideSoftKeyboard(this)
-    }
-
-    override fun onPageWatchlistExpirySelect(expiry: WatchlistExpiry) {
-        pageFragment.updateWatchlistExpiry(expiry)
     }
 
     override fun onPageLoadError(title: PageTitle) {

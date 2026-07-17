@@ -7,16 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.preference.SwitchPreferenceCompat
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.wikipedia.R
-import org.wikipedia.concurrency.FlowEventBus
-import org.wikipedia.events.ReadingListsEnableSyncStatusEvent
-import org.wikipedia.events.ReadingListsEnabledStatusEvent
-import org.wikipedia.events.ReadingListsNoLongerSyncedEvent
 import org.wikipedia.settings.dev.DeveloperSettingsActivity.Companion.newIntent
 
 class SettingsFragment : PreferenceLoaderFragment(), MenuProvider {
@@ -25,27 +16,6 @@ class SettingsFragment : PreferenceLoaderFragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                FlowEventBus.events.collectLatest { event ->
-                    when (event) {
-                        is ReadingListsEnabledStatusEvent -> {
-                            setReadingListSyncPref(true)
-                        }
-                        is ReadingListsNoLongerSyncedEvent -> {
-                            setReadingListSyncPref(false)
-                        }
-                        is ReadingListsEnableSyncStatusEvent -> {
-                            setReadingListSyncPref(Prefs.isReadingListSyncEnabled)
-                        }
-                    }
-                }
-            }
-        }
-
-        // TODO: Kick off a sync of reading lists, which will call back to us whether lists
-        // are enabled or not. (Not sure if this is necessary yet.)
     }
 
     override fun loadPreferences() {
@@ -55,7 +25,6 @@ class SettingsFragment : PreferenceLoaderFragment(), MenuProvider {
 
     override fun onResume() {
         super.onResume()
-        preferenceLoader.updateSyncReadingListsPrefSummary()
         preferenceLoader.updateLanguagePrefSummary()
         preferenceLoader.updateRecommendedReadingListSummary()
         requireActivity().invalidateOptionsMenu()
@@ -85,10 +54,6 @@ class SettingsFragment : PreferenceLoaderFragment(), MenuProvider {
 
     private fun prepareDeveloperSettingsMenuItem(menu: Menu) {
         menu.findItem(R.id.developer_settings).isVisible = Prefs.isShowDeveloperSettingsEnabled
-    }
-
-    private fun setReadingListSyncPref(checked: Boolean) {
-        (preferenceLoader.findPreference(R.string.preference_key_sync_reading_lists) as SwitchPreferenceCompat).isChecked = checked
     }
 
     companion object {

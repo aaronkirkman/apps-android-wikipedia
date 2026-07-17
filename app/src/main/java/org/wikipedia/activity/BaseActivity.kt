@@ -36,7 +36,6 @@ import org.wikipedia.events.ReadingListsNoLongerSyncedEvent
 import org.wikipedia.events.SplitLargeListsEvent
 import org.wikipedia.events.ThemeFontChangeEvent
 import org.wikipedia.events.UnreadNotificationsEvent
-import org.wikipedia.login.LoginActivity
 import org.wikipedia.main.MainActivity
 import org.wikipedia.notifications.NotificationPresenter
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
@@ -275,27 +274,7 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
     }
 
     private fun maybeShowLoggedOutInBackgroundDialog() {
-        if (!Prefs.queueLoggedOutInBackgroundDialog || isDestroyed || this is LoginActivity)
-            return
         Prefs.queueLoggedOutInBackgroundDialog = false
-
-        val instrument = TestKitchenAdapter.client.getInstrument("apps-authentication")
-            .setDefaultActionSource("logout_background_dialog")
-            .startFunnel("logout_account_background")
-        instrument.submitInteraction("impression")
-
-        MaterialAlertDialogBuilder(this)
-                .setCancelable(false)
-                .setTitle(R.string.logged_out_in_background_title)
-                .setMessage(R.string.logged_out_in_background_dialog)
-                .setPositiveButton(R.string.logged_out_in_background_login) { _, _ ->
-                    instrument.submitInteraction("click", elementId = "login_button")
-                    startActivity(LoginActivity.newIntent(this@BaseActivity, LoginActivity.SOURCE_LOGOUT_BACKGROUND))
-                }
-                .setNegativeButton(R.string.logged_out_in_background_cancel) { _, _ ->
-                    instrument.submitInteraction("click", elementId = "cancel")
-                }
-                .show()
     }
 
     private fun dismissCurrentTooltip() {

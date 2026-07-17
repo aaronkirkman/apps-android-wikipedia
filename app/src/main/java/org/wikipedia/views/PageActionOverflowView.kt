@@ -14,7 +14,6 @@ import androidx.core.widget.PopupWindowCompat
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.textview.MaterialTextView
 import org.wikipedia.R
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.databinding.ItemCustomizeToolbarMenuBinding
 import org.wikipedia.databinding.ViewPageActionOverflowBinding
 import org.wikipedia.page.PageViewModel
@@ -70,11 +69,6 @@ class PageActionOverflowView(context: Context) : FrameLayout(context) {
             val pageActionItem = PageActionItem.find(view.id)
             val enabled = model.page != null && (!model.shouldLoadAsMobileWeb || (model.shouldLoadAsMobileWeb && pageActionItem.isAvailableOnMobileWeb))
             when (pageActionItem) {
-                PageActionItem.ADD_TO_WATCHLIST -> {
-                    view.setText(if (model.isWatched) R.string.menu_page_unwatch else R.string.menu_page_watch)
-                    view.setCompoundDrawablesRelativeWithIntrinsicBounds(PageActionItem.watchlistIcon(model.isWatched, model.hasWatchlistExpiry), 0, 0, 0)
-                    view.visibility = if (enabled && AccountUtil.isLoggedIn) VISIBLE else GONE
-                }
                 PageActionItem.SAVE -> {
                     view.setCompoundDrawablesRelativeWithIntrinsicBounds(PageActionItem.readingListIcon(model.isInReadingList), 0, 0, 0)
                     view.visibility = if (enabled) VISIBLE else GONE
