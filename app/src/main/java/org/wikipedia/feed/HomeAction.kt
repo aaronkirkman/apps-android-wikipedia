@@ -28,7 +28,6 @@ sealed interface HomeAction {
     data object UpdateTabCount : HomeAction
     data class CardImpression(val card: Card, val index: Int) : HomeAction
     data class CardFooterClick(val card: Card) : HomeAction
-    data object NotificationClick : HomeAction
     data object ManageModulesClick : HomeAction
     data object ShuffleClick : HomeAction
 }

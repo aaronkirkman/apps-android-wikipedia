@@ -19,7 +19,6 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.database.AppDatabase
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.history.HistoryEntry
-import org.wikipedia.notifications.NotificationPollBroadcastReceiver
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
@@ -125,19 +124,6 @@ internal class DeveloperSettingsPreferenceLoader(fragment: PreferenceFragmentCom
         findPreference(R.string.preference_key_announcement_shown_dialogs).onPreferenceClickListener = Preference.OnPreferenceClickListener {
             Prefs.resetAnnouncementShownDialogs()
             loadPreferences()
-            true
-        }
-        findPreference(R.string.preference_key_suggested_edits_reactivation_test).onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _: Preference, _: Any? ->
-            NotificationPollBroadcastReceiver.stopPollTask(activity)
-            NotificationPollBroadcastReceiver.startPollTask(activity)
-            true
-        }
-        findPreference(R.string.preferences_developer_suggested_edits_reactivation_notification_stage_one).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            NotificationPollBroadcastReceiver.showSuggestedEditsLocalNotification(activity, R.string.suggested_edits_reactivation_notification_stage_one)
-            true
-        }
-        findPreference(R.string.preferences_developer_suggested_edits_reactivation_notification_stage_two).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            NotificationPollBroadcastReceiver.showSuggestedEditsLocalNotification(activity, R.string.suggested_edits_reactivation_notification_stage_two)
             true
         }
         findPreference(R.string.preference_developer_clear_last_location_and_zoom_level).onPreferenceClickListener = Preference.OnPreferenceClickListener {

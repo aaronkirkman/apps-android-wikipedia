@@ -224,11 +224,6 @@ class MainActivity : SingleFragmentActivity<MainFragment>(), MainFragment.Callba
         return statusBarInsets
     }
 
-    override fun onUnreadNotification() {
-        fragment.updateNotificationDot(true)
-        (fragment.currentFragment as? HomeFragment)?.refreshNotification()
-    }
-
     private fun setToolbarElevationDefault() {
         binding.mainToolbar.elevation = DimenUtil.dpToPx(DimenUtil.getDimension(R.dimen.toolbar_default_elevation))
     }

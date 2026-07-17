@@ -35,7 +35,6 @@ import org.wikipedia.events.ReadingListsEnableDialogEvent
 import org.wikipedia.events.ReadingListsNoLongerSyncedEvent
 import org.wikipedia.events.SplitLargeListsEvent
 import org.wikipedia.events.ThemeFontChangeEvent
-import org.wikipedia.events.UnreadNotificationsEvent
 import org.wikipedia.main.MainActivity
 import org.wikipedia.notifications.NotificationPresenter
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
@@ -176,13 +175,6 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
                                 FeedbackUtil.makeSnackbar(this@BaseActivity, getString(R.string.reading_list_toast_last_sync)).show()
                             }
                         }
-                        is UnreadNotificationsEvent -> {
-                            runOnUiThread {
-                                if (!isDestroyed) {
-                                    onUnreadNotification()
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -308,5 +300,4 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
         }
     }
 
-    open fun onUnreadNotification() { }
 }

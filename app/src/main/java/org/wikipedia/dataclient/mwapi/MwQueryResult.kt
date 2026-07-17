@@ -7,9 +7,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.json.JsonUtil
-import org.wikipedia.notifications.db.Notification
-import org.wikipedia.notifications.db.Notification.SeenTime
-import org.wikipedia.notifications.db.Notification.UnreadNotificationWikiItem
 import org.wikipedia.page.PageTitle
 import org.wikipedia.settings.SiteInfo
 import org.wikipedia.util.DateUtil
@@ -23,7 +20,6 @@ import java.util.*
 class MwQueryResult {
 
     @SerialName("userinfo") val userInfo: UserInfo? = null
-    @SerialName("unreadnotificationpages") val unreadNotificationWikis: Map<String, UnreadNotificationWikiItem>? = null
     @SerialName("authmanagerinfo") private val amInfo: MwAuthManagerInfo? = null
     @SerialName("general") val siteInfo: SiteInfo? = null
     @SerialName("autocreatetempuser") val autoCreateTempUser: SiteInfo.AutoCreateTempUser? = null
@@ -39,7 +35,6 @@ class MwQueryResult {
     val users: List<UserInfo>? = null
     val pages: List<MwQueryPage>? = null
     val echomarkseen: MarkReadResponse? = null
-    val notifications: NotificationList? = null
     val watchlist: List<WatchlistItem> = emptyList()
     val namespaces: Map<String, Namespace>? = null
     val allmessages: List<Message>? = null
@@ -166,13 +161,6 @@ class MwQueryResult {
 
     @Serializable
     class MarkReadResponse(val timestamp: String? = null, val result: String? = null)
-
-    @Serializable
-    class NotificationList(val list: List<Notification>? = null,
-                           val seenTime: SeenTime? = null,
-                           val count: Int = 0,
-                           private val rawcount: Int = 0,
-                           @SerialName("continue") val continueStr: String? = null)
 
     @Serializable
     class WatchlistItem {

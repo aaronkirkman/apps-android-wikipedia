@@ -307,31 +307,6 @@ interface Service {
     @GET(MW_API_PREFIX + "action=query&list=users&usprop=groups|cancreate")
     suspend fun getUserList(@Query("ususers") userNames: String): MwQueryResponse
 
-    // ------- Notifications -------
-
-    @Headers("Cache-Control: no-cache")
-    @GET(MW_API_PREFIX + "action=query&meta=notifications&notformat=model&notlimit=max&notwikis=*")
-    suspend fun getAllNotifications(
-        @Query("notfilter") filter: String?,
-        @Query("notcontinue") continueStr: String?
-    ): MwQueryResponse
-
-    @FormUrlEncoded
-    @POST(MW_API_PREFIX + "action=echomarkread")
-    suspend fun markRead(
-        @Field("token") token: String,
-        @Field("list") readList: String?,
-        @Field("unreadlist") unreadList: String?
-    ): MwQueryResponse
-
-    @Headers("Cache-Control: no-cache")
-    @GET(MW_API_PREFIX + "action=query&meta=notifications&notwikis=*&notprop=list&notfilter=!read&notlimit=1")
-    suspend fun lastUnreadNotification(): MwQueryResponse
-
-    @Headers("Cache-Control: no-cache")
-    @GET(MW_API_PREFIX + "action=query&meta=unreadnotificationpages&unplimit=max&unpwikis=*")
-    suspend fun unreadNotificationWikis(): MwQueryResponse
-
     @FormUrlEncoded
     @POST(MW_API_PREFIX + "action=echopushsubscriptions&command=create&provider=fcm")
     suspend fun subscribePush(

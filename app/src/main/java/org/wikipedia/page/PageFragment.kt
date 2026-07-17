@@ -53,7 +53,6 @@ import org.wikipedia.analytics.eventplatform.ArticleFindInPageInteractionEvent
 import org.wikipedia.analytics.eventplatform.ArticleInteractionEvent
 import org.wikipedia.analytics.eventplatform.EventPlatformClient
 import org.wikipedia.analytics.eventplatform.PlacesEvent
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.bridge.CommunicationBridge
 import org.wikipedia.bridge.JavaScriptActionHandler
 import org.wikipedia.categories.CategoryActivity
@@ -72,7 +71,6 @@ import org.wikipedia.json.JsonUtil
 import org.wikipedia.main.MainActivity
 import org.wikipedia.media.AvPlayer
 import org.wikipedia.navtab.NavTab
-import org.wikipedia.notifications.PollNotificationWorker
 import org.wikipedia.page.action.PageActionItem
 import org.wikipedia.page.issues.PageIssuesDialog
 import org.wikipedia.page.leadimages.LeadImagesHandler
@@ -912,11 +910,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             dismissBottomSheet()
         }
 
-        if (AccountUtil.isLoggedIn) {
-            // explicitly check notifications for the current user
-            PollNotificationWorker.schedulePollNotificationJob(requireContext())
-        }
-
         EventPlatformClient.AssociationController.beginNewPageView()
 
         // update the time spent reading of the current page, before loading the new one
@@ -1109,10 +1102,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
 
     fun callback(): Callback? {
         return getCallback(this, Callback::class.java)
-    }
-
-    fun showAnonNotification() {
-        (requireActivity() as PageActivity).onAnonNotification()
     }
 
     fun showOverflowMenu(anchor: View) {

@@ -39,7 +39,6 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.BaseActivity
 import org.wikipedia.activity.FragmentUtil.getCallback
 import org.wikipedia.analytics.eventplatform.ReadingListsAnalyticsHelper
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.commons.FilePageActivity
 import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.databinding.FragmentMainBinding
@@ -58,7 +57,6 @@ import org.wikipedia.history.HistoryFragment
 import org.wikipedia.navtab.MenuNavTabDialog
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.navtab.NavTabFragmentPagerAdapter
-import org.wikipedia.notifications.NotificationActivity
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
@@ -78,7 +76,6 @@ import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.ShareUtil
 import org.wikipedia.util.TabUtil
-import org.wikipedia.views.NotificationButtonView
 import org.wikipedia.views.TabCountsView
 import org.wikipedia.views.imageservice.ImageService
 import org.wikipedia.widgets.SearchWidgetInstallDialog
@@ -94,7 +91,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
     private var _binding: FragmentMainBinding? = null
     val binding get() = _binding!!
 
-    private lateinit var notificationButtonView: NotificationButtonView
     private var tabCountsView: TabCountsView? = null
     private var showTabCountsAnimation = false
     private val downloadReceiver = MediaDownloadReceiver()
@@ -129,7 +125,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
                         is LoggedOutEvent,
                         is LoggedOutInBackgroundEvent -> {
                             requireActivity().invalidateOptionsMenu()
-                            (currentFragment as? HomeFragment)?.refreshNotification()
                             ExclusiveBottomSheetPresenter.dismiss(childFragmentManager)
                             refreshContents()
                         }
@@ -168,8 +163,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
 
         maybeShowFeedNewModulesTooltip()
         Prefs.incrementExploreFeedVisitCount()
-
-        notificationButtonView = NotificationButtonView(requireActivity())
 
         if (savedInstanceState == null) {
             handleIntent(requireActivity().intent)
@@ -279,23 +272,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
             FeedbackUtil.setButtonTooltip(tabCountsView!!)
             showTabCountsAnimation = false
         }
-        val notificationMenuItem = menu.findItem(R.id.menu_notifications)
-        if (AccountUtil.isLoggedIn) {
-            notificationMenuItem.isVisible = true
-            notificationButtonView.setUnreadCount(Prefs.notificationUnreadCount)
-            notificationButtonView.setOnClickListener {
-                if (AccountUtil.isLoggedIn) {
-                    startActivity(NotificationActivity.newIntent(requireActivity()))
-                }
-            }
-            notificationButtonView.contentDescription = getString(R.string.notifications_activity_title)
-            notificationMenuItem.actionView = notificationButtonView
-            notificationMenuItem.expandActionView()
-            FeedbackUtil.setButtonTooltip(notificationButtonView)
-        } else {
-            notificationMenuItem.isVisible = false
-        }
-        updateNotificationDot(false)
     }
 
     fun handleIntent(intent: Intent) {
@@ -434,17 +410,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         val fragment = currentFragment
         if (fragment is HistoryFragment) {
             fragment.refresh()
-        }
-    }
-
-    fun updateNotificationDot(animate: Boolean) {
-        if (AccountUtil.isLoggedIn && Prefs.notificationUnreadCount > 0) {
-            notificationButtonView.setUnreadCount(Prefs.notificationUnreadCount)
-            if (animate) {
-                notificationButtonView.runAnimation()
-            }
-        } else {
-            notificationButtonView.setUnreadCount(0)
         }
     }
 

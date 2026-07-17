@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -17,15 +16,12 @@ import org.wikipedia.Constants.InvokeSource
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.BaseActivity
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.databinding.ActivityTabsBinding
 import org.wikipedia.main.MainActivity
 import org.wikipedia.navtab.NavTab
-import org.wikipedia.notifications.NotificationActivity
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.PageActivity
 import org.wikipedia.readinglist.AddToReadingListDialog
-import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DimenUtil
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.ResourceUtil
@@ -45,7 +41,7 @@ class TabActivity : BaseActivity() {
         setContentView(binding.root)
         binding.tabCountsView.updateTabCount(false)
         binding.tabCountsView.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
-        FeedbackUtil.setButtonTooltip(binding.tabCountsView, binding.tabButtonNotifications)
+        FeedbackUtil.setButtonTooltip(binding.tabCountsView)
 
         binding.tabRecyclerView.adapter = TabItemAdapter()
         val touchCallback = SwipeableTabTouchHelperCallback(this)
@@ -61,22 +57,11 @@ class TabActivity : BaseActivity() {
             setDisplayHomeAsUpEnabled(true)
             title = ""
         }
-
-        binding.tabButtonNotifications.setOnClickListener {
-            if (AccountUtil.isLoggedIn) {
-                startActivity(NotificationActivity.newIntent(this))
-            }
-        }
     }
 
     override fun onPause() {
         super.onPause()
         app.commitTabState()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        updateNotificationsButton(false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -122,10 +107,6 @@ class TabActivity : BaseActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onUnreadNotification() {
-        updateNotificationsButton(true)
     }
 
     private fun saveTabsToList() {
@@ -179,22 +160,6 @@ class TabActivity : BaseActivity() {
                 .putExtra(Constants.INTENT_RETURN_TO_MAIN, true)
                 .putExtra(Constants.INTENT_EXTRA_GO_TO_MAIN_TAB, NavTab.HOME.code()))
         finish()
-    }
-
-    private fun updateNotificationsButton(animate: Boolean) {
-        if (AccountUtil.isLoggedIn) {
-            binding.tabButtonNotifications.isVisible = true
-            if (Prefs.notificationUnreadCount > 0) {
-                binding.tabButtonNotifications.setUnreadCount(Prefs.notificationUnreadCount)
-                if (animate) {
-                    binding.tabButtonNotifications.runAnimation()
-                }
-            } else {
-                binding.tabButtonNotifications.setUnreadCount(0)
-            }
-        } else {
-            binding.tabButtonNotifications.isVisible = false
-        }
     }
 
     private fun adapterPositionToTabIndex(adapterPosition: Int): Int {

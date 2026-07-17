@@ -62,12 +62,6 @@
                         android:layout_height="match_parent"
                         android:contentDescription="@string/menu_page_show_tabs" />
 
-                    <org.wikipedia.views.NotificationButtonView
-                        android:id="@+id/page_toolbar_button_notifications"
-                        android:layout_width="48dp"
-                        android:layout_height="match_parent"
-                        android:contentDescription="@string/notifications_activity_title"/>
-
                     <ImageView
                         android:id="@+id/page_toolbar_button_show_overflow_menu"
                         android:layout_width="48dp"

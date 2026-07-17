@@ -31,7 +31,6 @@ import org.wikipedia.installreferrer.InstallReferrerListener
 import org.wikipedia.language.AcceptLanguageUtil
 import org.wikipedia.language.AppLanguageState
 import org.wikipedia.notifications.NotificationCategory
-import org.wikipedia.notifications.NotificationPollBroadcastReceiver
 import org.wikipedia.page.tabs.Tab
 import org.wikipedia.push.WikipediaFirebaseMessagingService
 import org.wikipedia.settings.Prefs
@@ -167,8 +166,6 @@ class WikipediaApp : Application() {
         NotificationCategory.createNotificationChannels(this)
         AppShortcuts.setShortcuts(this)
 
-        // Kick the notification receiver, in case it hasn't yet been started by the system.
-        NotificationPollBroadcastReceiver.startPollTask(this)
         InstallReferrerListener.newInstance(this)
 
         // For good measure, explicitly call our token subscription function, in case the
@@ -268,9 +265,6 @@ class WikipediaApp : Application() {
         Prefs.impactLastQueryTime = 0
         Prefs.impactLastResponseBody = emptyMap()
         SharedPreferenceCookieManager.instance.clearAllCookies()
-        MainScope().launch {
-            AppDatabase.instance.notificationDao().deleteAll()
-        }
         FlowEventBus.post(LoggedOutEvent())
         L.d("Logout complete.")
     }

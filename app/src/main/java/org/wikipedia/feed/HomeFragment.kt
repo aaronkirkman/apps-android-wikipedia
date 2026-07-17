@@ -30,7 +30,6 @@ import org.wikipedia.feed.topread.TopReadCard
 import org.wikipedia.main.MainActivity
 import org.wikipedia.main.MainFragment
 import org.wikipedia.navtab.NavTab
-import org.wikipedia.notifications.NotificationActivity
 import org.wikipedia.page.tabs.TabActivity
 import org.wikipedia.random.RandomActivity
 import org.wikipedia.settings.Prefs
@@ -71,7 +70,6 @@ class HomeFragment : Fragment() {
                 val selectedTab by viewModel.selectedTab.collectAsState()
                 val wikiSite by viewModel.wikiSite.collectAsState()
                 val tabsState by viewModel.tabsState.collectAsState()
-                val notificationState by viewModel.unreadCount.collectAsState()
                 val communityContentState by viewModel.communityState.collectAsState()
 
                 BaseTheme(currentTheme = WikipediaApp.instance.currentTheme) {
@@ -82,7 +80,6 @@ class HomeFragment : Fragment() {
                         communityContentState = communityContentState,
                         overflowMenuState = pageOverflowMenuViewModel.pageOverflowMenuState,
                         tabsState = tabsState,
-                        notificationBellState = notificationState,
                         onAction = { handleHomeAction(it, wikiSite, selectedTab) }
                     )
                 }
@@ -96,7 +93,6 @@ class HomeFragment : Fragment() {
         viewModel.updateTabCount()
         viewModel.updateSelectedLanguageIfNeeded()
         instrument.startFunnel("home_feed")
-        refreshNotification()
         maybeShowSurveyDialog()
     }
 
@@ -108,10 +104,6 @@ class HomeFragment : Fragment() {
         super.onPause()
         cardImpressions.clear()
         instrument.stopFunnel()
-    }
-
-    fun refreshNotification() {
-        viewModel.refreshUnreadNotificationCount()
     }
 
     fun updateLanguage(languageCode: String) {
@@ -268,9 +260,6 @@ class HomeFragment : Fragment() {
                         startActivity(DidYouKnowActivity.newIntent(requireActivity(), card.site, card.items))
                     }
                 }
-            }
-            HomeAction.NotificationClick -> {
-                requireActivity().startActivity(NotificationActivity.newIntent(requireActivity()))
             }
             HomeAction.ManageModulesClick -> {
                 instrument.submitInteraction("click", actionSource = "feed_empty", elementId = "customize_feed")

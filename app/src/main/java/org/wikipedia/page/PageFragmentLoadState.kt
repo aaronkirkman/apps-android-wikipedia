@@ -21,11 +21,9 @@ import org.wikipedia.dataclient.mwapi.MwQueryResponse
 import org.wikipedia.dataclient.okhttp.OfflineCacheInterceptor
 import org.wikipedia.dataclient.page.PageSummary
 import org.wikipedia.history.HistoryEntry
-import org.wikipedia.notifications.AnonymousNotificationHelper
 import org.wikipedia.page.leadimages.LeadImagesHandler
 import org.wikipedia.page.tabs.Tab
 import org.wikipedia.settings.Prefs
-import org.wikipedia.staticdata.UserTalkAliasData
 import org.wikipedia.util.DateUtil
 import org.wikipedia.util.UriUtil
 import org.wikipedia.util.log.L
@@ -164,8 +162,6 @@ class PageFragmentLoadState(private var model: PageViewModel,
                     if (makeWatchRequest) {
                         ServiceFactory.get(title.wikiSite)
                             .getWatchedStatusWithCategories(title.prefixedText)
-                    } else if (WikipediaApp.instance.isOnline && !AccountUtil.isLoggedIn) {
-                        AnonymousNotificationHelper.maybeGetAnonUserInfo(title.wikiSite)
                     } else {
                         MwQueryResponse()
                     }
@@ -214,22 +210,6 @@ class PageFragmentLoadState(private var model: PageViewModel,
                 bridge.resetHtml(title)
             }
             fragment.onPageMetadataLoaded(redirectedFrom)
-
-            if (AnonymousNotificationHelper.shouldCheckAnonNotifications(watchedResponse)) {
-                checkAnonNotifications(title)
-            }
-        }
-    }
-
-    private fun checkAnonNotifications(title: PageTitle) {
-        fragment.lifecycleScope.launch(CoroutineExceptionHandler { _, throwable ->
-            L.e(throwable)
-        }) {
-            val response = ServiceFactory.get(title.wikiSite)
-                .getLastModified(UserTalkAliasData.valueFor(title.wikiSite.languageCode) + ":" + Prefs.lastAnonUserWithMessages)
-            if (AnonymousNotificationHelper.anonTalkPageHasRecentMessage(response, title)) {
-                fragment.showAnonNotification()
-            }
         }
     }
 

@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
-import org.wikipedia.auth.AccountUtil
-import org.wikipedia.compose.components.NotificationBellState
 import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.feed.dayheader.DayHeaderCard
@@ -89,9 +87,6 @@ class HomeViewModel : ViewModel() {
             error = throwable
         )
     }
-
-    private val _unreadCount = MutableStateFlow(NotificationBellState())
-    val unreadCount = _unreadCount.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -224,9 +219,5 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             SettingsRepository.removeHiddenModule(moduleKey)
         }
-    }
-
-    fun refreshUnreadNotificationCount() {
-        _unreadCount.update { it.copy(unreadCount = Prefs.notificationUnreadCount, canShow = AccountUtil.isLoggedIn) }
     }
 }

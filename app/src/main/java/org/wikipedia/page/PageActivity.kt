@@ -39,7 +39,6 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.BaseActivity
 import org.wikipedia.analytics.eventplatform.BreadCrumbLogEvent
 import org.wikipedia.analytics.testkitchen.TestKitchenAdapter
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.commons.FilePageActivity
 import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.databinding.ActivityPageBinding
@@ -52,8 +51,6 @@ import org.wikipedia.gallery.GalleryActivity
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.language.LangLinksActivity
 import org.wikipedia.navtab.NavTab
-import org.wikipedia.notifications.AnonymousNotificationHelper
-import org.wikipedia.notifications.NotificationActivity
 import org.wikipedia.page.linkpreview.LinkPreviewDialog
 import org.wikipedia.page.tabs.TabActivity
 import org.wikipedia.readinglist.ReadingListActivity
@@ -172,19 +169,11 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
             requestBrowseTabLauncher.launch(TabActivity.newIntentFromPageActivity(this))
         }
         toolbarHideHandler = ViewHideHandler(binding.pageToolbarContainer, null, Gravity.TOP) { isTooltipShowing }
-        FeedbackUtil.setButtonTooltip(binding.pageToolbarButtonNotifications, binding.pageToolbarButtonTabs, binding.pageToolbarButtonShowOverflowMenu)
+        FeedbackUtil.setButtonTooltip(binding.pageToolbarButtonTabs, binding.pageToolbarButtonShowOverflowMenu)
         binding.pageToolbarButtonShowOverflowMenu.setOnClickListener {
             pageFragment.showOverflowMenu(it)
             pageFragment.articleInteractionEvent?.logMoreClick()
             Prefs.showOneTimeCustomizeToolbarTooltip = false
-        }
-
-        binding.pageToolbarButtonNotifications.isVisible = AccountUtil.isLoggedIn
-        binding.pageToolbarButtonNotifications.setOnClickListener {
-            pageFragment.articleInteractionEvent?.logNotificationClick()
-            if (AccountUtil.isLoggedIn) {
-                startActivity(NotificationActivity.newIntent(this@PageActivity))
-            }
         }
 
         // Navigation setup
@@ -262,7 +251,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     override fun onResume() {
         super.onResume()
         app.resetWikiSite()
-        updateNotificationsButton(false)
         Prefs.temporaryWikitext = null
     }
 
@@ -634,34 +622,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
         binding.pageToolbarButtonTabs.updateTabCount(true)
     }
 
-    private fun updateNotificationsButton(animate: Boolean) {
-        if (AccountUtil.isLoggedIn) {
-            binding.pageToolbarButtonNotifications.isVisible = true
-            if (Prefs.notificationUnreadCount > 0) {
-                binding.pageToolbarButtonNotifications.setUnreadCount(Prefs.notificationUnreadCount)
-                if (animate) {
-                    toolbarHideHandler.ensureDisplayed()
-                    binding.pageToolbarButtonNotifications.runAnimation()
-                }
-            } else {
-                binding.pageToolbarButtonNotifications.setUnreadCount(0)
-            }
-        } else if (!AccountUtil.isLoggedIn && AnonymousNotificationHelper.isWithinAnonNotificationTime()) {
-            binding.pageToolbarButtonNotifications.isVisible = true
-            if (Prefs.hasAnonymousNotification) {
-                binding.pageToolbarButtonNotifications.setUnreadCount(1)
-                if (animate) {
-                    toolbarHideHandler.ensureDisplayed()
-                    binding.pageToolbarButtonNotifications.runAnimation()
-                }
-            } else {
-                binding.pageToolbarButtonNotifications.setUnreadCount(0)
-            }
-        } else {
-            binding.pageToolbarButtonNotifications.isVisible = false
-        }
-    }
-
     fun clearActionBarTitle() {
         supportActionBar?.title = ""
     }
@@ -672,14 +632,6 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
 
     fun getOverflowMenu(): View {
         return binding.pageToolbarButtonShowOverflowMenu
-    }
-
-    override fun onUnreadNotification() {
-        updateNotificationsButton(true)
-    }
-
-    fun onAnonNotification() {
-        updateNotificationsButton(true)
     }
 
     fun updateSearchHint() {

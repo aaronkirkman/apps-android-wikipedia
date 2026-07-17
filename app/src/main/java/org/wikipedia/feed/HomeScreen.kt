@@ -46,8 +46,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.wikipedia.R
-import org.wikipedia.compose.components.NotificationBell
-import org.wikipedia.compose.components.NotificationBellState
 import org.wikipedia.compose.components.TabsBox
 import org.wikipedia.compose.components.WikiLangCodeBox
 import org.wikipedia.compose.components.menu.PageOverflowMenuViewModel
@@ -71,7 +69,6 @@ fun HomeScreen(
     communityContentState: CommunityContentState,
     overflowMenuState: PageOverflowMenuViewModel.PageOverflowMenuState? = null,
     tabsState: TabsState,
-    notificationBellState: NotificationBellState,
     onAction: (HomeAction) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -111,9 +108,7 @@ fun HomeScreen(
                             topInset = topInset,
                             tabsState = tabsState,
                             onTabClick = { onAction(HomeAction.TabClick) },
-                            onUpdateTabCount = { onAction(HomeAction.UpdateTabCount) },
-                            notificationBellState = notificationBellState,
-                            onNotificationClick = { onAction(HomeAction.NotificationClick) }
+                            onUpdateTabCount = { onAction(HomeAction.UpdateTabCount) }
                         )
 
                         HomeTabBar(
@@ -145,10 +140,8 @@ fun HomeScreen(
 fun HomeToolbar(
     topInset: Int,
     tabsState: TabsState,
-    notificationBellState: NotificationBellState,
     onTabClick: () -> Unit,
-    onUpdateTabCount: () -> Unit,
-    onNotificationClick: () -> Unit
+    onUpdateTabCount: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
@@ -196,14 +189,7 @@ fun HomeToolbar(
                 )
             }
         }
-        if (notificationBellState.canShow) {
-            NotificationBell(
-                modifier = actionButtonModifier,
-                unreadCount = notificationBellState.unreadCount,
-                onClick = onNotificationClick
-            )
-        }
-        if (tabsState.count == 0 && !notificationBellState.canShow) {
+        if (tabsState.count == 0) {
             Spacer(modifier = actionButtonModifier)
         }
     }
@@ -387,8 +373,7 @@ private fun HomeScreenCommunityAllModulesOffPreview() {
             wikiSite = WikiSite.preview(),
             selectedTab = HomeTab.COMMUNITY,
             communityContentState = CommunityContentState(emptyState = FeedEmptyState.ALL_MODULES_HIDDEN, wikiSite = WikiSite.preview()),
-            tabsState = TabsState(1, false),
-            notificationBellState = NotificationBellState(unreadCount = 5, canShow = true)
+            tabsState = TabsState(1, false)
         )
     }
 }
@@ -401,8 +386,7 @@ fun HomeScreenCommunityPreview() {
             wikiSite = WikiSite.preview(),
             selectedTab = HomeTab.COMMUNITY,
             communityContentState = CommunityContentState(isInitialLoading = true, wikiSite = WikiSite.preview()),
-            tabsState = TabsState(1, false),
-            notificationBellState = NotificationBellState(unreadCount = 5, canShow = true)
+            tabsState = TabsState(1, false)
         )
     }
 }
