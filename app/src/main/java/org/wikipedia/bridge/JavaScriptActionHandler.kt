@@ -107,7 +107,7 @@ object JavaScriptActionHandler {
                 "   \"textSizeAdjustmentPercentage\": \"100%%\"," +
                 "   \"loadImages\": ${Prefs.isImageDownloadEnabled}," +
                 "   \"userGroups\": ${JsonUtil.encodeToString(AccountUtil.groups)}," +
-                "   \"isEditable\": ${!Prefs.readingFocusModeEnabled}" +
+                "   \"isEditable\": false" +
                 "}", topMargin, 48, leadImageHeight)
     }
 

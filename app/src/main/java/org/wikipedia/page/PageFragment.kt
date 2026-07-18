@@ -314,7 +314,7 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         bottomBarHideHandler.enabled = Prefs.readingFocusModeEnabled
         leadImagesHandler.refreshCallToActionVisibility()
         page?.let {
-            bridge.execute(JavaScriptActionHandler.setUpEditButtons(!Prefs.readingFocusModeEnabled, !it.pageProperties.canEdit))
+            bridge.execute(JavaScriptActionHandler.setUpEditButtons(false, !it.pageProperties.canEdit))
         }
         // We disable and then re-enable scroll events coming from the WebView, because toggling
         // reading focus mode within the article could actually change the dimensions of the page,
