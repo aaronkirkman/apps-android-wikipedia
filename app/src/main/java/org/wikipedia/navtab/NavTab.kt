@@ -24,7 +24,7 @@ enum class NavTab(val text: Int, val id: Int, val icon: Int) : EnumCode {
             return HistoryFragment.newInstance()
         }
     },
-    MORE(R.string.nav_item_more, R.id.nav_tab_more, R.drawable.ic_menu_white_24dp) {
+    MORE(R.string.settings_activity_title, R.id.nav_tab_more, R.drawable.ic_settings_black_24dp) {
         override fun newInstance(): Fragment {
             return Fragment()
         }

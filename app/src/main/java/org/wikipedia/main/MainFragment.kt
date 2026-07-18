@@ -54,7 +54,6 @@ import org.wikipedia.gallery.GalleryActivity
 import org.wikipedia.gallery.MediaDownloadReceiver
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.history.HistoryFragment
-import org.wikipedia.navtab.MenuNavTabDialog
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.navtab.NavTabFragmentPagerAdapter
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
@@ -82,7 +81,7 @@ import org.wikipedia.widgets.SearchWidgetInstallDialog
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragment.Callback, MenuNavTabDialog.Callback {
+class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragment.Callback {
     interface Callback {
         fun onTabChanged(tab: NavTab)
         fun updateToolbarElevation(elevate: Boolean)
@@ -145,7 +144,7 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         binding.mainNavTabLayout.setOnItemSelectedListener { item ->
             navTabBackStack.clear()
             if (item.order == NavTab.MORE.code()) {
-                ExclusiveBottomSheetPresenter.show(childFragmentManager, MenuNavTabDialog.newInstance())
+                settingsClick()
                 return@setOnItemSelectedListener false
             }
             val fragment = currentFragment
@@ -390,7 +389,7 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, HistoryFragme
         return false
     }
 
-    override fun settingsClick() {
+    private fun settingsClick() {
         startActivityForResult(SettingsActivity.newIntent(requireActivity()), Constants.ACTIVITY_REQUEST_SETTINGS)
     }
 
