@@ -279,7 +279,7 @@ object Prefs {
         set(pending) = PrefsIoUtil.setBoolean(R.string.preference_key_reading_lists_remote_setup_pending, pending)
 
     var isInitialOnboardingEnabled
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_initial_onboarding_enabled, true)
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_initial_onboarding_enabled, false)
         set(enabled) = PrefsIoUtil.setBoolean(R.string.preference_key_initial_onboarding_enabled, enabled)
 
     fun askedForPermissionOnce(permission: String): Boolean {

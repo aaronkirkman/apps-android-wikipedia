@@ -246,9 +246,6 @@
             android:name=".readinglist.ReadingListActivity" />
 
         <activity
-            android:name=".onboarding.InitialOnboardingActivity"/>
-
-        <activity
             android:name=".feed.topread.TopReadArticlesActivity"
             android:theme="@style/AppTheme.ActionBar"/>
 

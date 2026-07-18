@@ -14,7 +14,6 @@ import org.wikipedia.activity.SingleFragmentActivity
 import org.wikipedia.main.MainActivity
 import org.wikipedia.main.MainFragment
 import org.wikipedia.navtab.NavTab
-import org.wikipedia.onboarding.InitialOnboardingActivity
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
 
 object BreadCrumbViewUtil {
@@ -57,9 +56,6 @@ object BreadCrumbViewUtil {
         val fragment = getVisibleFragment(context)
 
         return when {
-            fragment != null && context is InitialOnboardingActivity -> {
-                getInitialOnboardingScreenName(fragment)
-            }
             fragment != null && context is MainActivity -> {
                 getMainFragmentTabName(fragment)
             }
@@ -79,11 +75,6 @@ object BreadCrumbViewUtil {
                 NavTab.of(mainFragmentPager.currentItem).name
             }
         }
-        return ""
-    }
-
-    private fun getInitialOnboardingScreenName(fragment: Fragment): String {
-        // TODO: add breadcrumb support for new onboarding screen?
         return ""
     }
 

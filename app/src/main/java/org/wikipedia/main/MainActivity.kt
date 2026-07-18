@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.view.ContextThemeWrapper
@@ -18,7 +17,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
-import org.wikipedia.Constants
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.SingleFragmentActivity
@@ -26,9 +24,7 @@ import org.wikipedia.analytics.testkitchen.TestKitchenAdapter
 import org.wikipedia.databinding.ActivityMainBinding
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.feed.HomeFragment
-import org.wikipedia.feed.HomeTab
 import org.wikipedia.navtab.NavTab
-import org.wikipedia.onboarding.InitialOnboardingActivity
 import org.wikipedia.page.PageActivity
 import org.wikipedia.settings.Prefs
 import org.wikipedia.theme.Theme
@@ -45,13 +41,6 @@ class MainActivity : SingleFragmentActivity<MainFragment>(), MainFragment.Callba
     private var statusBarInsets = Insets.NONE
     private var navBarInsets = Insets.NONE
     private var controlNavTabInFragment = false
-    private val onboardingLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        val fragment = fragment.currentFragment
-        if (fragment is HomeFragment) {
-            fragment.updateLanguage(Prefs.homeLanguageCode)
-            fragment.selectTab(HomeTab.COMMUNITY)
-        }
-    }
 
     override fun inflateAndSetContentView() {
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -84,10 +73,6 @@ class MainActivity : SingleFragmentActivity<MainFragment>(), MainFragment.Callba
         }
 
         setImageZoomHelper()
-        if (Prefs.isInitialOnboardingEnabled && savedInstanceState == null &&
-            !intent.hasExtra(Constants.INTENT_EXTRA_PREVIEW_SAVED_READING_LISTS)) {
-            onboardingLauncher.launch(InitialOnboardingActivity.newIntent(this))
-        }
         setNavigationBarColor(Color.TRANSPARENT)
         setSupportActionBar(binding.mainToolbar)
         supportActionBar?.title = ""
