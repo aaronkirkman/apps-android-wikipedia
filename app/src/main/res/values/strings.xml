@@ -562,6 +562,7 @@
     <string name="preference_category_push_notifications">Push notifications</string>
     <string name="preference_title_customize_push_notifications">Customize push notifications</string>
     <string name="preference_category_display_settings">Display settings</string>
+    <string name="preference_summary_no_value">Unset</string>
     <string name="preference_title_hide_read_notifications">Hide read notifications</string>
     <string name="notifications_channel_group_wikipedia_notifications_title">Wikipedia</string>
     <string name="notifications_channel_group_wikipedia_notifications_description">Notifications from Wikipedia</string>

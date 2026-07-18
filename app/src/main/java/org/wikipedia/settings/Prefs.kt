@@ -80,10 +80,6 @@ object Prefs {
             PrefsIoUtil.setString(R.string.preference_key_cookie_map, JsonUtil.encodeToString(map))
         }
 
-    var isShowDeveloperSettingsEnabled
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_show_developer_settings, isDevRelease)
-        set(enabled) = PrefsIoUtil.setBoolean(R.string.preference_key_show_developer_settings, enabled)
-
     var mruLanguageCodeList
         get() = StringUtil.csvToList(PrefsIoUtil.getString(R.string.preference_key_language_mru, null).orEmpty())
         set(value) = PrefsIoUtil.setString(R.string.preference_key_language_mru, StringUtil.listToCsv(value))

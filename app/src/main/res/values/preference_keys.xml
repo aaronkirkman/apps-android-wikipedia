@@ -29,7 +29,6 @@
     <string name="preference_key_login_groups" translatable="false">groups</string>
     <string name="preference_key_login_force_email_auth" translatable="false">loginForceEmailAuth</string>
     <string name="preference_key_last_background_login_date_time" translatable="false">lastBackgroundLoginDateTime</string>
-    <string name="preference_key_show_developer_settings" translatable="false">showDeveloperSettings</string>
     <string name="preference_key_last_run_time_format" translatable="false">%s-lastrun</string>
     <string name="preference_key_tabs" translatable="false">tabs</string>
     <string name="preference_key_customize_home_feed" translatable="false">customizeHomeFeed</string>
@@ -71,11 +70,6 @@
     <string name="preference_key_feed_cards_lang_supported" translatable="false">feedCardsLangSupported</string>
     <string name="preference_key_feed_cards_lang_disabled" translatable="false">feedCardsLangDisabled</string>
     <string name="preference_key_feed_customize_onboarding_card_enabled" translatable="false">feedCustomizeOnboardingCardEnabled</string>
-    <string name="preference_key_add_articles" translatable="false">addArticles</string>
-    <string name="preference_key_add_reading_lists" translatable="false">addReadingLists</string>
-    <string name="preference_key_delete_reading_lists" translatable="false">deleteReadingLists</string>
-    <string name="preference_key_delete_test_reading_lists" translatable="false">deleteTestReadingLists</string>
-    <string name="preference_key_add_malformed_reading_list_page" translatable="false">addMalformedReadingListPage</string>
     <string name="preference_key_reading_lists_last_sync_time" translatable="false">readingListsLastSyncTime</string>
     <string name="preference_key_reading_lists_deleted_ids" translatable="false">readingListsDeletedIds</string>
     <string name="preference_key_reading_list_pages_deleted_ids" translatable="false">readingListPagesDeletedIds</string>
@@ -114,7 +108,6 @@
     <string name="preference_key_push_notification_token_old" translatable="false">pushNotificationTokenOld</string>
     <string name="preference_key_event_platform_session_id" translatable="false">eventPlatformSessionId</string>
     <string name="preference_key_event_platform_intake_base_uri" translatable="false">eventPlatformIntakeBaseUri</string>
-    <string name="preference_key_event_platform_intake_base_uri_list" translatable="false">eventPlatformIntakeBaseUriList</string>
     <string name="preference_key_event_platform_stored_stream_configs" translatable="false">eventPlatformStoredStreamConfigs</string>
     <string name="preference_key_crash_report_local_class_name" translatable="false">crashReportLocalClassName</string>
     <string name="preference_key_excluded_wiki_codes_notification" translatable="false">filterNotificationExcludedWikiCodes</string>
@@ -171,7 +164,6 @@
     <string name="preference_key_impact_last_query_time" translatable="false">impactLastQueryTime</string>
     <string name="preference_key_impact_last_response_body" translatable="false">impactLastResponseBody</string>
     <string name="preference_key_default_places_location_latlng" translatable="false">placesDefaultLocationLatLng</string>
-    <string name="preference_key_playground_category" translatable="false">categoryPlayground</string>
     <string name="preference_key_otd_sound_on" translatable="false">isOtdSoundOn</string>
     <string name="preference_key_year_in_review_visited" translatable="false">yearInReviewVisited</string>
     <string name="preference_key_yir_survey_state" translatable="false">yirSurveyState</string>
@@ -186,7 +178,6 @@
     <string name="preference_key_reading_challenge_streak" translatable="false">readingChallengeStreak</string>
     <string name="preference_key_reading_challenge_enrolled" translatable="false">readingChallengeEnrolled</string>
     <string name="preference_key_reading_challenge_last_read_date" translatable="false">readingChallengeLastReadDate</string>
-    <string name="preference_key_reading_challenge_widgets" translatable="false">readingChallengeWidgets</string>
     <string name="preference_key_reading_challenge_onboarding_shown" translatable="false">readingChallengeOnboardingShown</string>
     <string name="preference_key_reading_challenge_install_prompt_shown" translatable="false">readingChallengeInstallPromptShown</string>
     <string name="preference_key_reading_challenge_enrollment_date" translatable="false">readingChallengeEnrollmentDate</string>

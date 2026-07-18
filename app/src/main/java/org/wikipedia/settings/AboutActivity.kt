@@ -3,8 +3,6 @@ package org.wikipedia.settings
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,16 +15,8 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -36,14 +26,12 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import org.wikipedia.BuildConfig
 import org.wikipedia.R
 import org.wikipedia.activity.BaseActivity
 import org.wikipedia.compose.components.HtmlText
 import org.wikipedia.compose.components.LicenseLinkText
 import org.wikipedia.compose.components.LinkTextData
-import org.wikipedia.compose.components.Snackbar
 import org.wikipedia.compose.components.WikiTopAppBar
 import org.wikipedia.compose.theme.BaseTheme
 import org.wikipedia.compose.theme.WikipediaTheme
@@ -111,10 +99,6 @@ class AboutActivity : BaseActivity() {
             }
         }
     }
-
-    companion object {
-        const val SECRET_CLICK_LIMIT = 7
-    }
 }
 
 @Composable
@@ -124,20 +108,8 @@ fun AboutWikipediaScreen(
     credits: List<LinkTextData>,
     onBackButtonClick: () -> Unit
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
-
     Scaffold(
         modifier = modifier,
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                snackbar = {
-                    Snackbar(
-                        message = it.visuals.message
-                    )
-                }
-            )
-        },
         topBar = {
             WikiTopAppBar(
                 title = stringResource(R.string.about_activity_title),
@@ -150,8 +122,7 @@ fun AboutWikipediaScreen(
                modifier = Modifier
                    .padding(paddingValues),
                versionName = versionName,
-               credits = credits,
-               snackbarHostState = snackbarHostState
+               credits = credits
            )
         }
     )
@@ -161,8 +132,7 @@ fun AboutWikipediaScreen(
 fun AboutScreenContent(
     modifier: Modifier = Modifier,
     versionName: String,
-    credits: List<LinkTextData>,
-    snackbarHostState: SnackbarHostState
+    credits: List<LinkTextData>
 ) {
     Column(
         modifier = modifier
@@ -173,8 +143,7 @@ fun AboutScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 30.dp, bottom = 16.dp),
-            versionName = versionName,
-            snackbarHostState = snackbarHostState
+            versionName = versionName
         )
         SelectionContainer {
             AboutScreenBody(
@@ -196,37 +165,12 @@ fun AboutScreenContent(
 fun AboutWikipediaHeader(
     modifier: Modifier = Modifier,
     versionName: String,
-    snackbarHostState: SnackbarHostState
 ) {
-    val scope = rememberCoroutineScope()
-
-    val alreadyEnabledMessage = stringResource(R.string.show_developer_settings_already_enabled)
-    val enabledMessage = stringResource(R.string.show_developer_settings_enabled)
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AboutWikipediaImage(
-            onSecretCountClick = { isEnabled ->
-                scope.launch {
-                    when (isEnabled) {
-                        true -> {
-                            snackbarHostState.showSnackbar(
-                                message = alreadyEnabledMessage,
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-
-                        false -> {
-                            snackbarHostState.showSnackbar(
-                                message = enabledMessage,
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-                    }
-                }
-            }
-        )
+        AboutWikipediaImage()
         SelectionContainer {
             Text(
                 modifier = Modifier
@@ -241,32 +185,14 @@ fun AboutWikipediaHeader(
 @Composable
 fun AboutWikipediaImage(
     modifier: Modifier = Modifier,
-    onSecretCountClick: (isEnabled: Boolean) -> Unit,
 ) {
-    var secretClickCount by remember { mutableIntStateOf(0) }
-
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
             modifier = Modifier
-                .size(88.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {
-                        secretClickCount++
-                        if (secretClickCount == AboutActivity.SECRET_CLICK_LIMIT) {
-                            if (Prefs.isShowDeveloperSettingsEnabled) {
-                                onSecretCountClick(true)
-                            } else {
-                                Prefs.isShowDeveloperSettingsEnabled = true
-                                onSecretCountClick(false)
-                            }
-                        }
-                    },
-                ),
+                .size(88.dp),
             painter = painterResource(R.drawable.w_nav_mark),
             contentDescription = stringResource(R.string.about_logo_content_description),
         )
