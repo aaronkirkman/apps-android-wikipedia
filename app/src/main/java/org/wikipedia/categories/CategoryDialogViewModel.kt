@@ -44,7 +44,7 @@ class CategoryDialogViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
         }
         viewModelScope.launch(CoroutineExceptionHandler { _, _ -> }) {
             val response = ServiceFactory.get(pageTitle.wikiSite).getCategoryInfo(titles.joinToString("|") { it.prefixedText })
-            val counts = response.query?.pages?.associate { it.title to (it.categoryInfo?.size ?: 0) }.orEmpty()
+            val counts = response.query?.pages?.associate { StringUtil.addUnderscores(it.title) to (it.categoryInfo?.size ?: 0) }.orEmpty()
             categoryCounts.postValue(counts)
         }
     }
