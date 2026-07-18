@@ -129,13 +129,13 @@ interface ReadingListPageDao {
     }
 
     @Transaction
-    suspend fun addPagesToListIfNotExist(list: ReadingList, titles: List<PageTitle>): List<String> {
+    suspend fun addPagesToListIfNotExist(list: ReadingList, titles: List<PageTitle>, excludeImages: Boolean = false): List<String> {
         val pages = mutableListOf<ReadingListPage>()
         for (title in titles) {
             if (getPageByTitle(list, title) != null) {
                 continue
             }
-            val page = addPageToList(list, title)
+            val page = addPageToList(list, title, excludeImages)
             pages.add(page)
         }
         if (pages.isNotEmpty()) {
@@ -264,8 +264,9 @@ interface ReadingListPageDao {
         )
     }
 
-    private suspend fun addPageToList(list: ReadingList, title: PageTitle): ReadingListPage {
+    private suspend fun addPageToList(list: ReadingList, title: PageTitle, excludeImages: Boolean = false): ReadingListPage {
         val protoPage = ReadingListPage(title)
+        protoPage.excludeImages = excludeImages
         insertPageIntoDb(list, protoPage)
         return protoPage
     }

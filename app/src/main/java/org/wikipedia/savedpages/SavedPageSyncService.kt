@@ -193,7 +193,7 @@ class SavedPageSyncService(context: Context, params: WorkerParameters) : Corouti
                 fileUrls.addAll(PageComponentsUrlParser.parse(it.string(),
                     pageTitle.wikiSite).filter { url -> url.isNotEmpty() })
             }
-            if (Prefs.isImageDownloadEnabled) {
+            if (Prefs.isImageDownloadEnabled && !page.excludeImages) {
                 // download thumbnail and lead image
                 if (!summaryResponse.thumbnailUrl.isNullOrEmpty()) {
                     page.thumbUrl = UriUtil.resolveProtocolRelativeUrl(pageTitle.wikiSite, summaryResponse.thumbnailUrl.orEmpty())

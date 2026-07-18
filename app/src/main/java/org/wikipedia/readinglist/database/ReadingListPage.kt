@@ -28,7 +28,8 @@ data class ReadingListPage(
     var sizeBytes: Long = 0,
     var lang: String = "en",
     var revId: Long = 0,
-    var remoteId: Long = 0
+    var remoteId: Long = 0,
+    var excludeImages: Boolean = false
 ) : Serializable {
 
     constructor(title: PageTitle) :

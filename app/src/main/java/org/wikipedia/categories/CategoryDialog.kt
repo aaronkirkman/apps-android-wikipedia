@@ -17,6 +17,7 @@ import org.wikipedia.extensions.setLayoutDirectionByLang
 import org.wikipedia.page.ExtendedBottomSheetDialogFragment
 import org.wikipedia.page.PageTitle
 import org.wikipedia.readinglist.database.ReadingList
+import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.Resource
 import org.wikipedia.util.StringUtil
 import org.wikipedia.util.log.L
@@ -29,6 +30,8 @@ class CategoryDialog : ExtendedBottomSheetDialogFragment() {
 
     private val itemCallback = ItemCallback()
     private val viewModel: CategoryDialogViewModel by viewModels()
+    private var categoryCounts: Map<String, Int> = emptyMap()
+    private val savingCategories = mutableSetOf<String>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = DialogCategoriesBinding.inflate(inflater, container, false)
@@ -55,6 +58,31 @@ class CategoryDialog : ExtendedBottomSheetDialogFragment() {
             }
         }
 
+        viewModel.categoryCounts.observe(this) {
+            categoryCounts = it
+            binding.categoriesRecycler.adapter?.notifyDataSetChanged()
+        }
+
+        viewModel.saveAllState.observe(this) {
+            when (it) {
+                is Resource.Success -> {
+                    val (category, count) = it.data
+                    savingCategories.remove(category.prefixedText)
+                    binding.categoriesRecycler.adapter?.notifyDataSetChanged()
+                    FeedbackUtil.makeSnackbar(requireActivity(),
+                        resources.getQuantityString(R.plurals.category_save_all_offline_success, count, count,
+                            StringUtil.removeNamespace(category.displayText))).show()
+                }
+                is Resource.Error -> {
+                    savingCategories.clear()
+                    binding.categoriesRecycler.adapter?.notifyDataSetChanged()
+                    FeedbackUtil.showMessage(requireActivity(), R.string.category_save_all_offline_error)
+                    L.e(it.throwable)
+                }
+                else -> {}
+            }
+        }
+
         return binding.root
     }
 
@@ -74,6 +102,13 @@ class CategoryDialog : ExtendedBottomSheetDialogFragment() {
         fun bindItem(title: PageTitle) {
             view.item = title
             view.setTitle(StringUtil.removeNamespace(title.displayText))
+            val count = categoryCounts[title.prefixedText]
+            view.setDescription(count?.let { view.context.resources.getQuantityString(R.plurals.category_article_count, it, it) })
+            view.setActionHint(R.string.category_save_all_offline_action_hint)
+            view.setSecondaryActionIcon(
+                if (savingCategories.contains(title.prefixedText)) R.drawable.ic_download_in_progress else R.drawable.ic_download_24px,
+                true
+            )
         }
     }
 
@@ -115,7 +150,12 @@ class CategoryDialog : ExtendedBottomSheetDialogFragment() {
             return false
         }
 
-        override fun onActionClick(item: PageTitle?, view: View) {}
+        override fun onActionClick(item: PageTitle?, view: View) {
+            if (item != null && savingCategories.add(item.prefixedText)) {
+                binding.categoriesRecycler.adapter?.notifyDataSetChanged()
+                viewModel.saveCategoryForOffline(item)
+            }
+        }
 
         override fun onListChipClick(readingList: ReadingList) {}
     }

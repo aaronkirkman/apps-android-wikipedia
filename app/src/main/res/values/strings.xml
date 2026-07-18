@@ -981,6 +981,16 @@
     <string name="category_tab_subcategories">Subcategories</string>
     <string name="category_empty">No articles found in this category.</string>
     <string name="subcategory_empty">No subcategories found in this category.</string>
+    <plurals name="category_article_count">
+        <item quantity="one">%d article</item>
+        <item quantity="other">%d articles</item>
+    </plurals>
+    <string name="category_save_all_offline_action_hint">Save all articles in this category for offline use</string>
+    <plurals name="category_save_all_offline_success">
+        <item quantity="one">Saved %1$d article from "%2$s" for offline use.</item>
+        <item quantity="other">Saved %1$d articles from "%2$s" for offline use.</item>
+    </plurals>
+    <string name="category_save_all_offline_error">Couldn\'t save articles from this category. Please try again.</string>
     <string name="search_namespaces">Namespaces</string>
     <string name="user_contrib_current">current</string>
     <string name="media_playback_error">Error playing media.</string>
